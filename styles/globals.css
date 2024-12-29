@@ -3,19 +3,54 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Primary Colors */
+  --color-primary: #3b82f6; /* Blue 500 */
+  --color-primary-dark: #2563eb; /* Blue 600 */
+  --color-primary-light: #60a5fa; /* Blue 400 */
+
+  /* Secondary Colors */
+  --color-secondary: #8b5cf6; /* Purple 500 */
+  --color-secondary-dark: #7c3aed; /* Purple 600 */
+  --color-secondary-light: #a78bfa; /* Purple 400 */
+
+  /* Background Colors */
+  --color-background: #f9fafb; /* Gray 50 */
+  --color-surface: #ffffff; /* White */
+
+  /* Text Colors */
+  --color-text-primary: #111827; /* Gray 900 */
+  --color-text-secondary: #4b5563; /* Gray 600 */
+  --color-text-tertiary: #9ca3af; /* Gray 400 */
+  --color-text-inverse: #ffffff; /* White */
+
+  /* Border Colors */
+  --color-border: #e5e7eb; /* Gray 200 */
+  --color-border-focus: #3b82f6; /* Blue 500 */
+
+  /* Status Colors */
+  --color-error: #ef4444; /* Red 500 */
+  --color-success: #10b981; /* Green 500 */
+  --color-warning: #f59e0b; /* Yellow 500 */
+
+  /* Overlay Colors */
+  --color-overlay: rgba(0, 0, 0, 0.5);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Utility classes for the custom colors */
+@layer utilities {
+  .bg-primary {
+    background-color: var(--color-primary);
   }
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  .bg-primary-dark {
+    background-color: var(--color-primary-dark);
+  }
+  .bg-primary-light {
+    background-color: var(--color-primary-light);
+  }
+  .text-primary {
+    color: var(--color-primary);
+  }
+  .border-primary {
+    border-color: var(--color-primary);
+  }
 }
