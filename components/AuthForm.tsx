@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+//components/AuthForm.tsx
+import { useState } from "react";
 import { supabase } from "../lib/supabase";
-import UsernameSetupModal from "./UsernameSetupModal";
 
 interface AuthFormProps {
   onClose?: () => void;
@@ -17,42 +17,14 @@ export default function AuthForm({ onClose }: AuthFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [showUsernameModal, setShowUsernameModal] = useState(false);
-  const [pendingEmail, setPendingEmail] = useState("");
-
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [confirmationEmail, setConfirmationEmail] = useState("");
   const [formState, setFormState] = useState<FormState>({
     email: "",
     password: "",
     username: "",
     role: "player",
   });
-
-  useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_IN" && session?.user) {
-        if (session.user.app_metadata.provider === "google") {
-          const { data: profile, error } = await supabase
-            .from("user_profiles")
-            .select("*")
-            .eq("id", session.user.id)
-            .single();
-
-          if (error || !profile) {
-            setPendingEmail(session.user.email!);
-            setShowUsernameModal(true);
-          } else {
-            onClose?.();
-          }
-        }
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [onClose]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,44 +33,83 @@ export default function AuthForm({ onClose }: AuthFormProps) {
 
     try {
       if (mode === "signup") {
-        const { data, error: signUpError } = await supabase.auth.signUp({
-          email: formState.email,
-          password: formState.password,
-          options: {
-            data: {
-              username: formState.username,
-              role: formState.role,
+        // First create the auth user
+        const { data: authData, error: signUpError } =
+          await supabase.auth.signUp({
+            email: formState.email,
+            password: formState.password,
+            options: {
+              data: {
+                username: formState.username,
+                role: formState.role,
+              },
+              emailRedirectTo: `${window.location.origin}/auth/callback`,
             },
-          },
-        });
+          });
 
         if (signUpError) throw signUpError;
+        if (!authData.user) throw new Error("Signup failed");
 
-        const { error: profileError } = await supabase
-          .from("user_profiles")
-          .insert([
-            {
-              id: data.user?.id,
+        try {
+          // Create user profile
+          const { error: profileError } = await supabase
+            .from("user_profiles")
+            .insert({
+              id: authData.user.id,
               username: formState.username,
               email: formState.email,
               role: formState.role,
               coins: 0,
               gems: 0,
-            },
-          ]);
+            });
 
-        if (profileError) throw profileError;
+          if (profileError) throw profileError;
+
+          // Show confirmation message
+          setConfirmationEmail(formState.email);
+          setShowConfirmation(true);
+        } catch (err) {
+          console.error("Profile creation error:", err);
+          // Clean up auth user if profile creation fails
+          await supabase.auth.signOut();
+          throw new Error("Failed to create profile. Please try again.");
+        }
       } else {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: formState.email,
-          password: formState.password,
-        });
+        // Handle sign in
+        const { data, error: signInError } =
+          await supabase.auth.signInWithPassword({
+            email: formState.email,
+            password: formState.password,
+          });
 
-        if (signInError) throw signInError;
+        if (signInError) {
+          if (signInError.message.includes("Email not confirmed")) {
+            setConfirmationEmail(formState.email);
+            setShowConfirmation(true);
+            throw new Error(
+              "Please check your email to confirm your account before signing in."
+            );
+          }
+          throw signInError;
+        }
+
+        if (data?.user) {
+          const { data: profile, error: profileError } = await supabase
+            .from("user_profiles")
+            .select("*")
+            .eq("id", data.user.id)
+            .single();
+
+          if (profileError) {
+            console.error("Profile fetch error:", profileError);
+            throw new Error("Error loading user profile");
+          }
+
+          onClose?.();
+        }
       }
-
-      onClose?.();
     } catch (err: any) {
+      console.error("Auth error:", err);
       setError(err.message);
     } finally {
       setIsLoading(false);
@@ -110,10 +121,6 @@ export default function AuthForm({ onClose }: AuthFormProps) {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          queryParams: {
-            access_type: "offline",
-            prompt: "consent",
-          },
           redirectTo: `${window.location.origin}/auth/callback`,
         },
       });
@@ -124,6 +131,40 @@ export default function AuthForm({ onClose }: AuthFormProps) {
     }
   };
 
+  if (showConfirmation) {
+    return (
+      <div className="bg-white rounded-lg p-8">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            Verify Your Email
+          </h2>
+          <p className="text-gray-600 mb-6">
+            We've sent a verification link to <br />
+            <span className="font-medium">{confirmationEmail}</span>
+          </p>
+          <p className="text-sm text-gray-500 mb-6">
+            Please click the link in the email to verify your account. Check
+            your spam folder if you don't see it.
+          </p>
+          <button
+            onClick={() => {
+              setShowConfirmation(false);
+              setFormState({
+                email: "",
+                password: "",
+                username: "",
+                role: "player",
+              });
+            }}
+            className="text-blue-600 hover:text-blue-700 font-medium"
+          >
+            Back to {mode === "signin" ? "Sign In" : "Sign Up"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white rounded-lg p-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">
@@ -133,7 +174,7 @@ export default function AuthForm({ onClose }: AuthFormProps) {
       <form onSubmit={handleSubmit} className="space-y-5">
         {mode === "signup" && (
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">
+            <label className="block text-sm font-medium text-gray-900 mb-2">
               Username
             </label>
             <input
@@ -150,7 +191,7 @@ export default function AuthForm({ onClose }: AuthFormProps) {
         )}
 
         <div>
-          <label className="block text-sm font-semibold text-gray-900 mb-2">
+          <label className="block text-sm font-medium text-gray-900 mb-2">
             Email
           </label>
           <input
@@ -166,7 +207,7 @@ export default function AuthForm({ onClose }: AuthFormProps) {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-900 mb-2">
+          <label className="block text-sm font-medium text-gray-900 mb-2">
             Password
           </label>
           <input
@@ -183,7 +224,7 @@ export default function AuthForm({ onClose }: AuthFormProps) {
 
         {mode === "signup" && (
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">
+            <label className="block text-sm font-medium text-gray-900 mb-2">
               I am a:
             </label>
             <select
@@ -220,16 +261,17 @@ export default function AuthForm({ onClose }: AuthFormProps) {
 
         <button
           type="button"
-          onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+          onClick={() => {
+            setMode(mode === "signin" ? "signup" : "signin");
+            setError(null);
+          }}
           className="w-full text-sm text-blue-600 hover:text-blue-700 font-medium"
         >
           {mode === "signin"
             ? "Need an account? Sign up"
             : "Already have an account? Sign in"}
         </button>
-      </form>
 
-      <div className="mt-6">
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-gray-300" />
@@ -241,33 +283,22 @@ export default function AuthForm({ onClose }: AuthFormProps) {
           </div>
         </div>
 
-        <div className="mt-6">
-          <button
-            type="button"
-            onClick={handleGoogleSignIn}
-            className="w-full flex items-center justify-center gap-3 px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        <button
+          type="button"
+          onClick={handleGoogleSignIn}
+          className="w-full flex items-center justify-center gap-3 px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        >
+          <svg
+            className="w-5 h-5"
+            aria-hidden="true"
+            fill="currentColor"
+            viewBox="0 0 24 24"
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path
-                fill="currentColor"
-                d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"
-              />
-            </svg>
-            Continue with Google
-          </button>
-        </div>
-      </div>
-
-      {showUsernameModal && (
-        <UsernameSetupModal
-          isOpen={showUsernameModal}
-          onClose={() => {
-            setShowUsernameModal(false);
-            onClose?.();
-          }}
-          email={pendingEmail}
-        />
-      )}
+            <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z" />
+          </svg>
+          Continue with Google
+        </button>
+      </form>
     </div>
   );
 }
