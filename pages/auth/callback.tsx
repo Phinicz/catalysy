@@ -1,272 +1,164 @@
-//components/AuthForm.tsx
-import { useState } from "react";
+//pages/auth/callback.tsx
+import { useEffect } from "react";
+import { useRouter } from "next/router";
 import { supabase } from "../../lib/supabase";
+import AuthModal from "../../components/AuthModal";
+import Image from "next/image";
+import { Gamepad2, Trophy, Gift } from "lucide-react";
 
-interface AuthFormProps {
-  onClose?: () => void;
-}
+export default function AuthCallback() {
+  const router = useRouter();
 
-interface FormState {
-  email: string;
-  password: string;
-  username: string;
-  role: "player" | "partner";
-}
+  useEffect(() => {
+    const handleCallback = async () => {
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
 
-export default function AuthForm({ onClose }: AuthFormProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [confirmationEmail, setConfirmationEmail] = useState("");
-  const [formState, setFormState] = useState<FormState>({
-    email: "",
-    password: "",
-    username: "",
-    role: "player",
-  });
+      if (error) {
+        console.error("Auth error:", error);
+        router.push("/"); // Redirect to home on error
+        return;
+      }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
+      if (session) {
+        // Check if profile exists
+        const { data: profile } = await supabase
+          .from("user_profiles")
+          .select("*")
+          .eq("id", session.user.id)
+          .single();
 
-    try {
-      if (mode === "signup") {
-        // Create auth user
-        const { data: authData, error: signUpError } =
-          await supabase.auth.signUp({
-            email: formState.email,
-            password: formState.password,
-            options: {
-              emailRedirectTo: `${window.location.origin}/auth/callback`,
-            },
-          });
-
-        if (signUpError) throw signUpError;
-        if (!authData.user) throw new Error("Signup failed");
-
-        try {
-          // Create user profile
-          const { error: profileError } = await supabase
-            .from("user_profiles")
-            .insert({
-              id: authData.user.id,
-              username: formState.username,
-              email: formState.email,
-              role: formState.role,
-              coins: 0,
-              gems: 0,
-            });
-
-          if (profileError) throw profileError;
-
-          // Show confirmation message
-          setConfirmationEmail(formState.email);
-          setShowConfirmation(true);
-        } catch (err) {
-          console.error("Profile creation error:", err);
-          await supabase.auth.signOut();
-          throw new Error("Failed to create profile. Please try again.");
+        if (profile) {
+          router.push("/stats"); // Redirect to dashboard if profile exists
+        } else {
+          router.push("/"); // Go home if no profile
         }
       } else {
-        // Handle sign in
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: formState.email,
-          password: formState.password,
-        });
-
-        if (signInError) {
-          if (signInError.message.includes("Email not confirmed")) {
-            setConfirmationEmail(formState.email);
-            setShowConfirmation(true);
-            throw new Error("Please confirm your email before signing in");
-          }
-          throw signInError;
-        }
-
-        onClose?.();
+        router.push("/"); // No session, go home
       }
-    } catch (err: any) {
-      console.error("Auth error:", err);
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
 
-  const handleGoogleSignIn = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
+    // Small delay to ensure auth state is updated
+    const timer = setTimeout(() => {
+      handleCallback();
+    }, 1000);
 
-      if (error) throw error;
-    } catch (err: any) {
-      setError(err.message);
-    }
-  };
-
-  if (showConfirmation) {
-    return (
-      <div className="bg-white rounded-lg p-8">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Check Your Email
-          </h2>
-          <p className="text-gray-600 mb-6">
-            We sent a confirmation link to{" "}
-            <span className="font-medium">{confirmationEmail}</span>
-          </p>
-          <p className="text-sm text-gray-500 mb-6">
-            Please click the link in the email to confirm your account. Check
-            your spam folder if you don't see it.
-          </p>
-          <button
-            onClick={() => setShowConfirmation(false)}
-            className="text-blue-600 hover:text-blue-700 font-medium"
-          >
-            Back to {mode === "signin" ? "Sign In" : "Sign Up"}
-          </button>
-        </div>
-      </div>
-    );
-  }
+    return () => clearTimeout(timer);
+  }, [router]);
 
   return (
-    <div className="bg-white rounded-lg p-8">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">
-        {mode === "signin" ? "Sign In" : "Create Account"}
-      </h2>
-
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {mode === "signup" && (
-          <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
-              Username
-            </label>
-            <input
-              type="text"
-              required
-              value={formState.username}
-              onChange={(e) =>
-                setFormState((prev) => ({ ...prev, username: e.target.value }))
-              }
-              className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Choose a username"
-            />
-          </div>
-        )}
-
-        <div>
-          <label className="block text-sm font-medium text-gray-900 mb-2">
-            Email
-          </label>
-          <input
-            type="email"
-            required
-            value={formState.email}
-            onChange={(e) =>
-              setFormState((prev) => ({ ...prev, email: e.target.value }))
-            }
-            className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Enter your email"
+    <div className="min-h-screen bg-white">
+      {/* Hero Banner */}
+      <div className="relative">
+        <div className="w-full h-[400px] relative overflow-hidden rounded-lg">
+          <Image
+            src="/placeholders/achievements/1.jpg"
+            alt="Level Up Your Gaming Experience"
+            fill
+            className="object-cover"
+            priority
           />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-900 mb-2">
-            Password
-          </label>
-          <input
-            type="password"
-            required
-            value={formState.password}
-            onChange={(e) =>
-              setFormState((prev) => ({ ...prev, password: e.target.value }))
-            }
-            className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Enter your password"
-          />
-        </div>
-
-        {mode === "signup" && (
-          <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
-              I am a:
-            </label>
-            <select
-              value={formState.role}
-              onChange={(e) =>
-                setFormState((prev) => ({
-                  ...prev,
-                  role: e.target.value as "player" | "partner",
-                }))
-              }
-              className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="player">Player</option>
-              <option value="partner">Partner</option>
-            </select>
-          </div>
-        )}
-
-        {error && (
-          <div className="text-red-600 text-sm font-medium">{error}</div>
-        )}
-
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
-        >
-          {isLoading
-            ? "Processing..."
-            : mode === "signin"
-            ? "Sign In"
-            : "Create Account"}
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-          className="w-full text-sm text-blue-600 hover:text-blue-700 font-medium"
-        >
-          {mode === "signin"
-            ? "Need an account? Sign up"
-            : "Already have an account? Sign in"}
-        </button>
-
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300" />
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">
-              Or continue with
-            </span>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent">
+            <div className="absolute bottom-0 left-0 p-8">
+              <h1 className="text-4xl font-bold text-white mb-2">
+                Level Up Your Gaming Experience
+              </h1>
+              <p className="text-white/90">
+                Complete achievements, earn rewards, and enhance your gameplay
+              </p>
+            </div>
           </div>
         </div>
+      </div>
 
-        <button
-          type="button"
-          onClick={handleGoogleSignIn}
-          className="w-full flex items-center justify-center gap-3 px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-        >
-          <svg
-            className="w-5 h-5"
-            aria-hidden="true"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z" />
-          </svg>
-          Continue with Google
-        </button>
-      </form>
+      {/* Loading State */}
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-8 max-w-sm w-full mx-4 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Verifying Your Account
+          </h2>
+          <p className="text-gray-600">
+            Please wait while we complete the authentication process...
+          </p>
+        </div>
+      </div>
+
+      {/* How It Works Section */}
+      <div className="max-w-7xl mx-auto px-4 py-16">
+        <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
+        <div className="grid md:grid-cols-3 gap-8">
+          {/* Play Games */}
+          <div className="p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+              <Gamepad2 className="w-6 h-6 text-blue-600" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Play Games
+            </h3>
+            <p className="text-gray-600">
+              Connect your gaming accounts and start playing
+            </p>
+          </div>
+
+          {/* Complete Achievements */}
+          <div className="p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+              <Trophy className="w-6 h-6 text-blue-600" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Complete Achievements
+            </h3>
+            <p className="text-gray-600">Accomplish tasks and earn points</p>
+          </div>
+
+          {/* Earn Rewards */}
+          <div className="p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+              <Gift className="w-6 h-6 text-blue-600" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Earn Rewards
+            </h3>
+            <p className="text-gray-600">Redeem points for exclusive rewards</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Featured Games */}
+      <div className="bg-gray-50 py-16">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12">
+            Featured Games
+          </h2>
+          <div className="grid md:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((num) => (
+              <div
+                key={num}
+                className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all"
+              >
+                <div className="aspect-video relative">
+                  <Image
+                    src={`/placeholders/achievements/${num}.jpg`}
+                    alt={`Game ${num}`}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="p-4">
+                  <h4 className="font-semibold text-gray-900">
+                    Game Title {num}
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    Available Achievements: {25 + num * 5}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
