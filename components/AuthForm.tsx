@@ -135,7 +135,7 @@ export default function AuthForm({ onClose }: AuthFormProps) {
     return (
       <div className="bg-white rounded-lg p-8">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          <h2 className="text-2xl font-bold text-white mb-4">
             Verify Your Email
           </h2>
           <p className="text-gray-600 mb-6">
@@ -156,7 +156,7 @@ export default function AuthForm({ onClose }: AuthFormProps) {
                 role: "player",
               });
             }}
-            className="text-blue-600 hover:text-blue-700 font-medium"
+            className="text-red-600 hover:text-red-700 font-medium"
           >
             Back to {mode === "signin" ? "Sign In" : "Sign Up"}
           </button>
@@ -166,15 +166,15 @@ export default function AuthForm({ onClose }: AuthFormProps) {
   }
 
   return (
-    <div className="bg-white rounded-lg p-8">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">
+    <div className="bg-black rounded-lg p-8">
+      <h2 className="text-2xl font-bold text-white mb-6">
         {mode === "signin" ? "Sign In" : "Create Account"}
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {mode === "signup" && (
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
+            <label className="block text-sm font-medium text-white mb-2">
               Username
             </label>
             <input
@@ -184,14 +184,14 @@ export default function AuthForm({ onClose }: AuthFormProps) {
               onChange={(e) =>
                 setFormState((prev) => ({ ...prev, username: e.target.value }))
               }
-              className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-700"
               placeholder="Choose a username"
             />
           </div>
         )}
 
         <div>
-          <label className="block text-sm font-medium text-gray-900 mb-2">
+          <label className="block text-sm font-medium text-white mb-2">
             Email
           </label>
           <input
@@ -201,13 +201,13 @@ export default function AuthForm({ onClose }: AuthFormProps) {
             onChange={(e) =>
               setFormState((prev) => ({ ...prev, email: e.target.value }))
             }
-            className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-2 text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
             placeholder="Enter your email"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-900 mb-2">
+          <label className="block text-sm font-medium text-white mb-2">
             Password
           </label>
           <input
@@ -217,29 +217,42 @@ export default function AuthForm({ onClose }: AuthFormProps) {
             onChange={(e) =>
               setFormState((prev) => ({ ...prev, password: e.target.value }))
             }
-            className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-2 text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-700"
             placeholder="Enter your password"
           />
         </div>
 
         {mode === "signup" && (
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
-              I am a:
-            </label>
-            <select
-              value={formState.role}
-              onChange={(e) =>
-                setFormState((prev) => ({
-                  ...prev,
-                  role: e.target.value as "player" | "partner",
-                }))
-              }
-              className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="player">Player</option>
-              <option value="partner">Partner</option>
-            </select>
+            <label className="block text-sm font-medium mb-2">I am a:</label>
+            <div className="flex space-x-4">
+              <button
+                type="button"
+                onClick={() =>
+                  setFormState((prev) => ({ ...prev, role: "player" }))
+                }
+                className={`w-1/2 px-4 py-2 rounded-lg text-center font-medium focus:outline-none ${
+                  formState.role === "player"
+                    ? "bg-red-600 text-white"
+                    : "bg-white text-black border border-white"
+                }`}
+              >
+                Player
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setFormState((prev) => ({ ...prev, role: "partner" }))
+                }
+                className={`w-1/2 px-4 py-2 rounded-lg text-center font-medium focus:outline-none ${
+                  formState.role === "partner"
+                    ? "bg-red-600 text-white"
+                    : "bg-white text-black border border-white"
+                }`}
+              >
+                Partner
+              </button>
+            </div>
           </div>
         )}
 
@@ -250,7 +263,7 @@ export default function AuthForm({ onClose }: AuthFormProps) {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+          className="w-full bg-red-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-offset-2 disabled:opacity-50"
         >
           {isLoading
             ? "Processing..."
@@ -265,7 +278,7 @@ export default function AuthForm({ onClose }: AuthFormProps) {
             setMode(mode === "signin" ? "signup" : "signin");
             setError(null);
           }}
-          className="w-full text-sm text-blue-600 hover:text-blue-700 font-medium"
+          className="w-full text-sm text-white hover:text-white/50 font-medium"
         >
           {mode === "signin"
             ? "Need an account? Sign up"
@@ -277,7 +290,7 @@ export default function AuthForm({ onClose }: AuthFormProps) {
             <div className="w-full border-t border-gray-300" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">
+            <span className="px-2 bg-red-500 rounded-sm text-white">
               Or continue with
             </span>
           </div>
@@ -286,7 +299,7 @@ export default function AuthForm({ onClose }: AuthFormProps) {
         <button
           type="button"
           onClick={handleGoogleSignIn}
-          className="w-full flex items-center justify-center gap-3 px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="w-full flex items-center justify-center gap-3 px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-500 via-red-500 to-yellow-500 hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-700"
         >
           <svg
             className="w-5 h-5"

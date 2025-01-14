@@ -6,7 +6,7 @@ const SAMPLE_REWARDS = [
     id: "1",
     title: "Exclusive Character Skin",
     description: "Limited edition skin for your favorite character",
-    imageUrl: "/api/placeholder/400/300",
+    imageUrl: "/placeholders/achivements/1.jpg",
     category: "COSMETIC",
     points: 1000,
   },
@@ -14,7 +14,7 @@ const SAMPLE_REWARDS = [
     id: "2",
     title: "Premium Battle Pass",
     description: "Get instant access to premium rewards",
-    imageUrl: "/api/placeholder/400/300",
+    imageUrl: "/placeholders/achivements/2.jpg",
     category: "PASS",
     points: 2000,
   },
@@ -22,7 +22,7 @@ const SAMPLE_REWARDS = [
     id: "3",
     title: "Rare Mount",
     description: "Show off with this exclusive mount",
-    imageUrl: "/api/placeholder/400/300",
+    imageUrl: "/placeholders/achivements/4.jpg",
     category: "MOUNT",
     points: 1500,
   },
@@ -30,7 +30,7 @@ const SAMPLE_REWARDS = [
     id: "4",
     title: "Weapon Skin Bundle",
     description: "Collection of unique weapon skins",
-    imageUrl: "/api/placeholder/400/300",
+    imageUrl: "/placeholders/achivements/3.jpg",
     category: "BUNDLE",
     points: 3000,
   },
@@ -38,7 +38,7 @@ const SAMPLE_REWARDS = [
     id: "5",
     title: "Player Title",
     description: "Unique display title for your profile",
-    imageUrl: "/api/placeholder/400/300",
+    imageUrl: "/placeholders/achivements/4.jpg",
     category: "TITLE",
     points: 500,
   },
@@ -46,7 +46,7 @@ const SAMPLE_REWARDS = [
     id: "6",
     title: "Emote Pack",
     description: "Set of exclusive emotes",
-    imageUrl: "/api/placeholder/400/300",
+    imageUrl: "/placeholders/achivements/5.jpg",
     category: "COSMETIC",
     points: 800,
   },
@@ -54,7 +54,7 @@ const SAMPLE_REWARDS = [
     id: "7",
     title: "Profile Banner",
     description: "Customize your profile with this rare banner",
-    imageUrl: "/api/placeholder/400/300",
+    imageUrl: "/placeholders/achivements/4.jpg",
     category: "COSMETIC",
     points: 700,
   },
@@ -62,7 +62,7 @@ const SAMPLE_REWARDS = [
     id: "8",
     title: "Season Pass Bundle",
     description: "Get the next 3 season passes",
-    imageUrl: "/api/placeholder/400/300",
+    imageUrl: "/placeholders/achivements/4.jpg",
     category: "BUNDLE",
     points: 5000,
   },
@@ -88,7 +88,7 @@ export default function RewardsPage() {
     <div className="p-8">
       <div className="relative h-[300px] rounded-lg overflow-hidden mb-8">
         <img
-          src="/api/placeholder/1200/300"
+          src="/placeholders/achivements/4.jpg"
           alt="Rewards"
           className="w-full h-full object-cover"
         />

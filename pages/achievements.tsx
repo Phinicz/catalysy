@@ -9,21 +9,21 @@ const SAMPLE_ACHIEVEMENTS = {
       id: "1",
       title: "Master Strategist",
       description: "Win 50 ranked matches with a win rate above 60%",
-      imageUrl: "/api/placeholder/400/300",
+      imageUrl: "/placeholders/achivements/4.jpg",
       points: 500,
       startDate: "2024-12-01",
       endDate: "2024-12-31",
       status: "active" as const,
       game: {
         name: "Nyan Heroes",
-        icon: "/api/placeholder/50/50",
+        icon: "/placeholders/achivements/4.jpg",
       },
     },
     {
       id: "2",
       title: "Dungeon Master",
       description: "Complete all dungeons in hardcore mode",
-      imageUrl: "/api/placeholder/400/300",
+      imageUrl: "/placeholders/achivements/5.jpg",
       points: 1000,
       startDate: "2024-12-15",
       endDate: "2025-01-15",
@@ -42,7 +42,7 @@ const SAMPLE_ACHIEVEMENTS = {
 const BANNER_ITEMS = [
   {
     id: "1",
-    imageUrl: "/api/placeholder/1200/400",
+    imageUrl: "/placeholders/achivements/3.jpg",
     title: "Earn Achievement Points",
     description: "Complete challenges and collect points",
   },

@@ -10,7 +10,7 @@ const SAMPLE_TASKS = {
       description: "Complete 10 winning matches in ranked mode",
       status: "ongoing" as const,
       progress: 60,
-      imageUrl: "/api/placeholder/400/400",
+      imageUrl: "/placeholders/achivements/1.jpg",
     },
     {
       id: "2",
@@ -18,7 +18,7 @@ const SAMPLE_TASKS = {
       description: "Finish all daily missions in Uldor Test",
       status: "ongoing" as const,
       progress: 30,
-      imageUrl: "/api/placeholder/400/400",
+      imageUrl: "/placeholders/achivements/2.jpg",
     },
   ],
   completed: [
@@ -28,7 +28,7 @@ const SAMPLE_TASKS = {
       description: "Win your first match in any game mode",
       status: "completed" as const,
       progress: 100,
-      imageUrl: "/api/placeholder/400/400",
+      imageUrl: "/placeholders/achivements/3.jpg",
     },
   ],
 };
@@ -36,13 +36,13 @@ const SAMPLE_TASKS = {
 const BANNER_ITEMS = [
   {
     id: "1",
-    imageUrl: "/api/placeholder/1200/400",
+    imageUrl: "/placeholders/achivements/1.jpg",
     title: "Track Your Progress",
     description: "See your gaming achievements and ongoing challenges",
   },
   {
     id: "2",
-    imageUrl: "/api/placeholder/1200/400",
+    imageUrl: "/placeholders/achivements/2.jpg",
     title: "Weekly Challenges",
     description: "New challenges every week with exclusive rewards",
   },

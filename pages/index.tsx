@@ -37,21 +37,21 @@ export default function HomePage() {
     bannerItems: [
       {
         id: "1",
-        imageUrl: "/banner1.jpg",
+        imageUrl: "/placeholders/achivements/1.jpg",
         title: "Level Up Your Gaming Experience",
         description:
           "Complete achievements, earn rewards, and enhance your gameplay",
       },
       {
         id: "2",
-        imageUrl: "/banner2.jpg",
+        imageUrl: "/placeholders/achivements/2.jpg",
         title: "Join Gaming Challenges",
         description:
           "Compete in daily and weekly challenges to earn exclusive rewards",
       },
       {
         id: "3",
-        imageUrl: "/banner3.jpg",
+        imageUrl: "/placeholders/achivements/3.jpg",
         title: "Connect with Pro Players",
         description:
           "Get coached by experienced players and improve your skills",
@@ -122,7 +122,7 @@ export default function HomePage() {
   const content = userRole === "partner" ? partnerContent : playerContent;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen py-20  ">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <SlidingBanner items={content.bannerItems} />
 
@@ -184,7 +184,7 @@ export default function HomePage() {
                   >
                     <div className="aspect-video bg-gray-200 relative">
                       <img
-                        src={`/api/placeholder/400/300`}
+                        src={`/placeholders/achivements/${index + 1}.jpg`}
                         alt="Game Preview"
                         className="w-full h-full object-cover"
                       />
