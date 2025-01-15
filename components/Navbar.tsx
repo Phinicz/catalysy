@@ -28,6 +28,9 @@ export default function Navbar() {
     { name: "Player Stats", path: "/stats" },
     { name: "Achievements", path: "/achievements" },
     { name: "Rewards", path: "/rewards" },
+    ...(profile?.role === "partner"
+      ? [{ name: "Challenge", path: "/challenge" }]
+      : []),
   ];
 
   useEffect(() => {
@@ -53,12 +56,15 @@ export default function Navbar() {
       const {
         data: { session },
       } = await supabase.auth.getSession();
+
       if (session?.user) {
         const { data, error } = await supabase
           .from("user_profiles")
           .select("*")
           .eq("id", session.user.id)
           .single();
+        console.log(data, "Here is the data");
+
         if (error) throw error;
         setProfile(data);
       } else {
