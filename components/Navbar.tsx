@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { BellRing, Menu, X } from "lucide-react";
 import AuthModal from "./AuthModal";
-
+import { usePathname } from "next/navigation";
 interface UserProfile {
   id: string;
   username: string;
@@ -23,11 +23,13 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
 
   const navigation = [
     { name: "Player Stats", path: "/stats" },
     { name: "Achievements", path: "/achievements" },
     { name: "Rewards", path: "/rewards" },
+    { name: "Subscriptions", path: "/subscriptions" },
     ...(profile?.role === "partner"
       ? [{ name: "Challenge", path: "/challenge" }]
       : []),

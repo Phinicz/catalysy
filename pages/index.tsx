@@ -3,10 +3,12 @@ import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import SlidingBanner from "../components/Banner/SlidingBanner";
 import { Gamepad2, Trophy, Gift, Users, Target, Star } from "lucide-react";
+import { useRouter } from "next/router";
 
 export default function HomePage() {
   const [userRole, setUserRole] = useState<"player" | "partner" | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     fetchUserRole();
@@ -216,6 +218,15 @@ export default function HomePage() {
             {userRole === "partner" ? "Become a Partner" : "Start Playing"}
           </button>
         </div>
+      </div>
+      <div className="fixed bottom-4 left-4 z-50">
+        <button
+          onClick={() => router.push("/feedback")}
+          className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition-all"
+        >
+          <Star className="w-5 h-5 mr-2" />
+          Feedback
+        </button>
       </div>
     </div>
   );
