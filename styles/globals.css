@@ -14,7 +14,7 @@
   --color-secondary-light: #a78bfa; /* Purple 400 */
 
   /* Background Colors */
-  --color-background: #f9fafb; /* Gray 50 */
+  --color-background: #000; /* Gray 50 */
   --color-surface: #ffffff; /* White */
 
   /* Text Colors */
@@ -49,13 +49,13 @@
 /* Utility classes for the custom colors */
 @layer utilities {
   .bg-primary {
-    background-color: var(--color-primary);
+    background-color: #000;
   }
   .bg-primary-dark {
-    background-color: var(--color-primary-dark);
+    background-color: #000;
   }
   .bg-primary-light {
-    background-color: var(--color-primary-light);
+    background-color: #000;
   }
   .text-primary {
     color: var(--color-primary);

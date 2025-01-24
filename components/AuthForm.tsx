@@ -1,6 +1,8 @@
 //components/AuthForm.tsx
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
+import { useAccount, useDisconnect, useEnsAvatar, useEnsName } from "wagmi";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 interface AuthFormProps {
   onClose?: () => void;

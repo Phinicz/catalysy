@@ -129,7 +129,7 @@ export default function HomePage() {
         <SlidingBanner items={content.bannerItems} />
 
         <div className="mt-16 mb-20">
-          <h2 className="text-3xl font-bold text-text-primary text-center mb-12">
+          <h2 className="text-3xl text-white font-bold text-text-primary text-center mb-12">
             How It Works
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
@@ -149,7 +149,7 @@ export default function HomePage() {
         </div>
 
         <div className="mb-20">
-          <h2 className="text-3xl font-bold text-text-primary text-center mb-12">
+          <h2 className="text-3xl font-bold text-text-primary text-white text-center mb-12">
             {userRole === "partner" ? "Why Choose Us" : "Featured Games"}
           </h2>
           <div className="grid md:grid-cols-4 gap-6">
@@ -206,15 +206,15 @@ export default function HomePage() {
         </div>
 
         <div className="text-center mb-20">
-          <h2 className="text-3xl font-bold text-text-primary mb-6">
+          <h2 className="text-3xl font-bold text-white text-text-primary mb-6">
             Ready to Get Started?
           </h2>
-          <p className="text-text-secondary mb-8 max-w-2xl mx-auto">
+          <p className="text-text-secondary text-white mb-8 max-w-2xl mx-auto">
             {userRole === "partner"
               ? "Join our network of gaming experts and start earning today!"
               : "Level up your gaming experience and earn rewards while playing!"}
           </p>
-          <button className="px-8 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors">
+          <button className="px-8 py-3  text-white bg-red-500 rounded-lg font-medium hover:bg-primary-dark transition-colors">
             {userRole === "partner" ? "Become a Partner" : "Start Playing"}
           </button>
         </div>
