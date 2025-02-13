@@ -12,7 +12,7 @@ const Challenge = () => {
   const handleSubmit = (e: any) => {
     e.preventDefault();
     // Handle form submission to admin dashboard
-    console.log("Form submitted:", formData);
+    // console.log("Form submitted:", formData);
   };
 
   return (

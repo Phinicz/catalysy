@@ -8,6 +8,7 @@ import AuthModal from "./AuthModal";
 import { usePathname } from "next/navigation";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { CustomWalletConnect } from "./CustomWalletConnect";
+import { useApi } from "@/context/ApiContext";
 
 interface UserProfile {
   id: string;
@@ -28,6 +29,7 @@ export default function Navbar() {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  
 
   const navigation = [
     { name: "Player Stats", path: "/stats" },
@@ -169,6 +171,13 @@ export default function Navbar() {
                           onClick={() => setIsProfileMenuOpen(false)}
                         >
                           Profile Settings
+                        </Link>
+                        <Link
+                          href="/teammember"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 transition-colors"
+                          onClick={() => setIsProfileMenuOpen(false)}
+                        >
+                          Team Member
                         </Link>
                         <button
                           onClick={async () => {

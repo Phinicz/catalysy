@@ -32,7 +32,7 @@ export default function RewardCard({
       <div className="p-4">
         <h3 className="font-medium text-text-primary mb-2">{title}</h3>
         <p className="text-sm text-text-secondary mb-4">{description}</p>
-        <button className="w-full py-2 px-4 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
+        <button className="w-full py-2 px-4 bg-red-500 font-semibold text-white rounded-lg hover:bg-primary-dark transition-colors">
           Claim Reward
         </button>
       </div>

@@ -114,7 +114,7 @@ export default function RewardsPage() {
                 onClick={() => setSelectedCategory(category)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                   selectedCategory === category
-                    ? "bg-primary text-white"
+                    ? "bg-primary text-white border-2 border-white"
                     : "bg-surface text-text-secondary hover:bg-background"
                 }`}
               >
@@ -128,7 +128,7 @@ export default function RewardsPage() {
               placeholder="Search rewards..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full sm:w-64 px-4 py-2 rounded-lg border border-[var(--color-border)] bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full sm:w-64 px-4 py-2 rounded-lg border border-[var(--color-border)] bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-red-500"
             />
           </div>
         </div>

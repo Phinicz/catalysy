@@ -136,7 +136,7 @@ export default function Sidebar() {
   }
 
   return (
-    <div className="fixed left-0 top-16 w-64 h-[calc(100vh-4rem)] bg-surface border-r border-[var(--color-border)] p-6 overflow-y-auto">
+    <div className="fixed left-0 top-16 w-64 h-[calc(100vh-4rem)] text-white border-r border-[var(--color-border)] p-6 overflow-y-auto">
       <div className="space-y-6">
         {/* Profile Section */}
         <div className="text-center">
@@ -146,41 +146,35 @@ export default function Sidebar() {
               alt={profile.username}
               width={96}
               height={96}
-              className="rounded-full mx-auto"
+              className="rounded-full mx-auto border-white"
             />
           ) : (
             <div className="w-24 h-24 bg-primary rounded-full mx-auto flex items-center justify-center">
-              <span className="text-2xl font-bold text-white">
+              <span className="text-2xl font-bold border-white text-white">
                 {profile?.username?.charAt(0).toUpperCase()}
               </span>
             </div>
           )}
-          <h3 className="mt-3 font-medium text-text-primary">
-            {profile?.username}
-          </h3>
-          <p className="text-sm text-text-secondary">{profile?.email}</p>
+          <h3 className="mt-3 font-medium text-white">{profile?.username}</h3>
+          <p className="text-sm text-white">{profile?.email}</p>
         </div>
 
         {/* Stats Section */}
         <div className="space-y-3">
           <div className="flex justify-between">
-            <span className="text-text-secondary">Completed</span>
-            <span className="font-medium text-text-primary">
-              {stats.completed}
-            </span>
+            <span className="text-white">Completed</span>
+            <span className="font-medium text-white">{stats.completed}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-text-secondary">Ongoing</span>
-            <span className="font-medium text-text-primary">
-              {stats.ongoing}
-            </span>
+            <span className="text-white">Ongoing</span>
+            <span className="font-medium text-white">{stats.ongoing}</span>
           </div>
           <div className="h-0.5 bg-[var(--color-border)]" />
         </div>
 
         {/* Points Section */}
         <div>
-          <h4 className="text-sm font-medium text-text-secondary mb-3">
+          <h4 className="text-sm font-medium text-white mb-3">
             Points Collected
           </h4>
           <div className="grid grid-cols-4 gap-2 mb-4">
@@ -190,15 +184,13 @@ export default function Sidebar() {
                 className="aspect-square rounded-lg flex items-center justify-center relative"
                 style={{ backgroundColor: `var(--color-${color}-light)` }}
               >
-                <span className="text-xs font-medium text-text-primary">
-                  {value}
-                </span>
+                <span className="text-xs font-medium text-white">{value}</span>
               </div>
             ))}
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-text-secondary">Total Points</span>
-            <span className="font-medium text-text-primary">{totalPoints}</span>
+            <span className="text-white">Total Points</span>
+            <span className="font-medium text-white">{totalPoints}</span>
           </div>
         </div>
 

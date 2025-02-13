@@ -173,10 +173,13 @@ export default function AuthForm({ onClose }: AuthFormProps) {
         {mode === "signin" ? "Sign In" : "Create Account"}
       </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-4 w-full max-w-md mx-auto p-4"
+      >
         {mode === "signup" && (
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
+            <label className="block text-sm font-medium text-white mb-1.5">
               Username
             </label>
             <input
@@ -186,14 +189,14 @@ export default function AuthForm({ onClose }: AuthFormProps) {
               onChange={(e) =>
                 setFormState((prev) => ({ ...prev, username: e.target.value }))
               }
-              className="w-full px-4 py-2 text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-700"
+              className="w-full px-3 py-2 text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-700 text-base"
               placeholder="Choose a username"
             />
           </div>
         )}
 
         <div>
-          <label className="block text-sm font-medium text-white mb-2">
+          <label className="block text-sm font-medium text-white mb-1.5">
             Email
           </label>
           <input
@@ -203,13 +206,13 @@ export default function AuthForm({ onClose }: AuthFormProps) {
             onChange={(e) =>
               setFormState((prev) => ({ ...prev, email: e.target.value }))
             }
-            className="w-full px-4 py-2 text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+            className="w-full px-3 py-2 text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-base"
             placeholder="Enter your email"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-white mb-2">
+          <label className="block text-sm font-medium text-white mb-1.5">
             Password
           </label>
           <input
@@ -219,21 +222,23 @@ export default function AuthForm({ onClose }: AuthFormProps) {
             onChange={(e) =>
               setFormState((prev) => ({ ...prev, password: e.target.value }))
             }
-            className="w-full px-4 py-2 text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-700"
+            className="w-full px-3 py-2 text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-700 text-base"
             placeholder="Enter your password"
           />
         </div>
 
         {mode === "signup" && (
           <div>
-            <label className="block text-sm font-medium mb-2">I am a:</label>
-            <div className="flex space-x-4">
+            <label className="block text-sm font-medium text-white mb-1.5">
+              I am a:
+            </label>
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
               <button
                 type="button"
                 onClick={() =>
                   setFormState((prev) => ({ ...prev, role: "player" }))
                 }
-                className={`w-1/2 px-4 py-2 rounded-lg text-center font-medium focus:outline-none ${
+                className={`flex-1 px-3 py-2 rounded-lg text-center font-medium focus:outline-none transition-colors ${
                   formState.role === "player"
                     ? "bg-red-600 text-white"
                     : "bg-white text-black border border-white"
@@ -246,7 +251,7 @@ export default function AuthForm({ onClose }: AuthFormProps) {
                 onClick={() =>
                   setFormState((prev) => ({ ...prev, role: "partner" }))
                 }
-                className={`w-1/2 px-4 py-2 rounded-lg text-center font-medium focus:outline-none ${
+                className={`flex-1 px-3 py-2 rounded-lg text-center font-medium focus:outline-none transition-colors ${
                   formState.role === "partner"
                     ? "bg-red-600 text-white"
                     : "bg-white text-black border border-white"
@@ -259,13 +264,15 @@ export default function AuthForm({ onClose }: AuthFormProps) {
         )}
 
         {error && (
-          <div className="text-red-600 text-sm font-medium">{error}</div>
+          <div className="text-red-600 text-sm font-medium text-center">
+            {error}
+          </div>
         )}
 
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-red-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-offset-2 disabled:opacity-50"
+          className="w-full bg-red-600 text-white py-2.5 px-4 rounded-lg font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-offset-2 disabled:opacity-50 transition-colors text-base"
         >
           {isLoading
             ? "Processing..."
@@ -280,14 +287,14 @@ export default function AuthForm({ onClose }: AuthFormProps) {
             setMode(mode === "signin" ? "signup" : "signin");
             setError(null);
           }}
-          className="w-full text-sm text-white hover:text-white/50 font-medium"
+          className="w-full text-sm text-white hover:text-white/50 font-medium py-2"
         >
           {mode === "signin"
             ? "Need an account? Sign up"
             : "Already have an account? Sign in"}
         </button>
 
-        <div className="relative">
+        <div className="relative py-2">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-gray-300" />
           </div>
@@ -301,7 +308,7 @@ export default function AuthForm({ onClose }: AuthFormProps) {
         <button
           type="button"
           onClick={handleGoogleSignIn}
-          className="w-full flex items-center justify-center gap-3 px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-500 via-red-500 to-yellow-500 hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-700"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-300 shadow-sm text-base font-medium rounded-lg text-white bg-gradient-to-r from-blue-500 via-red-500 to-yellow-500 hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-700 transition-opacity"
         >
           <svg
             className="w-5 h-5"

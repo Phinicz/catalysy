@@ -2,9 +2,22 @@
 const nextConfig = {
   images: {
     domains: [
-      "lh3.googleusercontent.com", // For Google profile pictures
-      `${process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1]}`, // For Supabase storage
-    ],
+      "lh3.googleusercontent.com",
+      process.env.NEXT_PUBLIC_SUPABASE_URL
+        ? process.env.NEXT_PUBLIC_SUPABASE_URL.split("//")[1]
+        : "",
+    ].filter(Boolean),
+  },
+  serverRuntimeConfig: {
+    snagsolutionsApiKey: process.env.SNAGSOLUTIONS_API_KEY,
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/api/snag/:path*",
+        destination: "https://admin.snagsolutions.io/api/:path*",
+      },
+    ];
   },
 };
 

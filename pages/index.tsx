@@ -2,13 +2,47 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import SlidingBanner from "../components/Banner/SlidingBanner";
-import { Gamepad2, Trophy, Gift, Users, Target, Star } from "lucide-react";
+import {
+  Gamepad2,
+  Trophy,
+  Gift,
+  Users,
+  Target,
+  Star,
+  User,
+} from "lucide-react";
 import { useRouter } from "next/router";
+import { useApi } from "@/context/ApiContext";
 
 export default function HomePage() {
   const [userRole, setUserRole] = useState<"player" | "partner" | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [usercount, setUserCount] = useState(0);
   const router = useRouter();
+
+  const { getUserCount } = useApi();
+
+  useEffect(() => {
+    const fetchUserCount = async () => {
+      try {
+        // setLoading(true);
+        const response = await getUserCount({
+          organizationId: process.env.NEXT_PUBLIC_ORGANIZATION_ID || "",
+          websiteId: process.env.NEXT_PUBLIC_WEBSITE_ID || "",
+        });
+        console.log(response, "response");
+        setUserCount(response.totalCount);
+        // setError(null);
+      } catch (err) {
+        // setError("Failed to fetch user count");
+        console.error(err);
+      } finally {
+        // setLoading(false);
+      }
+    };
+
+    fetchUserCount();
+  }, [getUserCount]);
 
   useEffect(() => {
     fetchUserRole();
@@ -61,19 +95,19 @@ export default function HomePage() {
     ],
     howItWorks: [
       {
-        icon: <Gamepad2 className="w-8 h-8 text-primary" />,
+        icon: <Gamepad2 className="w-8 h-8 text-red-500" />,
         title: "Play Games",
         description:
           "Connect your gaming accounts and start playing your favorite games",
       },
       {
-        icon: <Trophy className="w-8 h-8 text-primary" />,
+        icon: <Trophy className="w-8 h-8 text-red-500" />,
         title: "Complete Achievements",
         description:
           "Accomplish in-game tasks and earn points for your success",
       },
       {
-        icon: <Gift className="w-8 h-8 text-primary" />,
+        icon: <Gift className="w-8 h-8 text-red-500" />,
         title: "Earn Rewards",
         description:
           "Redeem your points for exclusive gaming rewards and perks",
@@ -226,6 +260,15 @@ export default function HomePage() {
         >
           <Star className="w-5 h-5 mr-2" />
           Feedback
+        </button>
+      </div>
+      <div className="fixed bottom-4 right-4 z-50">
+        <button
+          onClick={() => router.push("/users")}
+          className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition-all"
+        >
+          <User className="w-5 h-5 mr-2" />
+          Total User: {usercount}
         </button>
       </div>
     </div>

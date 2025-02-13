@@ -64,7 +64,7 @@ export default function AchievementsPage() {
 
       <div className="mt-8">
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-text-primary mb-6">
+          <h2 className="text-2xl font-bold text-white mb-6">
             Trending Achievements
           </h2>
           <AchievementGrid achievements={trendingAchievements} />
@@ -72,13 +72,11 @@ export default function AchievementsPage() {
 
         <section>
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-text-primary">
-              All Achievements
-            </h2>
+            <h2 className="text-2xl font-bold text-white">All Achievements</h2>
             <input
               type="search"
               placeholder="Search Achievements"
-              className="px-4 py-2 border border-[var(--color-border)] rounded-lg bg-surface text-text-primary"
+              className="px-4 py-2 border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-red-500 rounded-lg bg-surface text-black "
             />
           </div>
           <AchievementGrid achievements={allAchievements} />

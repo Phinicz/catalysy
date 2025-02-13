@@ -58,14 +58,14 @@ export default function StatsPage() {
 
       <div className="mt-8 space-y-8">
         <section>
-          <h2 className="text-2xl font-bold text-text-primary mb-4">
+          <h2 className="text-2xl font-bold text-white mb-4">
             Tasks in Progress
           </h2>
           <TaskList tasks={ongoingTasks} type="ongoing" />
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-text-primary mb-4">
+          <h2 className="text-2xl font-bold text-white mb-4">
             Completed Tasks
           </h2>
           <TaskList tasks={completedTasks} type="completed" />
