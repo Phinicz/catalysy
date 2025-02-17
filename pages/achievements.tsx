@@ -30,7 +30,7 @@ const SAMPLE_ACHIEVEMENTS = {
       status: "active" as const,
       game: {
         name: "Uldor Test",
-        icon: "/api/placeholder/50/50",
+        icon: "/placeholders/achivements/4.jpg",
       },
     },
   ],

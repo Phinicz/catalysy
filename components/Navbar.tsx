@@ -29,12 +29,15 @@ export default function Navbar() {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
-  
 
   const navigation = [
     { name: "Player Stats", path: "/stats" },
     { name: "Achievements", path: "/achievements" },
+    { name: "Leaderboard", path: "/leaderboard" },
+    { name: "BattlePass", path: "/battlepass" },
+    { name: "Merch Store", path: "/merchstore" },
     { name: "Rewards", path: "/rewards" },
+    { name: "LootBags", path: "/lootbags" },
     { name: "Subscriptions", path: "/subscriptions" },
     ...(profile?.role === "partner"
       ? [{ name: "Challenge", path: "/challenge" }]
@@ -89,7 +92,7 @@ export default function Navbar() {
         scrolled ? "bg-red-500/80 backdrop-blur-md shadow-lg" : "bg-red-500"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className=" mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           {/* Logo */}
           <Link href="/" className="flex items-center group">

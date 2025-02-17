@@ -3,7 +3,9 @@ import { supabase } from "../lib/supabase";
 import ImageUpload from "../components/ImageUpload";
 import { useAccount } from "wagmi";
 import { Copy } from "lucide-react";
-
+import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { useApi } from "@/context/ApiContext";
+import { toast } from "react-toastify";
 interface UserProfile {
   id: string;
   username: string;
@@ -15,12 +17,24 @@ interface UserProfile {
   gems: number;
 }
 
+interface ApiRegistrationStatus {
+  isRegistered: boolean;
+  displayName?: string;
+}
+
 export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isApiRegistering, setIsApiRegistering] = useState(false);
+  const [apiStatus, setApiStatus] = useState<ApiRegistrationStatus>({
+    isRegistered: false,
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const { openConnectModal } = useConnectModal();
   const { address, isConnected } = useAccount();
+  const { createUser, getUsers } = useApi();
+  const [isCheckingApi, setIsCheckingApi] = useState(false);
   const [editForm, setEditForm] = useState({
     username: "",
     bio: "",
@@ -30,6 +44,89 @@ export default function ProfilePage() {
   useEffect(() => {
     fetchProfile();
   }, []);
+
+  useEffect(() => {
+    if (address) {
+      checkApiRegistrationStatus();
+    }
+  }, [address]);
+
+  const checkApiRegistrationStatus = async () => {
+    if (!address) return;
+    setIsCheckingApi(true);
+    try {
+      const response = await getUsers();
+
+      // Now correctly accessing the users array from response.data
+      const isRegistered = response.data.some(
+        (user) => user.walletAddress.toLowerCase() === address.toLowerCase()
+      );
+
+      if (isRegistered) {
+        const user = response.data.find(
+          (user) => user.walletAddress.toLowerCase() === address.toLowerCase()
+        );
+        console.log(user, "here is the user");
+
+        setApiStatus({
+          isRegistered: true,
+          displayName: user?.userMetadata[0].displayName,
+        });
+      } else {
+        setApiStatus({ isRegistered: false });
+      }
+    } catch (error) {
+      console.error("Error checking API registration:", error);
+      setApiStatus({ isRegistered: false });
+    } finally {
+      setIsCheckingApi(false);
+    }
+  };
+
+  const handleApiRegistration = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!address || !profile) {
+      toast.error("Please connect your wallet first");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Remove userId from the registration payload
+      const response = await createUser({
+        walletAddress: address,
+        displayName: profile.username,
+        emailAddress: profile.email,
+      });
+
+      console.log("API registration response:", response);
+
+      // Add a small delay before checking the status
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      await checkApiRegistrationStatus();
+      toast.success("Successfully registered with API!");
+      setIsApiRegistering(false);
+    } catch (error) {
+      console.error("Detailed API registration error:", error);
+
+      if (error instanceof Error) {
+        if (error.message.includes("already registered")) {
+          toast.error("This wallet address is already registered");
+        } else if (error.message.includes("invalid")) {
+          toast.error(
+            "Invalid registration data. Please check your information."
+          );
+        } else {
+          toast.error(`Registration failed: ${error.message}`);
+        }
+      } else {
+        toast.error("Failed to register. Please try again later.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const fetchProfile = async () => {
     try {
@@ -260,6 +357,83 @@ export default function ProfilePage() {
               </div>
             </form>
           )}
+        </div>
+        <div className="mt-6 pt-6 border-t border-red-500">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-red-500">API Access</h2>
+            {!apiStatus.isRegistered && !isApiRegistering && !isCheckingApi && (
+              <button
+                onClick={() => setIsApiRegistering(true)}
+                className="bg-red-600 px-4 py-2 rounded-lg text-white font-bold hover:bg-red-700 transition"
+              >
+                Register for API
+              </button>
+            )}
+          </div>
+
+          {isCheckingApi ? (
+            <div className="bg-gray-800 p-4 rounded-lg border border-red-500">
+              <p className="text-white text-center">
+                Checking registration status...
+              </p>
+            </div>
+          ) : apiStatus.isRegistered ? (
+            <div className="bg-gray-800 p-4 rounded-lg border border-red-500">
+              <p className="text-white">
+                ✓ Registered for API access as{" "}
+                <span className="text-red-500 font-semibold">
+                  {apiStatus.displayName}
+                </span>
+              </p>
+            </div>
+          ) : isApiRegistering ? (
+            <form onSubmit={handleApiRegistration} className="space-y-4">
+              <p className="text-gray-400">
+                Register using your profile information:
+              </p>
+              <div className="bg-gray-800 p-4 rounded-lg border border-red-500">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-red-500 mb-1">
+                      Display Name
+                    </label>
+                    <p className="text-white">{profile?.username}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-red-500 mb-1">
+                      Email
+                    </label>
+                    <p className="text-white">{profile?.email}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <button
+                  type="submit"
+                  disabled={!isConnected || isLoading}
+                  className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition disabled:bg-gray-600"
+                >
+                  {isLoading ? "Registering..." : "Confirm Registration"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsApiRegistering(false)}
+                  className="flex-1 bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          ) : !isConnected ? (
+            <div className="text-center">
+              <button
+                onClick={openConnectModal}
+                className="bg-red-600 px-4 py-2 rounded-lg text-white font-bold hover:bg-red-700 transition"
+              >
+                Connect Wallet to Register
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>
