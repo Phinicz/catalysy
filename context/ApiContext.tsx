@@ -5,12 +5,14 @@ import {
   CreateUserData,
   UserCountResponse,
   UserCountParams,
+  LoyaltyRulesResponse,
 } from "../types/api.types";
 
 interface ApiContextType {
   getUsers: () => Promise<ApiResponse>;
   createUser: (userData: CreateUserData) => Promise<any>;
   getUserCount: (params: UserCountParams) => Promise<UserCountResponse>;
+  getLoyaltyRules: () => Promise<LoyaltyRulesResponse>;
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -22,6 +24,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({
     getUsers: apiService.getUsers.bind(apiService),
     createUser: apiService.createUser.bind(apiService),
     getUserCount: apiService.getUserCount.bind(apiService),
+    getLoyaltyRules: apiService.getLoyaltyRules.bind(apiService),
   };
 
   return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>;

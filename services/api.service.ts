@@ -4,6 +4,7 @@ import {
   CreateUserData,
   UserCountResponse,
   UserCountParams,
+  LoyaltyRulesResponse,
 } from "../types/api.types";
 
 class ApiService {
@@ -53,6 +54,10 @@ class ApiService {
     return this.fetchApi<UserCountResponse>(endpoint, {
       method: "GET",
     });
+  }
+
+  async getLoyaltyRules(): Promise<LoyaltyRulesResponse> {
+    return this.fetchApi<LoyaltyRulesResponse>("/loyalty/rules");
   }
 }
 

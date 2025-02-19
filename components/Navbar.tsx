@@ -39,6 +39,7 @@ export default function Navbar() {
     { name: "Rewards", path: "/rewards" },
     { name: "LootBags", path: "/lootbags" },
     { name: "Subscriptions", path: "/subscriptions" },
+    { name: "Reward Rules", path: "/rules" },
     ...(profile?.role === "partner"
       ? [{ name: "Challenge", path: "/challenge" }]
       : []),

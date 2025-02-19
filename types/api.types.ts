@@ -18,7 +18,6 @@ export interface ApiResponse {
 }
 
 export interface CreateUserData {
-  userId: string;
   walletAddress: string;
   displayName: string;
   emailAddress: string;
@@ -34,3 +33,17 @@ export interface UserCountParams {
   organizationId?: string;
   websiteId?: string;
 }
+
+export type LoyaltyRule = {
+  id: string;
+  name: string;
+  type: string;
+  network: string;
+  amount: string;
+  rewardType: string;
+  frequency: string;
+};
+
+export type LoyaltyRulesResponse = {
+  data: LoyaltyRule[];
+};
