@@ -40,7 +40,7 @@ export default function AchievementSystem() {
   };
 
   return (
-    <div className="min-h-screen pt-32 bg-black text-white p-8 relative overflow-hidden">
+    <div className="min-h-screen pt-32  text-white p-8 relative overflow-hidden">
       {/* Success Modal */}
       <AnimatePresence>
         {showSuccess && (
@@ -48,7 +48,7 @@ export default function AchievementSystem() {
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.5 }}
-            className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 backdrop-blur-sm"
+            className="fixed inset-0 flex items-center justify-center z-50  bg-opacity-50 backdrop-blur-sm"
           >
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
@@ -69,7 +69,7 @@ export default function AchievementSystem() {
                   damping: 15,
                   delay: 0.2,
                 }}
-                className="w-20 h-20 bg-red-600 rounded-full mx-auto mb-4 flex items-center justify-center"
+                className="w-20 h-20 bg-gray-600 rounded-full mx-auto mb-4 flex items-center justify-center"
               >
                 <motion.svg
                   initial={{ pathLength: 0 }}
@@ -102,7 +102,7 @@ export default function AchievementSystem() {
                   initial={{ width: 0 }}
                   animate={{ width: "100%" }}
                   transition={{ duration: 3 }}
-                  className="h-1 bg-red-600 mt-4 rounded-full"
+                  className="h-1 bg-gray-600 mt-4 rounded-full"
                 />
               </motion.div>
             </motion.div>
@@ -115,7 +115,7 @@ export default function AchievementSystem() {
         animate={{ y: 0, opacity: 1 }}
         className="text-center mb-12"
       >
-        <h1 className="text-4xl font-bold text-red-600 mb-4">
+        <h1 className="text-4xl font-bold text-white mb-4">
           Achievement System
         </h1>
         <p className="text-gray-400">
@@ -131,7 +131,7 @@ export default function AchievementSystem() {
             whileTap={{ scale: 0.95 }}
             className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
               selectedSub === sub.name
-                ? "bg-red-600 text-white"
+                ? "bg-gray-600 text-white"
                 : "bg-gray-800 text-gray-300 hover:bg-gray-700"
             }`}
             onClick={() => setSelectedSub(sub.name)}
@@ -152,12 +152,12 @@ export default function AchievementSystem() {
           <motion.div
             key={tier.name}
             variants={itemVariants}
-            className="bg-gray-900 rounded-xl p-6 border border-red-800 hover:border-red-600 transition-colors"
+            className="bg-gray-900 rounded-xl p-6 border border-gray-700 hover:border-gray-500 transition-colors"
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-red-500">{tier.name}</h3>
+              <h3 className="text-xl font-bold text-gray-300">{tier.name}</h3>
               <motion.div
-                className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-sm font-bold"
+                className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-sm font-bold"
                 whileHover={{ rotate: 180 }}
                 transition={{ type: "spring", stiffness: 200 }}
               >
@@ -183,7 +183,7 @@ export default function AchievementSystem() {
                 whileHover={{ scale: 1.05 }}
               >
                 <motion.div
-                  className="h-full bg-red-600"
+                  className="h-full bg-gray-600"
                   initial={{ width: 0 }}
                   animate={{ width: `${(index + 1) * 25}%` }}
                   transition={{ duration: 1, ease: "easeOut" }}
@@ -219,11 +219,11 @@ export default function AchievementSystem() {
         <motion.button
           whileHover={{
             scale: 1.05,
-            boxShadow: "0 0 20px rgba(239, 68, 68, 0.5)",
+            boxShadow: "0 0 20px rgba(156, 163, 175, 1)",
           }}
           whileTap={{ scale: 0.95 }}
           onClick={handlePurchase}
-          className="bg-red-600 text-white px-12 py-4 rounded-lg font-bold text-lg transform transition-all duration-300 hover:bg-red-700"
+          className="bg-gray-800 text-white px-12 py-4 rounded-lg font-bold text-lg transform transition-all duration-300 hover:bg-gray-600"
         >
           {selectedSub === "Free Subscription" ? (
             "Upgrade to Premium"

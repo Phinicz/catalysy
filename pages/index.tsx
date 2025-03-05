@@ -95,19 +95,19 @@ export default function HomePage() {
     ],
     howItWorks: [
       {
-        icon: <Gamepad2 className="w-8 h-8 text-red-500" />,
+        icon: <Gamepad2 className="w-8 h-8 text-gray-500" />,
         title: "Play Games",
         description:
           "Connect your gaming accounts and start playing your favorite games",
       },
       {
-        icon: <Trophy className="w-8 h-8 text-red-500" />,
+        icon: <Trophy className="w-8 h-8 text-gray-500" />,
         title: "Complete Achievements",
         description:
           "Accomplish in-game tasks and earn points for your success",
       },
       {
-        icon: <Gift className="w-8 h-8 text-red-500" />,
+        icon: <Gift className="w-8 h-8 text-gray-500" />,
         title: "Earn Rewards",
         description:
           "Redeem your points for exclusive gaming rewards and perks",
@@ -248,7 +248,7 @@ export default function HomePage() {
               ? "Join our network of gaming experts and start earning today!"
               : "Level up your gaming experience and earn rewards while playing!"}
           </p>
-          <button className="px-8 py-3  text-white bg-red-500 rounded-lg font-medium hover:bg-primary-dark transition-colors">
+          <button className="px-8 py-3  text-white bg-gray-600 rounded-lg font-medium hover:bg-gray-800 transition-colors">
             {userRole === "partner" ? "Become a Partner" : "Start Playing"}
           </button>
         </div>
@@ -256,7 +256,7 @@ export default function HomePage() {
       <div className="fixed bottom-4 left-4 z-50">
         <button
           onClick={() => router.push("/feedback")}
-          className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition-all"
+          className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg shadow hover:bg-gray-800 transition-all"
         >
           <Star className="w-5 h-5 mr-2" />
           Feedback
@@ -265,7 +265,7 @@ export default function HomePage() {
       <div className="fixed bottom-4 right-4 z-50">
         <button
           onClick={() => router.push("/users")}
-          className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition-all"
+          className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg shadow hover:bg-gray-800 transition-all"
         >
           <User className="w-5 h-5 mr-2" />
           Total User: {usercount}

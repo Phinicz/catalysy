@@ -18,7 +18,7 @@ interface UserProfile {
 }
 
 interface ApiRegistrationStatus {
-  isRegistered: boolean;
+  isRegistegray: boolean;
   displayName?: string;
 }
 
@@ -27,7 +27,7 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isApiRegistering, setIsApiRegistering] = useState(false);
   const [apiStatus, setApiStatus] = useState<ApiRegistrationStatus>({
-    isRegistered: false,
+    isRegistegray: false,
   });
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -40,6 +40,7 @@ export default function ProfilePage() {
     bio: "",
     profile_picture: "",
   });
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -58,26 +59,26 @@ export default function ProfilePage() {
       const response = await getUsers();
 
       // Now correctly accessing the users array from response.data
-      const isRegistered = response.data.some(
+      const isRegistegray = response.data.some(
         (user) => user.walletAddress.toLowerCase() === address.toLowerCase()
       );
 
-      if (isRegistered) {
+      if (isRegistegray) {
         const user = response.data.find(
           (user) => user.walletAddress.toLowerCase() === address.toLowerCase()
         );
         console.log(user, "here is the user");
 
         setApiStatus({
-          isRegistered: true,
+          isRegistegray: true,
           displayName: user?.userMetadata[0].displayName,
         });
       } else {
-        setApiStatus({ isRegistered: false });
+        setApiStatus({ isRegistegray: false });
       }
     } catch (error) {
       console.error("Error checking API registration:", error);
-      setApiStatus({ isRegistered: false });
+      setApiStatus({ isRegistegray: false });
     } finally {
       setIsCheckingApi(false);
     }
@@ -105,14 +106,14 @@ export default function ProfilePage() {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       await checkApiRegistrationStatus();
-      toast.success("Successfully registered with API!");
+      toast.success("Successfully registegray with API!");
       setIsApiRegistering(false);
     } catch (error) {
       console.error("Detailed API registration error:", error);
 
       if (error instanceof Error) {
-        if (error.message.includes("already registered")) {
-          toast.error("This wallet address is already registered");
+        if (error.message.includes("already registegray")) {
+          toast.error("This wallet address is already registegray");
         } else if (error.message.includes("invalid")) {
           toast.error(
             "Invalid registration data. Please check your information."
@@ -171,31 +172,60 @@ export default function ProfilePage() {
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsUpdating(true);
     try {
+      // Basic validation
+      if (!editForm.username.trim()) {
+        toast.error("Username is requigray");
+        return;
+      }
+
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      if (!session?.user) return;
+
+      if (!session?.user) {
+        toast.error("You must be logged in to update your profile");
+        return;
+      }
+
+      // First update auth user metadata
+      const { error: authError } = await supabase.auth.updateUser({
+        data: { username: editForm.username },
+      });
+
+      if (authError) throw authError;
+
+      // Then update profile - explicitly select columns to update
       const updates = {
-        username: editForm.username,
-        bio: editForm.bio || null,
+        username: editForm.username.trim(),
+        bio: editForm.bio?.trim() || null,
         profile_picture: editForm.profile_picture || null,
       };
-      const { error } = await supabase
+
+      const { error: profileError } = await supabase
         .from("user_profiles")
         .update(updates)
         .eq("id", session.user.id);
-      if (error) throw error;
+
+      if (profileError) throw profileError;
+
+      await fetchProfile(); // Refresh profile data
       setIsEditing(false);
-      fetchProfile();
+      toast.success("Profile updated successfully!");
     } catch (error) {
       console.error("Error updating profile:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update profile"
+      );
+    } finally {
+      setIsUpdating(false);
     }
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-red-500 text-xl">
+      <div className="min-h-screen flex items-center justify-center bg-black text-gray-500 text-xl">
         Loading...
       </div>
     );
@@ -203,20 +233,20 @@ export default function ProfilePage() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-red-500 text-xl">
+      <div className="min-h-screen flex items-center justify-center bg-black text-gray-500 text-xl">
         Profile not found
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black py-20 flex justify-center items-center">
+    <div className="min-h-screen  py-20 flex justify-center items-center">
       <div className="max-w-3xl w-full px-4">
-        <div className="bg-gray-900 rounded-lg shadow-lg p-6 border border-red-500 relative">
+        <div className="bg-gray-900 rounded-lg shadow-lg p-6 border border-gray-500 relative">
           {!isEditing ? (
             <div className="space-y-6 text-white">
               <div className="flex items-start gap-6">
-                <div className="flex-shrink-0 border-4 border-red-500 rounded-full overflow-hidden">
+                <div className="flex-shrink-0 border-4 border-gray-500 rounded-full overflow-hidden">
                   {profile.profile_picture ? (
                     <img
                       src={profile.profile_picture}
@@ -224,7 +254,7 @@ export default function ProfilePage() {
                       className="h-32 w-32 object-cover"
                     />
                   ) : (
-                    <div className="h-32 w-32 bg-gray-700 flex items-center justify-center text-3xl text-red-500 font-bold">
+                    <div className="h-32 w-32 bg-gray-700 flex items-center justify-center text-3xl text-gray-500 font-bold">
                       {profile.username[0].toUpperCase()}
                     </div>
                   )}
@@ -232,29 +262,29 @@ export default function ProfilePage() {
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h1 className="text-3xl font-bold text-red-500">
+                      <h1 className="text-3xl font-bold text-white">
                         {profile.username}
                       </h1>
                       <p className="text-sm text-gray-400">{profile.email}</p>
-                      <span className="mt-1 inline-block px-3 py-1 text-xs font-medium bg-red-500 text-white rounded-full uppercase">
+                      <span className="mt-1 inline-block px-3 py-1 text-xs font-medium bg-gray-500 text-white rounded-full uppercase">
                         {profile.role}
                       </span>
                     </div>
                     <button
                       onClick={() => setIsEditing(true)}
-                      className="bg-red-600 px-4 py-2 rounded-lg text-white font-bold hover:bg-red-700 transition"
+                      className="bg-gray-600 px-4 py-2 rounded-lg text-white font-bold hover:bg-gray-700 transition"
                     >
                       Edit Profile
                     </button>
                   </div>
                   <div className="mt-4">
-                    <h3 className="font-medium text-red-500">Bio</h3>
+                    <h3 className="font-medium text-gray-500">Bio</h3>
                     <p className="mt-1 text-gray-300">
                       {profile.bio || "No bio yet"}
                     </p>
                   </div>
                   <div className="mt-4">
-                    <h3 className="font-medium text-red-500">Wallet</h3>
+                    <h3 className="font-medium text-gray-500">Wallet</h3>
                     {isConnected ? (
                       <div className="mt-1 flex items-center space-x-2">
                         <p className="text-gray-300 font-mono">
@@ -279,15 +309,15 @@ export default function ProfilePage() {
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4 border-t border-red-500 pt-6">
-                <div className="bg-gray-800 p-4 rounded-lg text-center border border-red-500">
-                  <h3 className="text-red-500 font-medium">Coins</h3>
+              <div className="grid grid-cols-2 gap-4 border-t border-gray-500 pt-6">
+                <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-500">
+                  <h3 className="text-gray-500 font-medium">Coins</h3>
                   <p className="text-2xl font-bold text-white">
                     {profile.coins}
                   </p>
                 </div>
-                <div className="bg-gray-800 p-4 rounded-lg text-center border border-red-500">
-                  <h3 className="text-red-500 font-medium">Gems</h3>
+                <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-500">
+                  <h3 className="text-gray-500 font-medium">Gems</h3>
                   <p className="text-2xl font-bold text-white">
                     {profile.gems}
                   </p>
@@ -300,7 +330,7 @@ export default function ProfilePage() {
               className="space-y-6 text-white"
             >
               <div>
-                <label className="block text-sm font-medium text-red-500 mb-2">
+                <label className="block text-sm font-medium text-gray-500 mb-2">
                   Profile Picture
                 </label>
                 <ImageUpload
@@ -311,7 +341,7 @@ export default function ProfilePage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-red-500 mb-2">
+                <label className="block text-sm font-medium text-gray-500 mb-2">
                   Username
                 </label>
                 <input
@@ -324,11 +354,11 @@ export default function ProfilePage() {
                       username: e.target.value,
                     }))
                   }
-                  className="w-full px-3 py-2 border border-red-500 bg-black text-white rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-500 bg-gray-800 text-white rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-red-500 mb-2">
+                <label className="block text-sm font-medium text-gray-500 mb-2">
                   Bio
                 </label>
                 <textarea
@@ -337,15 +367,16 @@ export default function ProfilePage() {
                     setEditForm((prev) => ({ ...prev, bio: e.target.value }))
                   }
                   rows={4}
-                  className="w-full px-3 py-2 border border-red-500 bg-black text-white rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-500 bg-gray-800 text-white rounded-lg"
                 ></textarea>
               </div>
               <div className="flex gap-4">
                 <button
                   type="submit"
-                  className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
+                  disabled={isUpdating}
+                  className="flex-1 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition disabled:bg-gray-600"
                 >
-                  Save Changes
+                  {isUpdating ? "Saving..." : "Save Changes"}
                 </button>
                 <button
                   type="button"
@@ -358,30 +389,32 @@ export default function ProfilePage() {
             </form>
           )}
         </div>
-        <div className="mt-6 pt-6 border-t border-red-500">
+        <div className="mt-6 pt-6 border-t border-gray-500">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-red-500">API Access</h2>
-            {!apiStatus.isRegistered && !isApiRegistering && !isCheckingApi && (
-              <button
-                onClick={() => setIsApiRegistering(true)}
-                className="bg-red-600 px-4 py-2 rounded-lg text-white font-bold hover:bg-red-700 transition"
-              >
-                Register for API
-              </button>
-            )}
+            <h2 className="text-xl font-bold text-gray-500">API Access</h2>
+            {!apiStatus.isRegistegray &&
+              !isApiRegistering &&
+              !isCheckingApi && (
+                <button
+                  onClick={() => setIsApiRegistering(true)}
+                  className="bg-gray-600 px-4 py-2 rounded-lg text-white font-bold hover:bg-gray-700 transition"
+                >
+                  Register for API
+                </button>
+              )}
           </div>
 
           {isCheckingApi ? (
-            <div className="bg-gray-800 p-4 rounded-lg border border-red-500">
+            <div className="bg-gray-800 p-4 rounded-lg border border-gray-500">
               <p className="text-white text-center">
                 Checking registration status...
               </p>
             </div>
-          ) : apiStatus.isRegistered ? (
-            <div className="bg-gray-800 p-4 rounded-lg border border-red-500">
+          ) : apiStatus.isRegistegray ? (
+            <div className="bg-gray-800 p-4 rounded-lg border border-gray-500">
               <p className="text-white">
-                ✓ Registered for API access as{" "}
-                <span className="text-red-500 font-semibold">
+                ✓ Registegray for API access as{" "}
+                <span className="text-white font-semibold">
                   {apiStatus.displayName}
                 </span>
               </p>
@@ -391,16 +424,16 @@ export default function ProfilePage() {
               <p className="text-gray-400">
                 Register using your profile information:
               </p>
-              <div className="bg-gray-800 p-4 rounded-lg border border-red-500">
+              <div className="bg-gray-800 p-4 rounded-lg border border-gray-500">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm text-red-500 mb-1">
+                    <label className="block text-sm text-gray-500 mb-1">
                       Display Name
                     </label>
                     <p className="text-white">{profile?.username}</p>
                   </div>
                   <div>
-                    <label className="block text-sm text-red-500 mb-1">
+                    <label className="block text-sm text-gray-500 mb-1">
                       Email
                     </label>
                     <p className="text-white">{profile?.email}</p>
@@ -411,7 +444,7 @@ export default function ProfilePage() {
                 <button
                   type="submit"
                   disabled={!isConnected || isLoading}
-                  className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition disabled:bg-gray-600"
+                  className="flex-1 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition disabled:bg-gray-600"
                 >
                   {isLoading ? "Registering..." : "Confirm Registration"}
                 </button>
@@ -428,7 +461,7 @@ export default function ProfilePage() {
             <div className="text-center">
               <button
                 onClick={openConnectModal}
-                className="bg-red-600 px-4 py-2 rounded-lg text-white font-bold hover:bg-red-700 transition"
+                className="bg-gray-600 px-4 py-2 rounded-lg text-white font-bold hover:bg-gray-700 transition"
               >
                 Connect Wallet to Register
               </button>

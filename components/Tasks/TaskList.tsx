@@ -42,7 +42,7 @@ export default function TaskList({ tasks, type }: TaskListProps) {
               {type === "ongoing" && (
                 <div className="mt-2 w-full bg-background rounded-full h-2">
                   <div
-                    className="bg-red-500  h-full rounded-full"
+                    className="bg-gray-500  h-full rounded-full"
                     style={{ width: `${task.progress}%` }}
                   />
                 </div>

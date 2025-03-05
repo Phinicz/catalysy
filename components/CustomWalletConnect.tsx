@@ -35,7 +35,7 @@ export const CustomWalletConnect = () => {
                   <button
                     onClick={openConnectModal}
                     type="button"
-                    className="bg-red-600 text-white font-medium py-2 px-4 rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                    className="bg-gray-600 text-white font-medium py-2 px-4 rounded hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:ring-offset-2"
                   >
                     Connect Wallet
                   </button>
@@ -46,7 +46,7 @@ export const CustomWalletConnect = () => {
                   <button
                     onClick={openChainModal}
                     type="button"
-                    className="bg-red-600 text-white font-medium py-2 px-4 rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                    className="bg-gray-600 text-white font-medium py-2 px-4 rounded hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-offset-2"
                   >
                     Wrong network
                   </button>
@@ -57,7 +57,7 @@ export const CustomWalletConnect = () => {
                   <button
                     onClick={openAccountModal}
                     type="button"
-                    className="bg-gray-900 text-white font-medium py-2 px-4 rounded hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                    className="bg-gray-600 text-white font-medium py-2 px-4 rounded hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-offset-2"
                   >
                     {account.displayName}
                     {account.displayBalance

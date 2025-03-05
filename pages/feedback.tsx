@@ -17,10 +17,10 @@ export default function FeedbackPage() {
 
   return (
     <div
-      className="min-h-screen bg-black text-white flex flex-col bg-cover bg-center"
+      className="min-h-screen  text-white flex flex-col bg-cover bg-center"
       style={{ backgroundImage: "url('/backgrounds/feedback.jpg')" }}
     >
-      <header className="p-4 bg-red-600 bg-opacity-80">
+      <header className="p-4  bg-opacity-80">
         <button
           onClick={() => router.back()}
           className="flex items-center text-white hover:text-gray-200"
@@ -73,7 +73,7 @@ export default function FeedbackPage() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="w-full py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors"
+            className="w-full py-3 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-800 transition-colors"
             type="submit"
           >
             Submit Feedback

@@ -198,16 +198,13 @@ export default function Sidebar() {
         <div className="pt-4 border-t border-[var(--color-border)]">
           <button
             onClick={() => (window.location.href = "/profile")}
-            className="w-full px-4 py-2 text-sm bg-red-500 rounded-lg font-medium"
+            className="w-full px-4 py-2 text-sm bg-gray-600 hover:bg-gray-800 rounded-lg font-medium"
           >
             Profile Settings
           </button>
         </div>
         <div className="pt-1 ">
-          <button
-            onClick={() => (window.location.href = "/challenge")}
-            className="w-full px-4 py-2 text-sm bg-red-500 rounded-lg font-medium"
-          >
+          <button className="w-full px-4 py-2 text-sm bg-gray-600 hover:bg-gray-800 rounded-lg font-medium">
             Submit Challenge
           </button>
         </div>

@@ -34,7 +34,6 @@ export default function Navbar() {
     { name: "Player Stats", path: "/stats" },
     { name: "Achievements", path: "/achievements" },
     { name: "Leaderboard", path: "/leaderboard" },
-    { name: "BattlePass", path: "/battlepass" },
     { name: "Merch Store", path: "/merchstore" },
     { name: "Rewards", path: "/rewards" },
     { name: "LootBags", path: "/lootbags" },
@@ -89,9 +88,7 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed w-full top-0 z-50 transition-all duration-300 ${
-        scrolled ? "bg-red-500/80 backdrop-blur-md shadow-lg" : "bg-red-500"
-      }`}
+      className={`fixed w-full top-0 z-50 transition-all duration-300 ${"bg-transparent backdrop-blur-xl shadow-2xl"}`}
     >
       <div className=" mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
@@ -110,7 +107,7 @@ export default function Navbar() {
           <div className="md:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-white hover:text-red-200"
+              className="text-white hover:text-gray-200"
             >
               {isMenuOpen ? (
                 <X className="w-8 h-8" />
@@ -130,8 +127,8 @@ export default function Navbar() {
                     href={item.path}
                     className={`text-sm font-medium transition-colors duration-200 ${
                       router.pathname === item.path
-                        ? "text-red-200"
-                        : "text-white hover:text-red-200"
+                        ? "text-gray-500"
+                        : "text-white hover:text-gray-400"
                     }`}
                   >
                     {item.name}
@@ -141,7 +138,7 @@ export default function Navbar() {
                   <CustomWalletConnect />
                   <button
                     onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                    className="text-white hover:text-red-200"
+                    className="text-white hover:text-gray-200"
                   >
                     <BellRing className="w-6 h-6" />
                   </button>
@@ -153,12 +150,10 @@ export default function Navbar() {
                       className="flex items-center"
                     >
                       {profile.profile_picture ? (
-                        <Image
+                        <img
                           src={profile.profile_picture}
                           alt={profile.username}
-                          width={40}
-                          height={40}
-                          className="rounded-full ring-2 ring-red-500"
+                          className="w-10 h-10 rounded-full object-cover ring-2 ring-black"
                         />
                       ) : (
                         <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
@@ -171,14 +166,14 @@ export default function Navbar() {
                       <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 ring-1 ring-black ring-opacity-5">
                         <Link
                           href="/profile"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 transition-colors"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                           onClick={() => setIsProfileMenuOpen(false)}
                         >
                           Profile Settings
                         </Link>
                         <Link
                           href="/teammember"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 transition-colors"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                           onClick={() => setIsProfileMenuOpen(false)}
                         >
                           Team Member
@@ -189,7 +184,7 @@ export default function Navbar() {
                             setIsProfileMenuOpen(false);
                             router.push("/");
                           }}
-                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-red-50 transition-colors"
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                         >
                           Sign Out
                         </button>
@@ -237,7 +232,7 @@ export default function Navbar() {
                       onClick={() =>
                         setIsNotificationsOpen(!isNotificationsOpen)
                       }
-                      className="text-white hover:text-red-200"
+                      className="text-white hover:text-gray-200"
                     >
                       <BellRing className="w-8 h-8" />
                     </button>
@@ -267,7 +262,7 @@ export default function Navbar() {
                       setIsMenuOpen(false);
                       router.push("/");
                     }}
-                    className="w-full py-2 rounded-lg bg-red-500 text-white hover:bg-red-800 transition-colors"
+                    className="w-full py-2 rounded-lg bg-gray-500 text-white hover:bg-gray-800 transition-colors"
                   >
                     Sign Out
                   </button>
@@ -287,7 +282,7 @@ export default function Navbar() {
           </div>
           <button
             onClick={() => setIsMenuOpen(false)}
-            className="absolute top-4 right-4 text-white hover:text-red-200"
+            className="absolute top-4 right-4 text-white hover:text-gray-200"
           >
             <X className="w-8 h-8" />
           </button>
