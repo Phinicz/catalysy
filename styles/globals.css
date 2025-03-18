@@ -64,3 +64,47 @@
     border-color: var(--color-primary);
   }
 }
+
+body {
+  font-family: "Titillium Web", sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #000;
+  color: white;
+  overflow: hidden;
+}
+
+/* Custom scrollbar for Xbox feel */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Animation for blade transitions */
+@keyframes slideIn {
+  from {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.blade-content {
+  animation: slideIn 0.5s ease-out;
+}

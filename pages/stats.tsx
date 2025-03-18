@@ -53,7 +53,7 @@ export default function StatsPage() {
   const [completedTasks, setCompletedTasks] = useState(SAMPLE_TASKS.completed);
 
   return (
-    <div className="p-8">
+    <div className="px-8 py-20">
       <SlidingBanner items={BANNER_ITEMS} />
 
       <div className="mt-8 space-y-8">

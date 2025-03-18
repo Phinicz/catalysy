@@ -59,7 +59,7 @@ export default function AchievementsPage() {
   const [totalPages, setTotalPages] = useState(3);
 
   return (
-    <div className="p-8">
+    <div className="py-20 px-8">
       <SlidingBanner items={BANNER_ITEMS} />
 
       <div className="mt-8">
@@ -76,7 +76,7 @@ export default function AchievementsPage() {
             <input
               type="search"
               placeholder="Search Achievements"
-              className="px-4 py-2 border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-red-500 rounded-lg bg-surface text-black "
+              className="px-4 py-2 border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-gray-500 rounded-lg bg-surface text-black "
             />
           </div>
           <AchievementGrid achievements={allAchievements} />

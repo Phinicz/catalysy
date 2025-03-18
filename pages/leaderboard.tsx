@@ -237,7 +237,7 @@ const Leaderboard: React.FC = () => {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5 }}
-      className="w-full mt-16 mx-auto bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-2xl overflow-hidden"
+      className="w-full  mx-auto bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-2xl overflow-hidden"
     >
       <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 flex items-center justify-between">
         <h2 className="text-2xl font-bold text-white flex items-center">

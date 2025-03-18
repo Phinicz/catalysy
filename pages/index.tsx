@@ -158,8 +158,8 @@ export default function HomePage() {
   const content = userRole === "partner" ? partnerContent : playerContent;
 
   return (
-    <div className="min-h-screen py-20  ">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className=" pt-16 ">
+      <div className="max-w-7xl mx-auto px-4 ">
         <SlidingBanner items={content.bannerItems} />
 
         <div className="mt-16 mb-20">
@@ -253,7 +253,7 @@ export default function HomePage() {
           </button>
         </div>
       </div>
-      <div className="fixed bottom-4 left-4 z-50">
+      <div className="fixed top-4 left-4 z-50">
         <button
           onClick={() => router.push("/feedback")}
           className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg shadow hover:bg-gray-800 transition-all"
@@ -262,7 +262,7 @@ export default function HomePage() {
           Feedback
         </button>
       </div>
-      <div className="fixed bottom-4 right-4 z-50">
+      <div className="fixed top-4 right-4 z-50">
         <button
           onClick={() => router.push("/users")}
           className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg shadow hover:bg-gray-800 transition-all"
