@@ -7,6 +7,7 @@ import { WagmiProvider } from "wagmi";
 import "@rainbow-me/rainbowkit/styles.css";
 import { getDefaultConfig, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { mainnet, polygon, optimism, arbitrum, base } from "wagmi/chains";
+import { createStorage } from "wagmi";
 import { ApiProvider } from "../context/ApiContext";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,6 +16,10 @@ import { CustomWalletConnect } from "../components/CustomWalletConnect";
 import { supabase } from "../lib/supabase";
 import Image from "next/image";
 import Link from "next/link";
+import AuthModal from "../components/AuthModal";
+import Head from "next/head";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const config = getDefaultConfig({
   appName: "My RainbowKit App",
@@ -224,213 +229,189 @@ function MyApp({ Component, pageProps }: AppProps) {
   }, [activeBlade, shouldUseStandardLayout, isNavigating]);
 
   return (
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider>
-          <ApiProvider>
-            <div className="flex flex-col h-screen w-full">
-              {!shouldUseStandardLayout ? (
-                <div className="relative flex h-full w-full overflow-hidden bg-gradient-to-b from-gray-900 to-black">
-                  {/* Left sidebar with 3D effect for active blade title */}
-                  <div className="absolute left-0 top-0 h-full w-40 z-10 bg-gradient-to-r from-gray-900 to-transparent flex items-center justify-center">
-                    <div className="relative w-32 h-32">
-                      <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-green-700 rounded-full opacity-20 animate-pulse" />
-                      <div className="absolute inset-3 bg-gradient-to-br from-green-600 to-green-800 rounded-full shadow-lg" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <svg
-                          className="w-10 h-10 text-white"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={1.5}
-                            d={blades[activeBlade].svgPath}
-                          />
-                        </svg>
-                      </div>
-                    </div>
-                    <div className="absolute bottom-16 left-0 w-full">
-                      <div className="transform skew-x-12 bg-gradient-to-r from-green-600 to-green-400 p-2 shadow-lg text-center">
-                        <span className="text-white font-bold tracking-wider text-lg transform -skew-x-12 inline-block">
-                          {blades[activeBlade].name.toUpperCase()}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Logo at the top left */}
-                    <div className="absolute top-6 left-0 w-full flex justify-center">
-                      <Link href="/" className="flex items-center group">
-                        <Image
-                          src="/brand/logo.png"
-                          alt="Logo"
-                          width={120}
-                          height={120}
-                          className="transition-transform duration-300 group-hover:scale-105"
-                        />
-                      </Link>
-                    </div>
-                  </div>
-
-                  {/* Main Content Area with 3D transition effect */}
-                  <div
-                    ref={contentRef}
-                    className="w-full h-full perspective-1000"
-                  >
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={activeBlade}
-                        initial={{
-                          opacity: 0,
-                          rotateY: transitionDirection === "right" ? 45 : -45,
-                          x: transitionDirection === "right" ? 100 : -100,
-                        }}
-                        animate={{
-                          opacity: 1,
-                          rotateY: 0,
-                          x: 0,
-                        }}
-                        exit={{
-                          opacity: 0,
-                          rotateY: transitionDirection === "right" ? -45 : 45,
-                          x: transitionDirection === "right" ? -100 : 100,
-                        }}
-                        transition={{
-                          type: "spring",
-                          stiffness: 300,
-                          damping: 25,
-                        }}
-                        className="w-full h-full pl-40 pr-40 flex items-center justify-center"
-                      >
-                        <div className="w-full h-full mx-auto max-w-[95rem]  p-6">
-                          <div className="w-full h-full rounded-xl overflow-hidden border border-gray-700 shadow-2xl relative">
-                            {/* Green glow effect at the top */}
-                            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-400 via-green-500 to-green-400 opacity-70 shadow-lg shadow-green-500/50" />
-
-                            {/* Content container with glass morphism effect */}
-                            <div className="bg-gradient-to-b from-gray-800/80 to-gray-900/80 backdrop-blur-sm w-full h-full overflow-y-auto">
-                              <div className="">
-                                <Component {...pageProps} />
-                              </div>
-                            </div>
-                          </div>
+    <>
+      <Head>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        />
+      </Head>
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
+          <RainbowKitProvider>
+            <ApiProvider>
+              <div className="flex flex-col h-screen w-full">
+                {!shouldUseStandardLayout ? (
+                  <div className="relative flex h-full w-full overflow-hidden bg-gradient-to-b from-gray-900 to-black">
+                    {/* Left sidebar with 3D effect for active blade title */}
+                    <div className="absolute left-0 top-0 h-full w-40 z-10 bg-gradient-to-r from-gray-900 to-transparent flex items-center justify-center">
+                      <div className="relative w-32 h-32">
+                        <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-green-700 rounded-full opacity-20 animate-pulse" />
+                        <div className="absolute inset-3 bg-gradient-to-br from-green-600 to-green-800 rounded-full shadow-lg" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <svg
+                            className="w-10 h-10 text-white"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={1.5}
+                              d={blades[activeBlade].svgPath}
+                            />
+                          </svg>
                         </div>
-                      </motion.div>
-                    </AnimatePresence>
-                  </div>
-
-                  {/* Right side navigation with dynamic 3D ribbon effect */}
-                  {/* Right side navigation with dynamic 3D ribbon effect */}
-                  <div className="absolute right-0 top-0 h-full flex items-center justify-end">
-                    <div className="h-full pr-2 bg-gradient-to-l from-gray-900 to-transparent flex flex-col justify-between">
-                      {/* Navigation buttons */}
-                      <div className="flex flex-col items-end space-y-3 py-8">
-                        {blades.map((blade, index) => {
-                          const isActive = index === activeBlade;
-
-                          return (
-                            <motion.button
-                              key={index}
-                              onClick={() => navigateToBlade(index)}
-                              className={`flex items-center justify-end py-3 pl-6 pr-4 transition-all rounded-l-lg transform relative ${
-                                isActive
-                                  ? "bg-gradient-to-l from-green-600 to-green-700 text-white font-bold shadow-lg shadow-green-500/20 translate-x-1"
-                                  : "text-gray-300 hover:bg-gray-800/40 hover:text-white"
-                              }`}
-                              initial={false}
-                              animate={{
-                                x: isActive ? 1 : 0,
-                                scale: isActive ? 1.05 : 1,
-                              }}
-                              whileHover={{
-                                x: isActive ? 1 : -8,
-                                backgroundColor: !isActive
-                                  ? "rgba(31, 41, 55, 0.7)"
-                                  : undefined,
-                              }}
-                              transition={{
-                                type: "spring",
-                                stiffness: 400,
-                                damping: 25,
-                              }}
-                            >
-                              {/* SVG icon */}
-                              <svg
-                                className={`w-5 h-5 mr-3 ${
-                                  isActive ? "text-white" : "text-gray-400"
-                                }`}
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={1.5}
-                                  d={blade.svgPath}
-                                />
-                              </svg>
-
-                              <span className="text-base font-medium tracking-wide">
-                                {blade.name}
-                              </span>
-
-                              {/* Active indicator */}
-                              {isActive && (
-                                <motion.div
-                                  layoutId="activeIndicator"
-                                  className="absolute left-0 top-0 bottom-0 w-1 bg-green-400"
-                                  initial={{ opacity: 0 }}
-                                  animate={{ opacity: 1 }}
-                                  exit={{ opacity: 0 }}
-                                  transition={{ duration: 0.2 }}
-                                />
-                              )}
-                            </motion.button>
-                          );
-                        })}
+                      </div>
+                      <div className="absolute bottom-16 left-0 w-full">
+                        <div className="transform skew-x-12 bg-gradient-to-r from-green-600 to-green-400 p-2 shadow-lg text-center">
+                          <span className="text-white font-bold tracking-wider text-lg transform -skew-x-12 inline-block">
+                            {blades[activeBlade].name.toUpperCase()}
+                          </span>
+                        </div>
                       </div>
 
-                      {/* User Profile and wallet connect at the bottom */}
-                      <div className="flex flex-col items-end space-y-3 mt-auto mb-8 ">
-                        {/* Notifications button */}
-                        <motion.button
-                          onClick={() =>
-                            setIsNotificationsOpen(!isNotificationsOpen)
-                          }
-                          className="flex items-center justify-end py-3 pl-6 pr-4 rounded-l-lg text-gray-300 hover:bg-gray-800/40 hover:text-white w-full"
-                          whileHover={{
-                            x: -8,
-                            backgroundColor: "rgba(31, 41, 55, 0.7)",
+                      {/* Logo at the top left */}
+                      <div className="absolute top-6 left-0 w-full flex justify-center">
+                        <Link href="/" className="flex items-center group">
+                          <Image
+                            src="/brand/logo.png"
+                            alt="Logo"
+                            width={120}
+                            height={120}
+                            className="transition-transform duration-300 group-hover:scale-105"
+                          />
+                        </Link>
+                      </div>
+                    </div>
+
+                    {/* Main Content Area with 3D transition effect */}
+                    <div
+                      ref={contentRef}
+                      className="w-full h-full perspective-1000"
+                    >
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={activeBlade}
+                          initial={{
+                            opacity: 0,
+                            rotateY: transitionDirection === "right" ? 45 : -45,
+                            x: transitionDirection === "right" ? 100 : -100,
+                          }}
+                          animate={{
+                            opacity: 1,
+                            rotateY: 0,
+                            x: 0,
+                          }}
+                          exit={{
+                            opacity: 0,
+                            rotateY: transitionDirection === "right" ? -45 : 45,
+                            x: transitionDirection === "right" ? -100 : 100,
                           }}
                           transition={{
                             type: "spring",
-                            stiffness: 400,
+                            stiffness: 300,
                             damping: 25,
                           }}
+                          className="w-full h-full pl-40 pr-40 flex items-center justify-center"
                         >
-                          <BellRing className="w-5 h-5 mr-3 text-gray-400" />
-                          <span className="text-base font-medium tracking-wide">
-                            Notifications
-                          </span>
-                        </motion.button>
+                          <div className="w-full h-full mx-auto max-w-[1000px] p-2 md:p-4">
+                            <div className="w-full h-full rounded-xl overflow-hidden border border-gray-700 shadow-2xl relative">
+                              {/* Green glow effect at the top */}
+                              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-400 via-green-500 to-green-400 opacity-70 shadow-lg shadow-green-500/50" />
 
-                        {/* Wallet Connect */}
-                        <div className="flex items-center justify-end py-3 pl-6 pr-4 rounded-l-lg w-full">
-                          <CustomWalletConnect />
+                              {/* Content container with glass morphism effect */}
+                              <div className="bg-gradient-to-b from-gray-800/80 to-gray-900/80 backdrop-blur-sm w-full h-full overflow-y-auto">
+                                <div className="p-2 md:p-3">
+                                  <Component {...pageProps} />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      </AnimatePresence>
+                    </div>
+
+                    {/* Right side navigation with dynamic 3D ribbon effect */}
+                    <div className="absolute right-0 top-0 h-full flex items-center justify-end">
+                      <div className="h-full pr-2 bg-gradient-to-l from-gray-900 to-transparent flex flex-col justify-between">
+                        {/* Navigation buttons */}
+                        <div className="flex flex-col items-end space-y-2 py-4 overflow-y-auto overflow-x-hidden max-h-[calc(100vh-200px)]">
+                          {blades.map((blade, index) => {
+                            const isActive = index === activeBlade;
+
+                            return (
+                              <motion.button
+                                key={index}
+                                onClick={() => navigateToBlade(index)}
+                                className={`flex items-center justify-end py-2 pl-6 pr-4 transition-all rounded-l-lg transform relative ${
+                                  isActive
+                                    ? "bg-gradient-to-l from-green-600 to-green-700 text-white font-bold shadow-lg shadow-green-500/20 translate-x-1"
+                                    : "text-gray-300 hover:bg-gray-800/40 hover:text-white"
+                                }`}
+                                initial={false}
+                                animate={{
+                                  x: isActive ? 1 : 0,
+                                  scale: isActive ? 1.05 : 1,
+                                }}
+                                whileHover={{
+                                  x: isActive ? 1 : -8,
+                                  backgroundColor: !isActive
+                                    ? "rgba(31, 41, 55, 0.7)"
+                                    : undefined,
+                                }}
+                                transition={{
+                                  type: "spring",
+                                  stiffness: 400,
+                                  damping: 25,
+                                }}
+                              >
+                                {/* SVG icon */}
+                                <svg
+                                  className={`w-4 h-4 mr-2 ${
+                                    isActive ? "text-white" : "text-gray-400"
+                                  }`}
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={1.5}
+                                    d={blade.svgPath}
+                                  />
+                                </svg>
+
+                                <span className="text-sm font-medium tracking-wide">
+                                  {blade.name}
+                                </span>
+
+                                {/* Active indicator */}
+                                {isActive && (
+                                  <motion.div
+                                    layoutId="activeIndicator"
+                                    className="absolute left-0 top-0 bottom-0 w-1 bg-green-400"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.2 }}
+                                  />
+                                )}
+                              </motion.button>
+                            );
+                          })}
                         </div>
 
-                        {/* Profile button */}
-                        <div className="relative w-full">
+                        {/* User Profile and wallet connect at the bottom */}
+                        <div className="flex flex-col items-end space-y-2 mt-auto mb-4">
+                          {/* Notifications button */}
                           <motion.button
                             onClick={() =>
-                              profile
-                                ? setIsProfileMenuOpen(!isProfileMenuOpen)
-                                : setIsAuthModalOpen(true)
+                              setIsNotificationsOpen(!isNotificationsOpen)
                             }
-                            className="flex items-center justify-end py-3 pl-6 pr-4 rounded-l-lg text-gray-300 hover:bg-gray-800/40 hover:text-white w-full"
+                            className="flex items-center justify-end py-2 pl-6 pr-4 rounded-l-lg text-gray-300 hover:bg-gray-800/40 hover:text-white w-full"
                             whileHover={{
                               x: -8,
                               backgroundColor: "rgba(31, 41, 55, 0.7)",
@@ -441,121 +422,168 @@ function MyApp({ Component, pageProps }: AppProps) {
                               damping: 25,
                             }}
                           >
-                            {profile ? (
-                              <>
-                                {profile.profile_picture ? (
-                                  <div className="w-6 h-6 rounded-full overflow-hidden border border-green-500 mr-3">
-                                    <Image
-                                      src={profile.profile_picture}
-                                      alt={profile.username}
-                                      width={24}
-                                      height={24}
-                                      className="object-cover w-full h-full"
-                                    />
-                                  </div>
-                                ) : (
-                                  <div className="w-6 h-6 rounded-full bg-green-700 text-white flex items-center justify-center border border-green-500 mr-3">
-                                    {profile.username[0].toUpperCase()}
-                                  </div>
-                                )}
-                                <span className="text-base font-medium tracking-wide">
-                                  {profile.username}
-                                </span>
-                              </>
-                            ) : (
-                              <>
-                                <User className="w-5 h-5 mr-3 text-gray-400" />
-                                <span className="text-base font-medium tracking-wide">
-                                  Sign In
-                                </span>
-                              </>
-                            )}
+                            <BellRing className="w-4 h-4 mr-2 text-gray-400" />
+                            <span className="text-sm font-medium tracking-wide">
+                              Notifications
+                            </span>
                           </motion.button>
 
-                          {profile && isProfileMenuOpen && (
-                            <div className="absolute right-0 mt-2 bottom-10 w-48 bg-gray-800 rounded-lg shadow-lg py-1 ring-1 ring-green-500 ring-opacity-50 z-20">
-                              <Link
-                                href="/profile"
-                                className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 transition-colors"
-                                onClick={() => setIsProfileMenuOpen(false)}
-                              >
-                                Profile Settings
-                              </Link>
-                              <Link
-                                href="/teammember"
-                                className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 transition-colors"
-                                onClick={() => setIsProfileMenuOpen(false)}
-                              >
-                                Team Member
-                              </Link>
-                              <button
-                                onClick={async () => {
-                                  await supabase.auth.signOut();
-                                  setIsProfileMenuOpen(false);
-                                  router.push("/");
-                                }}
-                                className="block w-full text-left px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 transition-colors"
-                              >
-                                Sign Out
-                              </button>
-                            </div>
-                          )}
+                          {/* Wallet Connect */}
+                          <div className="flex items-center justify-end py-2 pl-6 pr-4 rounded-l-lg w-full">
+                            <CustomWalletConnect />
+                          </div>
+
+                          {/* Profile button */}
+                          <div className="relative w-full">
+                            <motion.button
+                              onClick={() =>
+                                profile
+                                  ? setIsProfileMenuOpen(!isProfileMenuOpen)
+                                  : setIsAuthModalOpen(true)
+                              }
+                              className="flex items-center justify-end py-2 pl-6 pr-4 rounded-l-lg text-gray-300 hover:bg-gray-800/40 hover:text-white w-full"
+                              whileHover={{
+                                x: -8,
+                                backgroundColor: "rgba(31, 41, 55, 0.7)",
+                              }}
+                              transition={{
+                                type: "spring",
+                                stiffness: 400,
+                                damping: 25,
+                              }}
+                            >
+                              {profile ? (
+                                <>
+                                  {profile.profile_picture ? (
+                                    <div className="w-5 h-5 rounded-full overflow-hidden border border-green-500 mr-2">
+                                      <Image
+                                        src={profile.profile_picture}
+                                        alt={profile.username}
+                                        width={20}
+                                        height={20}
+                                        className="object-cover w-full h-full"
+                                      />
+                                    </div>
+                                  ) : (
+                                    <div className="w-5 h-5 rounded-full bg-green-700 text-white flex items-center justify-center border border-green-500 mr-2 text-xs">
+                                      {profile.username[0].toUpperCase()}
+                                    </div>
+                                  )}
+                                  <span className="text-sm font-medium tracking-wide">
+                                    {profile.username}
+                                  </span>
+                                </>
+                              ) : (
+                                <>
+                                  <User className="w-4 h-4 mr-2 text-gray-400" />
+                                  <span className="text-sm font-medium tracking-wide">
+                                    Sign In
+                                  </span>
+                                </>
+                              )}
+                            </motion.button>
+
+                            {profile && isProfileMenuOpen && (
+                              <div className="absolute right-0 mt-2 bottom-10 w-48 bg-gray-800 rounded-lg shadow-lg py-1 ring-1 ring-green-500 ring-opacity-50 z-20">
+                                <Link
+                                  href="/profile"
+                                  className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 transition-colors"
+                                  onClick={() => setIsProfileMenuOpen(false)}
+                                >
+                                  Profile Settings
+                                </Link>
+                                <Link
+                                  href="/teammember"
+                                  className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 transition-colors"
+                                  onClick={() => setIsProfileMenuOpen(false)}
+                                >
+                                  Team Member
+                                </Link>
+                                <button
+                                  onClick={async () => {
+                                    await supabase.auth.signOut();
+                                    setIsProfileMenuOpen(false);
+                                    router.push("/");
+                                  }}
+                                  className="block w-full text-left px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 transition-colors"
+                                >
+                                  Sign Out
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Dynamic "ripple" effect background elements */}
-                  <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <motion.div
-                        key={i}
-                        className="absolute rounded-full bg-gradient-to-br from-green-500 to-green-700 opacity-0"
-                        style={{
-                          width: `${(i + 1) * 20}px`,
-                          height: `${(i + 1) * 20}px`,
-                          left: "50%",
-                          top: "50%",
-                          x: "-50%",
-                          y: "-50%",
-                        }}
-                        animate={{
-                          scale: [0, 5],
-                          opacity: [0, 0.03, 0],
-                        }}
-                        transition={{
-                          duration: 6,
-                          repeat: Infinity,
-                          delay: i * 1.2,
-                          ease: "easeInOut",
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="flex h-full">
-                  {/* Standard layout for auth, register, etc. */}
-                  {showSidebar && (
-                    <div className="hidden md:block h-full">
-                      <Sidebar />
+                    {/* Dynamic "ripple" effect background elements */}
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <motion.div
+                          key={i}
+                          className="absolute rounded-full bg-gradient-to-br from-green-500 to-green-700 opacity-0"
+                          style={{
+                            width: `${(i + 1) * 20}px`,
+                            height: `${(i + 1) * 20}px`,
+                            left: "50%",
+                            top: "50%",
+                            x: "-50%",
+                            y: "-50%",
+                          }}
+                          animate={{
+                            scale: [0, 5],
+                            opacity: [0, 0.03, 0],
+                          }}
+                          transition={{
+                            duration: 6,
+                            repeat: Infinity,
+                            delay: i * 1.2,
+                            ease: "easeInOut",
+                          }}
+                        />
+                      ))}
                     </div>
-                  )}
-                  {/* Main content - Full width on mobile, adjusted for sidebar on desktop */}
-                  <main
-                    className={`flex-1 w-full h-full overflow-y-auto ${
-                      showSidebar ? "md:ml-64" : ""
-                    } transition-all duration-200`}
-                  >
-                    <Component {...pageProps} />
-                  </main>
-                </div>
-              )}
-            </div>
-          </ApiProvider>
-        </RainbowKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+                  </div>
+                ) : (
+                  <div className="flex h-full">
+                    {/* Standard layout for auth, register, etc. */}
+                    {showSidebar && (
+                      <div className="hidden md:block h-full">
+                        <Sidebar />
+                      </div>
+                    )}
+                    {/* Main content - Full width on mobile, adjusted for sidebar on desktop */}
+                    <main
+                      className={`flex-1 w-full h-full overflow-y-auto ${
+                        showSidebar ? "md:ml-64" : ""
+                      } transition-all duration-200`}
+                    >
+                      <Component {...pageProps} />
+                    </main>
+                  </div>
+                )}
+              </div>
+              <AuthModal
+                isOpen={isAuthModalOpen}
+                onClose={() => setIsAuthModalOpen(false)}
+              />
+              <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="dark"
+              />
+            </ApiProvider>
+          </RainbowKitProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </>
   );
 }
 

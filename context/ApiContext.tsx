@@ -6,6 +6,7 @@ import {
   UserCountResponse,
   UserCountParams,
   LoyaltyRulesResponse,
+  RuleProcessingStatus,
 } from "../types/api.types";
 
 interface ApiContextType {
@@ -13,6 +14,11 @@ interface ApiContextType {
   createUser: (userData: CreateUserData) => Promise<any>;
   getUserCount: (params: UserCountParams) => Promise<UserCountResponse>;
   getLoyaltyRules: () => Promise<LoyaltyRulesResponse>;
+  completeLoyaltyRule: (ruleId: string, walletAddress: string) => Promise<any>;
+  getRuleProcessingStatus: (
+    walletAddress: string
+  ) => Promise<RuleProcessingStatus>;
+  getTransactionEntries: () => Promise<any>;
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -25,6 +31,10 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({
     createUser: apiService.createUser.bind(apiService),
     getUserCount: apiService.getUserCount.bind(apiService),
     getLoyaltyRules: apiService.getLoyaltyRules.bind(apiService),
+    completeLoyaltyRule: apiService.completeLoyaltyRule.bind(apiService),
+    getRuleProcessingStatus:
+      apiService.getRuleProcessingStatus.bind(apiService),
+    getTransactionEntries: apiService.getTransactionEntries.bind(apiService),
   };
 
   return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>;

@@ -13,6 +13,7 @@ export const useUsers = () => {
       try {
         const result = await getUsers();
         setData(result);
+        console.log(result, "here is the the result");
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error");
       } finally {

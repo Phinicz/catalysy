@@ -6,6 +6,7 @@ import { Copy } from "lucide-react";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { useApi } from "@/context/ApiContext";
 import { toast } from "react-toastify";
+
 interface UserProfile {
   id: string;
   username: string;
@@ -22,6 +23,15 @@ interface ApiRegistrationStatus {
   displayName?: string;
 }
 
+interface TransactionEntry {
+  amount: string | number;
+  loyaltyAccount: {
+    user: {
+      id: string;
+    };
+  };
+}
+
 export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -33,7 +43,7 @@ export default function ProfilePage() {
   const [copied, setCopied] = useState(false);
   const { openConnectModal } = useConnectModal();
   const { address, isConnected } = useAccount();
-  const { createUser, getUsers } = useApi();
+  const { createUser, getUsers, getTransactionEntries } = useApi();
   const [isCheckingApi, setIsCheckingApi] = useState(false);
   const [editForm, setEditForm] = useState({
     username: "",
@@ -41,6 +51,7 @@ export default function ProfilePage() {
     profile_picture: "",
   });
   const [isUpdating, setIsUpdating] = useState(false);
+  const [coins, setCoins] = useState(0);
 
   useEffect(() => {
     fetchProfile();
@@ -51,6 +62,79 @@ export default function ProfilePage() {
       checkApiRegistrationStatus();
     }
   }, [address]);
+
+  useEffect(() => {
+    const fetchTransactionEntries = async () => {
+      try {
+        // First get the user data to get the user ID
+        const usersResponse = await getUsers();
+        console.log("Users response:", usersResponse.data);
+
+        const user = usersResponse.data.find(
+          (user) => user.walletAddress.toLowerCase() === address?.toLowerCase()
+        );
+        console.log("Found user:", user);
+
+        if (!user) {
+          console.log("No user found for address:", address);
+          return;
+        }
+
+        // Then get transaction entries
+        const transactionResponse = await getTransactionEntries();
+        console.log("Raw transaction response:", transactionResponse);
+
+        // Properly extract the data array from the response
+        const transactions = (transactionResponse.data ||
+          []) as TransactionEntry[];
+        console.log("All transactions:", transactions);
+
+        // Filter transactions for the current user and sum up the amounts
+        const userTransactions = transactions.filter(
+          (transaction: TransactionEntry) => {
+            // Check if the transaction has a loyaltyAccount with a user
+            if (transaction.loyaltyAccount && transaction.loyaltyAccount.user) {
+              console.log(
+                "Comparing transaction user ID:",
+                transaction.loyaltyAccount.user.id,
+                "with user.id:",
+                user.id
+              );
+              return transaction.loyaltyAccount.user.id === user.id;
+            }
+            return false;
+          }
+        );
+
+        console.log("Filtered user transactions:", userTransactions);
+
+        // Calculate total coins from valid transactions
+        const totalCoins = userTransactions.reduce(
+          (sum: number, transaction: TransactionEntry) => {
+            const amount = parseInt(transaction.amount.toString()) || 0;
+            console.log(
+              "Processing transaction amount:",
+              transaction.amount,
+              "parsed as:",
+              amount
+            );
+            return sum + amount;
+          },
+          0
+        );
+
+        console.log("Final total coins calculated:", totalCoins);
+        setCoins(totalCoins);
+      } catch (error) {
+        console.error("Error fetching transaction entries:", error);
+      }
+    };
+
+    if (address) {
+      console.log("Fetching transactions for address:", address);
+      fetchTransactionEntries();
+    }
+  }, [address, getUsers, getTransactionEntries]);
 
   const checkApiRegistrationStatus = async () => {
     if (!address) return;
@@ -67,7 +151,6 @@ export default function ProfilePage() {
         const user = response.data.find(
           (user) => user.walletAddress.toLowerCase() === address.toLowerCase()
         );
-        console.log(user, "here is the user");
 
         setApiStatus({
           isRegistegray: true,
@@ -312,9 +395,7 @@ export default function ProfilePage() {
               <div className="grid grid-cols-2 gap-4 border-t border-gray-500 pt-6">
                 <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-500">
                   <h3 className="text-gray-500 font-medium">Coins</h3>
-                  <p className="text-2xl font-bold text-white">
-                    {profile.coins}
-                  </p>
+                  <p className="text-2xl font-bold text-white">{coins}</p>
                 </div>
                 <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-500">
                   <h3 className="text-gray-500 font-medium">Gems</h3>

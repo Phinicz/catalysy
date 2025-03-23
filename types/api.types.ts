@@ -47,3 +47,12 @@ export type LoyaltyRule = {
 export type LoyaltyRulesResponse = {
   data: LoyaltyRule[];
 };
+
+export type RuleProcessingStatus = {
+  data: {
+    loyaltyRuleId: string;
+    userId: string;
+    status: "completed" | "pending" | "failed";
+    message?: string;
+  }[];
+};

@@ -21,7 +21,7 @@
     "next": "15.0.2",
     "react": "19.0.0-rc-02c0e824-20241028",
     "react-dom": "19.0.0-rc-02c0e824-20241028",
-    "react-toastify": "^11.0.3",
+    "react-toastify": "^11.0.5",
     "uuid": "^11.0.5",
     "viem": "2.x",
     "wagmi": "^2.14.9"

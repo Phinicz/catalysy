@@ -22,18 +22,18 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 pt-20">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
       {/* Overlay to close modal on click */}
       <div className="fixed inset-0 bg-black bg-opacity-50" onClick={onClose} />
 
       {/* Modal Content */}
-      <div className="relative w-full max-w-5xl bg-black rounded-lg shadow-xl flex flex-col md:flex-row overflow-hidden">
+      <div className="relative w-full max-w-4xl bg-black rounded-lg shadow-xl flex flex-col md:flex-row overflow-hidden my-8">
         {/* Image Section */}
-        <div className="w-full md:w-1/2">
+        <div className="w-full md:w-1/2 h-48 md:h-auto">
           <img
             src="/brand/apex.jpg"
             alt="Modal Image"
-            className="w-full h-48 md:h-full object-cover md:rounded-l-lg"
+            className="w-full h-full object-cover md:rounded-l-lg"
           />
         </div>
 
@@ -42,12 +42,12 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute right-4 top-4 text-gray-400 hover:text-gray-500"
+            className="absolute right-4 top-4 text-gray-400 hover:text-gray-500 z-10"
           >
             ✕
           </button>
 
-          <AuthForm />
+          <AuthForm onClose={onClose} />
         </div>
       </div>
     </div>

@@ -1,6 +1,48 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useEffect, useState } from "react";
+import { useAccount } from "wagmi";
+import { useApi } from "../context/ApiContext";
+import { toast } from "react-toastify";
 
 export const CustomWalletConnect = () => {
+  const { address, isConnected } = useAccount();
+  const { getLoyaltyRules, completeLoyaltyRule } = useApi();
+  const [isProcessingRule, setIsProcessingRule] = useState(false);
+
+  useEffect(() => {
+    const handleWalletConnect = async () => {
+      if (isConnected && address && !isProcessingRule) {
+        try {
+          setIsProcessingRule(true);
+          // Get all loyalty rules
+          const rulesResponse = await getLoyaltyRules();
+
+          // Find the wallet connect rule
+          const walletConnectRule = rulesResponse.data.find(
+            (rule) => rule.type === "WalletConnect"
+          );
+
+          if (walletConnectRule) {
+            // Complete the rule
+            await completeLoyaltyRule(walletConnectRule.id, address);
+            toast.success("Wallet connection reward claimed successfully!");
+          }
+        } catch (error) {
+          console.error("Error processing wallet connect rule:", error);
+          if (error instanceof Error) {
+            toast.error(`Failed to process reward: ${error.message}`);
+          } else {
+            toast.error("Failed to process wallet connection reward");
+          }
+        } finally {
+          setIsProcessingRule(false);
+        }
+      }
+    };
+
+    handleWalletConnect();
+  }, [address, isConnected, getLoyaltyRules, completeLoyaltyRule]);
+
   return (
     <ConnectButton.Custom>
       {({
@@ -18,6 +60,7 @@ export const CustomWalletConnect = () => {
           account &&
           chain &&
           (!authenticationStatus || authenticationStatus === "authenticated");
+
         return (
           <div
             {...(!ready && {
