@@ -10,9 +10,6 @@ export default function FeedbackPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle feedback submission logic
-    // console.log("Feedback:", feedback);
-    // console.log("Email:", email);
   };
 
   return (

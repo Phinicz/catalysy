@@ -49,10 +49,6 @@ export type LoyaltyRulesResponse = {
 };
 
 export type RuleProcessingStatus = {
-  data: {
-    loyaltyRuleId: string;
-    userId: string;
-    status: "completed" | "pending" | "failed";
-    message?: string;
-  }[];
+  message: string;
+  rewarded: boolean;
 };

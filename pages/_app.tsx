@@ -243,101 +243,24 @@ function MyApp({ Component, pageProps }: AppProps) {
               <div className="flex flex-col h-screen w-full">
                 {!shouldUseStandardLayout ? (
                   <div className="relative flex h-full w-full overflow-hidden bg-gradient-to-b from-gray-900 to-black">
-                    {/* Left sidebar with 3D effect for active blade title */}
-                    <div className="absolute left-0 top-0 h-full w-40 z-10 bg-gradient-to-r from-gray-900 to-transparent flex items-center justify-center">
-                      <div className="relative w-32 h-32">
-                        <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-green-700 rounded-full opacity-20 animate-pulse" />
-                        <div className="absolute inset-3 bg-gradient-to-br from-green-600 to-green-800 rounded-full shadow-lg" />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <svg
-                            className="w-10 h-10 text-white"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={1.5}
-                              d={blades[activeBlade].svgPath}
+                    {/* Left side navigation with dynamic 3D ribbon effect */}
+                    <div className="absolute left-0 top-0 h-full flex items-center justify-start">
+                      <div className="h-full pl-2 bg-gradient-to-r from-gray-900 to-transparent flex flex-col justify-between">
+                        {/* Logo at the top */}
+                        <div className="flex justify-center py-4">
+                          <Link href="/" className="flex items-center group">
+                            <Image
+                              src="/brand/logo.png"
+                              alt="Logo"
+                              width={120}
+                              height={120}
+                              className="transition-transform duration-300 group-hover:scale-105"
                             />
-                          </svg>
+                          </Link>
                         </div>
-                      </div>
-                      <div className="absolute bottom-16 left-0 w-full">
-                        <div className="transform skew-x-12 bg-gradient-to-r from-green-600 to-green-400 p-2 shadow-lg text-center">
-                          <span className="text-white font-bold tracking-wider text-lg transform -skew-x-12 inline-block">
-                            {blades[activeBlade].name.toUpperCase()}
-                          </span>
-                        </div>
-                      </div>
 
-                      {/* Logo at the top left */}
-                      <div className="absolute top-6 left-0 w-full flex justify-center">
-                        <Link href="/" className="flex items-center group">
-                          <Image
-                            src="/brand/logo.png"
-                            alt="Logo"
-                            width={120}
-                            height={120}
-                            className="transition-transform duration-300 group-hover:scale-105"
-                          />
-                        </Link>
-                      </div>
-                    </div>
-
-                    {/* Main Content Area with 3D transition effect */}
-                    <div
-                      ref={contentRef}
-                      className="w-full h-full perspective-1000"
-                    >
-                      <AnimatePresence mode="wait">
-                        <motion.div
-                          key={activeBlade}
-                          initial={{
-                            opacity: 0,
-                            rotateY: transitionDirection === "right" ? 45 : -45,
-                            x: transitionDirection === "right" ? 100 : -100,
-                          }}
-                          animate={{
-                            opacity: 1,
-                            rotateY: 0,
-                            x: 0,
-                          }}
-                          exit={{
-                            opacity: 0,
-                            rotateY: transitionDirection === "right" ? -45 : 45,
-                            x: transitionDirection === "right" ? -100 : 100,
-                          }}
-                          transition={{
-                            type: "spring",
-                            stiffness: 300,
-                            damping: 25,
-                          }}
-                          className="w-full h-full pl-40 pr-40 flex items-center justify-center"
-                        >
-                          <div className="w-full h-full mx-auto max-w-[1000px] p-2 md:p-4">
-                            <div className="w-full h-full rounded-xl overflow-hidden border border-gray-700 shadow-2xl relative">
-                              {/* Green glow effect at the top */}
-                              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-400 via-green-500 to-green-400 opacity-70 shadow-lg shadow-green-500/50" />
-
-                              {/* Content container with glass morphism effect */}
-                              <div className="bg-gradient-to-b from-gray-800/80 to-gray-900/80 backdrop-blur-sm w-full h-full overflow-y-auto">
-                                <div className="p-2 md:p-3">
-                                  <Component {...pageProps} />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </motion.div>
-                      </AnimatePresence>
-                    </div>
-
-                    {/* Right side navigation with dynamic 3D ribbon effect */}
-                    <div className="absolute right-0 top-0 h-full flex items-center justify-end">
-                      <div className="h-full pr-2 bg-gradient-to-l from-gray-900 to-transparent flex flex-col justify-between">
                         {/* Navigation buttons */}
-                        <div className="flex flex-col items-end space-y-2 py-4 overflow-y-auto overflow-x-hidden max-h-[calc(100vh-200px)]">
+                        <div className="flex flex-col items-start space-y-2 py-4 overflow-y-auto overflow-x-hidden max-h-[calc(100vh-200px)]">
                           {blades.map((blade, index) => {
                             const isActive = index === activeBlade;
 
@@ -345,18 +268,18 @@ function MyApp({ Component, pageProps }: AppProps) {
                               <motion.button
                                 key={index}
                                 onClick={() => navigateToBlade(index)}
-                                className={`flex items-center justify-end py-2 pl-6 pr-4 transition-all rounded-l-lg transform relative ${
+                                className={`flex items-center justify-start py-2 pr-6 pl-4 transition-all rounded-r-lg transform relative ${
                                   isActive
-                                    ? "bg-gradient-to-l from-green-600 to-green-700 text-white font-bold shadow-lg shadow-green-500/20 translate-x-1"
+                                    ? "bg-gradient-to-r from-green-600 to-green-700 text-white font-bold shadow-lg shadow-green-500/20 -translate-x-1"
                                     : "text-gray-300 hover:bg-gray-800/40 hover:text-white"
                                 }`}
                                 initial={false}
                                 animate={{
-                                  x: isActive ? 1 : 0,
+                                  x: isActive ? -1 : 0,
                                   scale: isActive ? 1.05 : 1,
                                 }}
                                 whileHover={{
-                                  x: isActive ? 1 : -8,
+                                  x: isActive ? -1 : 8,
                                   backgroundColor: !isActive
                                     ? "rgba(31, 41, 55, 0.7)"
                                     : undefined,
@@ -392,7 +315,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                                 {isActive && (
                                   <motion.div
                                     layoutId="activeIndicator"
-                                    className="absolute left-0 top-0 bottom-0 w-1 bg-green-400"
+                                    className="absolute right-0 top-0 bottom-0 w-1 bg-green-400"
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
@@ -405,15 +328,15 @@ function MyApp({ Component, pageProps }: AppProps) {
                         </div>
 
                         {/* User Profile and wallet connect at the bottom */}
-                        <div className="flex flex-col items-end space-y-2 mt-auto mb-4">
+                        <div className="flex flex-col items-start space-y-2 mt-auto mb-4">
                           {/* Notifications button */}
                           <motion.button
                             onClick={() =>
                               setIsNotificationsOpen(!isNotificationsOpen)
                             }
-                            className="flex items-center justify-end py-2 pl-6 pr-4 rounded-l-lg text-gray-300 hover:bg-gray-800/40 hover:text-white w-full"
+                            className="flex items-center justify-start py-2 pr-6 pl-4 rounded-r-lg text-gray-300 hover:bg-gray-800/40 hover:text-white w-full"
                             whileHover={{
-                              x: -8,
+                              x: 8,
                               backgroundColor: "rgba(31, 41, 55, 0.7)",
                             }}
                             transition={{
@@ -429,7 +352,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                           </motion.button>
 
                           {/* Wallet Connect */}
-                          <div className="flex items-center justify-end py-2 pl-6 pr-4 rounded-l-lg w-full">
+                          <div className="flex items-center justify-start py-2 pr-6 pl-4 rounded-r-lg w-full">
                             <CustomWalletConnect />
                           </div>
 
@@ -441,9 +364,9 @@ function MyApp({ Component, pageProps }: AppProps) {
                                   ? setIsProfileMenuOpen(!isProfileMenuOpen)
                                   : setIsAuthModalOpen(true)
                               }
-                              className="flex items-center justify-end py-2 pl-6 pr-4 rounded-l-lg text-gray-300 hover:bg-gray-800/40 hover:text-white w-full"
+                              className="flex items-center justify-start py-2 pr-6 pl-4 rounded-r-lg text-gray-300 hover:bg-gray-800/40 hover:text-white w-full"
                               whileHover={{
-                                x: -8,
+                                x: 8,
                                 backgroundColor: "rgba(31, 41, 55, 0.7)",
                               }}
                               transition={{
@@ -484,7 +407,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                             </motion.button>
 
                             {profile && isProfileMenuOpen && (
-                              <div className="absolute right-0 mt-2 bottom-10 w-48 bg-gray-800 rounded-lg shadow-lg py-1 ring-1 ring-green-500 ring-opacity-50 z-20">
+                              <div className="absolute left-0 mt-2 bottom-10 w-48 bg-gray-800 rounded-lg shadow-lg py-1 ring-1 ring-green-500 ring-opacity-50 z-20">
                                 <Link
                                   href="/profile"
                                   className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 transition-colors"
@@ -514,6 +437,53 @@ function MyApp({ Component, pageProps }: AppProps) {
                           </div>
                         </div>
                       </div>
+                    </div>
+
+                    {/* Main Content Area with 3D transition effect */}
+                    <div
+                      ref={contentRef}
+                      className="w-full h-full perspective-1000"
+                    >
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={activeBlade}
+                          initial={{
+                            opacity: 0,
+                            rotateY: transitionDirection === "right" ? 45 : -45,
+                            x: transitionDirection === "right" ? 100 : -100,
+                          }}
+                          animate={{
+                            opacity: 1,
+                            rotateY: 0,
+                            x: 0,
+                          }}
+                          exit={{
+                            opacity: 0,
+                            rotateY: transitionDirection === "right" ? -45 : 45,
+                            x: transitionDirection === "right" ? -100 : 100,
+                          }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 25,
+                          }}
+                          className="w-full h-full pl-40 pr-15 flex items-center justify-center"
+                        >
+                          <div className="w-full h-full mx-auto max-w-[1300px] p-4 md:p-6">
+                            <div className="w-full h-full rounded-xl overflow-hidden border border-gray-700 shadow-2xl relative">
+                              {/* Green glow effect at the top */}
+                              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-400 via-green-500 to-green-400 opacity-70 shadow-lg shadow-green-500/50" />
+
+                              {/* Content container with glass morphism effect */}
+                              <div className="bg-gradient-to-b from-gray-800/80 to-gray-900/80 backdrop-blur-sm w-full h-full overflow-y-auto">
+                                <div className="p-4 md:p-6">
+                                  <Component {...pageProps} />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      </AnimatePresence>
                     </div>
 
                     {/* Dynamic "ripple" effect background elements */}

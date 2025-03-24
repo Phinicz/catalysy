@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import { useApi } from "../context/ApiContext";
 import { toast } from "react-toastify";
+import { supabase } from "../lib/supabase";
 
 export const CustomWalletConnect = () => {
   const { address, isConnected } = useAccount();
@@ -10,38 +11,85 @@ export const CustomWalletConnect = () => {
   const [isProcessingRule, setIsProcessingRule] = useState(false);
 
   useEffect(() => {
-    const handleWalletConnect = async () => {
-      if (isConnected && address && !isProcessingRule) {
-        try {
-          setIsProcessingRule(true);
-          // Get all loyalty rules
-          const rulesResponse = await getLoyaltyRules();
+    const checkWalletAccess = async () => {
+      if (!isConnected || !address) return;
 
-          // Find the wallet connect rule
-          const walletConnectRule = rulesResponse.data.find(
-            (rule) => rule.type === "WalletConnect"
-          );
+      try {
+        // Get the current user's session
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (!session?.user) return;
 
-          if (walletConnectRule) {
-            // Complete the rule
-            await completeLoyaltyRule(walletConnectRule.id, address);
-            toast.success("Wallet connection reward claimed successfully!");
-          }
-        } catch (error) {
-          console.error("Error processing wallet connect rule:", error);
-          if (error instanceof Error) {
-            toast.error(`Failed to process reward: ${error.message}`);
-          } else {
-            toast.error("Failed to process wallet connection reward");
-          }
-        } finally {
-          setIsProcessingRule(false);
+        // Get the user's profile
+        const { data: profile } = await supabase
+          .from("user_profiles")
+          .select("*")
+          .eq("id", session.user.id)
+          .single();
+
+        if (!profile) return;
+
+        // If this is the first wallet connection
+        if (!profile.wallet_address) {
+          // Update the profile with the connected wallet
+          await supabase
+            .from("user_profiles")
+            .update({ wallet_address: address })
+            .eq("id", session.user.id);
+
+          // Process the wallet connect rule
+          handleWalletConnect();
         }
+        // If a wallet is already associated
+        else if (
+          profile.wallet_address.toLowerCase() !== address.toLowerCase()
+        ) {
+          // Disconnect if it's not the registered wallet
+          toast.error(
+            "Please connect with the wallet address you registered with."
+          );
+          // You might want to add a disconnect function here
+          window.location.reload(); // Force disconnect by reloading
+          return;
+        }
+      } catch (error) {
+        console.error("Error checking wallet access:", error);
       }
     };
 
-    handleWalletConnect();
-  }, [address, isConnected, getLoyaltyRules, completeLoyaltyRule]);
+    checkWalletAccess();
+  }, [address, isConnected]);
+
+  const handleWalletConnect = async () => {
+    if (!isConnected || !address || isProcessingRule) return;
+
+    try {
+      setIsProcessingRule(true);
+      // Get all loyalty rules
+      const rulesResponse = await getLoyaltyRules();
+
+      // Find the wallet connect rule
+      const walletConnectRule = rulesResponse.data.find(
+        (rule) => rule.type === "WalletConnect"
+      );
+
+      if (walletConnectRule) {
+        // Complete the rule
+        await completeLoyaltyRule(walletConnectRule.id, address);
+        toast.success("Wallet connection reward claimed successfully!");
+      }
+    } catch (error) {
+      console.error("Error processing wallet connect rule:", error);
+      if (error instanceof Error) {
+        toast.error(`Failed to process reward: ${error.message}`);
+      } else {
+        toast.error("Failed to process wallet connection reward");
+      }
+    } finally {
+      setIsProcessingRule(false);
+    }
+  };
 
   return (
     <ConnectButton.Custom>

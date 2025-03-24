@@ -16,7 +16,8 @@ interface ApiContextType {
   getLoyaltyRules: () => Promise<LoyaltyRulesResponse>;
   completeLoyaltyRule: (ruleId: string, walletAddress: string) => Promise<any>;
   getRuleProcessingStatus: (
-    walletAddress: string
+    walletAddress: string,
+    ruleId: string
   ) => Promise<RuleProcessingStatus>;
   getTransactionEntries: () => Promise<any>;
 }

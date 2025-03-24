@@ -10,5 +10,3 @@ export interface UserProfile {
   coins: number;
   gems: number;
 }
-
-

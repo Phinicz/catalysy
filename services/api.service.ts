@@ -21,12 +21,27 @@ class ApiService {
       },
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "API request failed");
+    // Get the response text first
+    const responseText = await response.text();
+
+    // If the response is empty, throw an error
+    if (!responseText) {
+      throw new Error("Empty response from server");
     }
 
-    return response.json();
+    try {
+      // Try to parse the response as JSON
+      const data = JSON.parse(responseText);
+
+      if (!response.ok) {
+        throw new Error(data.message || "API request failed");
+      }
+
+      return data;
+    } catch (parseError) {
+      // If JSON parsing fails, throw a more descriptive error
+      throw new Error(`Invalid response from server: ${responseText}`);
+    }
   }
 
   async getUsers(): Promise<ApiResponse> {
@@ -64,54 +79,27 @@ class ApiService {
   async completeLoyaltyRule(
     ruleId: string,
     walletAddress: string
-  ): Promise<any> {
+  ): Promise<{ message: string; rewarded: boolean }> {
     return this.fetchApi(`/loyalty/rules/${ruleId}/complete`, {
       method: "POST",
+      headers: {
+        "X-API-KEY": process.env.NEXT_PUBLIC_SNAG_API_KEY || "",
+      },
       body: JSON.stringify({ walletAddress }),
     });
   }
 
   async getRuleProcessingStatus(
-    walletAddress: string
-  ): Promise<RuleProcessingStatus> {
-    try {
-      // First get the user data to extract the user ID
-      const usersResponse = await this.getUsers();
-      const user = usersResponse.data.find(
-        (user) =>
-          user.walletAddress.toLowerCase() === walletAddress.toLowerCase()
-      );
-
-      if (!user) {
-        console.error("User not found for wallet address:", walletAddress);
-        return { data: [] };
-      }
-
-      if (
-        !process.env.NEXT_PUBLIC_WEBSITE_ID ||
-        !process.env.NEXT_PUBLIC_ORGANIZATION_ID
-      ) {
-        throw new Error(
-          "Missing required environment variables: NEXT_PUBLIC_WEBSITE_ID and/or NEXT_PUBLIC_ORGANIZATION_ID"
-        );
-      }
-
-      const queryParams = new URLSearchParams({
-        userId: user.id,
-        websiteId: process.env.NEXT_PUBLIC_WEBSITE_ID,
-        organizationId: process.env.NEXT_PUBLIC_ORGANIZATION_ID,
-      });
-
-      return this.fetchApi<RuleProcessingStatus>(
-        `/loyalty/rules/status?${queryParams.toString()}`,
-        {
-          method: "GET",
-        }
-      );
-    } catch (error) {
-      console.error("Error fetching rule status:", error);
-      return { data: [] };
-    }
+    walletAddress: string,
+    ruleId: string
+  ): Promise<{ message: string; rewarded: boolean }> {
+    return this.fetchApi(`/loyalty/rules/${ruleId}/complete`, {
+      method: "POST",
+      headers: {
+        "X-API-KEY": process.env.NEXT_PUBLIC_SNAG_API_KEY || "",
+      },
+      body: JSON.stringify({ walletAddress }),
+    });
   }
 
   async getTransactionEntries(): Promise<any> {

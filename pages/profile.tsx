@@ -68,12 +68,10 @@ export default function ProfilePage() {
       try {
         // First get the user data to get the user ID
         const usersResponse = await getUsers();
-        console.log("Users response:", usersResponse.data);
 
         const user = usersResponse.data.find(
           (user) => user.walletAddress.toLowerCase() === address?.toLowerCase()
         );
-        console.log("Found user:", user);
 
         if (!user) {
           console.log("No user found for address:", address);
@@ -82,31 +80,21 @@ export default function ProfilePage() {
 
         // Then get transaction entries
         const transactionResponse = await getTransactionEntries();
-        console.log("Raw transaction response:", transactionResponse);
 
         // Properly extract the data array from the response
         const transactions = (transactionResponse.data ||
           []) as TransactionEntry[];
-        console.log("All transactions:", transactions);
 
         // Filter transactions for the current user and sum up the amounts
         const userTransactions = transactions.filter(
           (transaction: TransactionEntry) => {
             // Check if the transaction has a loyaltyAccount with a user
             if (transaction.loyaltyAccount && transaction.loyaltyAccount.user) {
-              console.log(
-                "Comparing transaction user ID:",
-                transaction.loyaltyAccount.user.id,
-                "with user.id:",
-                user.id
-              );
               return transaction.loyaltyAccount.user.id === user.id;
             }
             return false;
           }
         );
-
-        console.log("Filtered user transactions:", userTransactions);
 
         // Calculate total coins from valid transactions
         const totalCoins = userTransactions.reduce(
@@ -123,7 +111,6 @@ export default function ProfilePage() {
           0
         );
 
-        console.log("Final total coins calculated:", totalCoins);
         setCoins(totalCoins);
       } catch (error) {
         console.error("Error fetching transaction entries:", error);
@@ -131,7 +118,6 @@ export default function ProfilePage() {
     };
 
     if (address) {
-      console.log("Fetching transactions for address:", address);
       fetchTransactionEntries();
     }
   }, [address, getUsers, getTransactionEntries]);

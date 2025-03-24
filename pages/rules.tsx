@@ -17,11 +17,16 @@ import {
 } from "lucide-react";
 import { useAccount } from "wagmi";
 
+type RuleStatusState = {
+  loyaltyRuleId: string;
+  status: "completed" | "pending" | "failed" | "not_completed";
+  completedAt: string | null;
+  message?: string;
+}[];
+
 export default function LoyaltyRulesPage() {
   const [rules, setRules] = useState<LoyaltyRule[]>([]);
-  const [ruleStatus, setRuleStatus] = useState<RuleProcessingStatus["data"]>(
-    []
-  );
+  const [ruleStatus, setRuleStatus] = useState<RuleStatusState>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isStatusLoading, setIsStatusLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,15 +54,43 @@ export default function LoyaltyRulesPage() {
     if (!address) return;
     try {
       setIsStatusLoading(true);
-      const response = await api.getRuleProcessingStatus(address);
-      console.log("Rule status response:", response.data);
-      setRuleStatus(response.data);
+      const statusPromises = rules.map(async (rule) => {
+        try {
+          const response = await api.getRuleProcessingStatus(address, rule.id);
+          return {
+            loyaltyRuleId: rule.id,
+            status: "completed" as const,
+            completedAt: new Date().toISOString(),
+            message: response.message,
+          };
+        } catch (error: any) {
+          // If error message contains "already been rewarded", it means the rule is completed
+          if (error.message?.includes("already been rewarded")) {
+            return {
+              loyaltyRuleId: rule.id,
+              status: "completed" as const,
+              completedAt: new Date().toISOString(),
+              message: error.message,
+            };
+          }
+          // For any other error, mark as not completed
+          return {
+            loyaltyRuleId: rule.id,
+            status: "not_completed" as const,
+            completedAt: null,
+            message: error.message || "Rule not completed",
+          };
+        }
+      });
+
+      const allStatuses = await Promise.all(statusPromises);
+      setRuleStatus(allStatuses);
     } catch (err) {
       console.error("Failed to fetch rule status:", err);
     } finally {
       setIsStatusLoading(false);
     }
-  }, [address, api]);
+  }, [address, api, rules]);
 
   useEffect(() => {
     fetchRules();
@@ -75,41 +108,54 @@ export default function LoyaltyRulesPage() {
     try {
       setCompletingRule(ruleId);
 
-      // Optimistically update the UI
-      setRuleStatus((prev) => [
-        ...prev,
-        {
-          loyaltyRuleId: ruleId,
-          userId: "", // Will be updated with actual value on refresh
-          status: "completed",
-          message: "Quest Completed",
-        },
-      ]);
+      const response = await api.completeLoyaltyRule(ruleId, address);
 
-      await api.completeLoyaltyRule(ruleId, address);
-      setShowSuccessMessage(`Successfully completed: ${ruleName}`);
+      if (response.rewarded) {
+        setRuleStatus((prev) => [
+          ...prev.filter((status) => status.loyaltyRuleId !== ruleId),
+          {
+            loyaltyRuleId: ruleId,
+            status: "completed",
+            completedAt: new Date().toISOString(),
+            message: response.message || "Rule completed successfully",
+          },
+        ]);
+        setShowSuccessMessage(`Successfully completed: ${ruleName}`);
+      } else {
+        throw new Error(response.message || "Failed to complete rule");
+      }
       setTimeout(() => setShowSuccessMessage(null), 5000);
-
-      // Refresh to get actual status
-      await refreshRuleStatus();
     } catch (err) {
       console.error("Error completing rule:", err);
       const errorMessage =
         err instanceof Error ? err.message : "Failed to complete rule";
 
+      // Handle specific error cases
       if (errorMessage.includes("already been rewarded")) {
+        setRuleStatus((prev) => [
+          ...prev.filter((status) => status.loyaltyRuleId !== ruleId),
+          {
+            loyaltyRuleId: ruleId,
+            status: "completed",
+            completedAt: new Date().toISOString(),
+            message: "Rule already completed",
+          },
+        ]);
         setShowSuccessMessage(`${ruleName} has already been completed!`);
-        setTimeout(() => setShowSuccessMessage(null), 5000);
-      } else {
-        // Remove the optimistic update if there was an error
-        setRuleStatus((prev) =>
-          prev.filter((status) => status.loyaltyRuleId !== ruleId)
-        );
+      } else if (errorMessage.includes("Empty response from server")) {
         setShowSuccessMessage(
-          `Failed to complete ${ruleName}. Please try again.`
+          `Server error: Please try again in a few moments`
         );
-        setTimeout(() => setShowSuccessMessage(null), 5000);
+      } else if (errorMessage.includes("Invalid response from server")) {
+        setShowSuccessMessage(
+          `Server error: Please try again in a few moments`
+        );
+      } else {
+        setShowSuccessMessage(
+          `Failed to complete ${ruleName}: ${errorMessage}`
+        );
       }
+      setTimeout(() => setShowSuccessMessage(null), 5000);
     } finally {
       setCompletingRule(null);
     }
@@ -122,7 +168,7 @@ export default function LoyaltyRulesPage() {
   const totalPoints = rules
     .filter((rule) =>
       ruleStatus.find(
-        (status) =>
+        (status: any) =>
           status.loyaltyRuleId === rule.id && status.status === "completed"
       )
     )
