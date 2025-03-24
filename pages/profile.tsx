@@ -15,6 +15,7 @@ interface UserProfile {
   bio: string | null;
   coins: number;
   gems: number;
+  twitter_username?: string;
 }
 
 interface ApiRegistrationStatus {
@@ -48,6 +49,7 @@ export default function ProfilePage() {
     username: "",
     bio: "",
     profile_picture: "",
+    twitter_username: "",
   });
   const [isUpdating, setIsUpdating] = useState(false);
   const [coins, setCoins] = useState(0);
@@ -237,6 +239,7 @@ export default function ProfilePage() {
         username: data.username,
         bio: data.bio || "",
         profile_picture: data.profile_picture || "",
+        twitter_username: data.twitter_username || "",
       });
     } catch (error) {
       console.error("Error:", error);
@@ -264,7 +267,7 @@ export default function ProfilePage() {
     try {
       // Basic validation
       if (!editForm.username.trim()) {
-        toast.error("Username is requigray");
+        toast.error("Username is required");
         return;
       }
 
@@ -289,6 +292,7 @@ export default function ProfilePage() {
         username: editForm.username.trim(),
         bio: editForm.bio?.trim() || null,
         profile_picture: editForm.profile_picture || null,
+        twitter_username: editForm.twitter_username?.trim() || null,
       };
 
       const { error: profileError } = await supabase
@@ -369,6 +373,23 @@ export default function ProfilePage() {
                     <h3 className="font-medium text-gray-500">Bio</h3>
                     <p className="mt-1 text-gray-300">
                       {profile.bio || "No bio yet"}
+                    </p>
+                  </div>
+                  <div className="mt-4">
+                    <h3 className="font-medium text-gray-500">Twitter</h3>
+                    <p className="mt-1 text-gray-300">
+                      {profile.twitter_username ? (
+                        <a
+                          href={`https://twitter.com/${profile.twitter_username}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-400 hover:text-blue-300"
+                        >
+                          {profile.twitter_username}
+                        </a>
+                      ) : (
+                        "No Twitter connected"
+                      )}
                     </p>
                   </div>
                   <div className="mt-4">
@@ -455,6 +476,38 @@ export default function ProfilePage() {
                   rows={4}
                   className="w-full px-3 py-2 border border-gray-500 bg-gray-800 text-white rounded-lg"
                 ></textarea>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-2">
+                  Twitter Username
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Enter your Twitter username"
+                    value={editForm.twitter_username}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({
+                        ...prev,
+                        twitter_username: e.target.value.replace(/^@/, ""),
+                      }))
+                    }
+                    className="flex-1 px-3 py-2 border border-gray-500 bg-gray-800 text-white rounded-lg"
+                  />
+                  {editForm.twitter_username && (
+                    <a
+                      href={`https://twitter.com/${editForm.twitter_username}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center"
+                    >
+                      View Profile
+                    </a>
+                  )}
+                </div>
+                <p className="mt-1 text-sm text-gray-400">
+                  Enter your Twitter username without the @ symbol
+                </p>
               </div>
               <div className="flex gap-4">
                 <button
