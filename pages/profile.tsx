@@ -6,7 +6,6 @@ import { Copy } from "lucide-react";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { useApi } from "@/context/ApiContext";
 import { toast } from "react-toastify";
-
 interface UserProfile {
   id: string;
   username: string;
@@ -68,6 +67,7 @@ export default function ProfilePage() {
       try {
         // First get the user data to get the user ID
         const usersResponse = await getUsers();
+        console.log("Users response:", usersResponse);
 
         const user = usersResponse.data.find(
           (user) => user.walletAddress.toLowerCase() === address?.toLowerCase()
@@ -78,28 +78,32 @@ export default function ProfilePage() {
           return;
         }
 
+        console.log("Found user:", user);
+
         // Then get transaction entries
         const transactionResponse = await getTransactionEntries();
+        console.log("Transaction response:", transactionResponse);
 
         // Properly extract the data array from the response
-        const transactions = (transactionResponse.data ||
-          []) as TransactionEntry[];
+        const transactions = transactionResponse.data || [];
 
         // Filter transactions for the current user and sum up the amounts
         const userTransactions = transactions.filter(
           (transaction: TransactionEntry) => {
             // Check if the transaction has a loyaltyAccount with a user
-            if (transaction.loyaltyAccount && transaction.loyaltyAccount.user) {
+            if (transaction.loyaltyAccount?.user?.id) {
               return transaction.loyaltyAccount.user.id === user.id;
             }
             return false;
           }
         );
 
+        console.log("User transactions:", userTransactions);
+
         // Calculate total coins from valid transactions
         const totalCoins = userTransactions.reduce(
           (sum: number, transaction: TransactionEntry) => {
-            const amount = parseInt(transaction.amount.toString()) || 0;
+            const amount = Number(transaction.amount) || 0;
             console.log(
               "Processing transaction amount:",
               transaction.amount,
@@ -111,6 +115,7 @@ export default function ProfilePage() {
           0
         );
 
+        console.log("Total coins calculated:", totalCoins);
         setCoins(totalCoins);
       } catch (error) {
         console.error("Error fetching transaction entries:", error);
@@ -127,27 +132,41 @@ export default function ProfilePage() {
     setIsCheckingApi(true);
     try {
       const response = await getUsers();
+      console.log("API Response:", response);
+      console.log("Current wallet address:", address);
 
-      // Now correctly accessing the users array from response.data
-      const isRegistegray = response.data.some(
-        (user) => user.walletAddress.toLowerCase() === address.toLowerCase()
-      );
+      // Find user with matching wallet address
+      const user = response.data?.find((user) => {
+        const userWallet = user.walletAddress.toLowerCase();
+        const currentWallet = address.toLowerCase();
+        console.log("Comparing wallets:", {
+          userWallet,
+          currentWallet,
+          matches: userWallet === currentWallet,
+        });
+        return userWallet === currentWallet;
+      });
 
-      if (isRegistegray) {
-        const user = response.data.find(
-          (user) => user.walletAddress.toLowerCase() === address.toLowerCase()
-        );
-
+      if (user) {
+        console.log("Found registered user:", user);
+        // Use profile username as display name
+        const displayName =
+          profile?.username || user.walletAddress?.slice(0, 8);
+        console.log("Setting display name:", displayName);
         setApiStatus({
           isRegistegray: true,
-          displayName: user?.userMetadata[0].displayName,
+          displayName: displayName,
         });
       } else {
+        console.log("No registered user found for wallet:", address);
         setApiStatus({ isRegistegray: false });
       }
     } catch (error) {
       console.error("Error checking API registration:", error);
-      setApiStatus({ isRegistegray: false });
+      // Don't reset status on error, keep the current status
+      if (!apiStatus.isRegistegray) {
+        setApiStatus({ isRegistegray: false });
+      }
     } finally {
       setIsCheckingApi(false);
     }

@@ -6,10 +6,40 @@ export interface UserMetadata {
 
 export interface User {
   id: string;
-  walletAddress: string;
-  userMetadata: UserMetadata[];
   temporaryLoyaltyUser: boolean;
   isSnagSuperAdmin: boolean;
+  walletAddress: string;
+  walletType: string;
+  displayName?: string;
+  emailAddress?: string;
+  createdAt: string;
+  updatedAt: string;
+  organizationId: string;
+  websiteId: string;
+  userId: string;
+  bio: string | null;
+  discordUserId: string | null;
+  telegramUserId: string | null;
+  twitterUserId: string | null;
+  steamUserId: string | null;
+  epicAccountIdentifier: string | null;
+  instagramUserId: string | null;
+  emailVerifiedAt: string | null;
+  discordVerifiedAt: string | null;
+  telegramVerifiedAt: string | null;
+  twitterVerifiedAt: string | null;
+  steamVerifiedAt: string | null;
+  epicVerifiedAt: string | null;
+  instagramVerifiedAt: string | null;
+  isBlocked: boolean;
+  location: string | null;
+  logoUrl: string | null;
+  portfolioUrl: string | null;
+  meta: any | null;
+  userGroup: any | null;
+  userGroupId: string | null;
+  walletGroupIdentifier: string | null;
+  externalIdentifier: string | null;
 }
 
 export interface ApiResponse {

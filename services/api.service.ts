@@ -21,36 +21,51 @@ class ApiService {
       },
     });
 
-    // Get the response text first
-    const responseText = await response.text();
-
-    // If the response is empty, throw an error
-    if (!responseText) {
-      throw new Error("Empty response from server");
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "API request failed");
     }
 
-    try {
-      // Try to parse the response as JSON
-      const data = JSON.parse(responseText);
-
-      if (!response.ok) {
-        throw new Error(data.message || "API request failed");
-      }
-
-      return data;
-    } catch (parseError) {
-      // If JSON parsing fails, throw a more descriptive error
-      throw new Error(`Invalid response from server: ${responseText}`);
-    }
+    return response.json();
   }
 
   async getUsers(): Promise<ApiResponse> {
-    return this.fetchApi<ApiResponse>("/users");
+    let allUsers: any[] = [];
+    let startingAfter: string | null = null;
+    let hasNextPage = true;
+
+    while (hasNextPage) {
+      // Construct the endpoint with pagination if needed
+      let endpoint = "/users";
+      if (startingAfter) {
+        endpoint += `?startingAfter=${startingAfter}`;
+      }
+
+      // Fetch data from the API
+      const response = await this.fetchApi<ApiResponse>(endpoint);
+
+      // Append the fetched users to the array
+      allUsers = [...allUsers, ...response.data];
+
+      // Check if there is more data to fetch
+      hasNextPage = response.hasNextPage;
+
+      // Update cursor for the next request
+      if (hasNextPage && response.data.length > 0) {
+        startingAfter = response.data[response.data.length - 1].id;
+      }
+    }
+
+    // Return all users
+    return { data: allUsers, hasNextPage: false };
   }
 
   async createUser(userData: CreateUserData): Promise<any> {
     return this.fetchApi("/users/metadatas", {
       method: "POST",
+      headers: {
+        "X-API-KEY": process.env.NEXT_PUBLIC_SNAG_API_KEY || "",
+      },
       body: JSON.stringify(userData),
     });
   }

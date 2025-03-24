@@ -1,20 +1,23 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useEffect, useState } from "react";
-import { useAccount } from "wagmi";
+import { useAccount, useDisconnect } from "wagmi";
 import { useApi } from "../context/ApiContext";
 import { toast } from "react-toastify";
 import { supabase } from "../lib/supabase";
 
 export const CustomWalletConnect = () => {
   const { address, isConnected } = useAccount();
+  const { disconnect } = useDisconnect();
   const { getLoyaltyRules, completeLoyaltyRule } = useApi();
   const [isProcessingRule, setIsProcessingRule] = useState(false);
+  const [isCheckingWallet, setIsCheckingWallet] = useState(false);
 
   useEffect(() => {
     const checkWalletAccess = async () => {
-      if (!isConnected || !address) return;
+      if (!isConnected || !address || isCheckingWallet) return;
 
       try {
+        setIsCheckingWallet(true);
         // Get the current user's session
         const {
           data: { session },
@@ -49,17 +52,18 @@ export const CustomWalletConnect = () => {
           toast.error(
             "Please connect with the wallet address you registered with."
           );
-          // You might want to add a disconnect function here
-          window.location.reload(); // Force disconnect by reloading
+          disconnect();
           return;
         }
       } catch (error) {
         console.error("Error checking wallet access:", error);
+      } finally {
+        setIsCheckingWallet(false);
       }
     };
 
     checkWalletAccess();
-  }, [address, isConnected]);
+  }, [address, isConnected, disconnect]);
 
   const handleWalletConnect = async () => {
     if (!isConnected || !address || isProcessingRule) return;

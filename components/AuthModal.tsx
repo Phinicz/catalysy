@@ -23,30 +23,39 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
-      {/* Overlay to close modal on click */}
-      <div className="fixed inset-0 bg-black bg-opacity-50" onClick={onClose} />
+      {/* Backdrop with blur effect */}
+      <div
+        className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
+        onClick={onClose}
+      />
 
       {/* Modal Content */}
-      <div className="relative w-full max-w-4xl bg-black rounded-lg shadow-xl flex flex-col md:flex-row overflow-hidden my-8">
-        {/* Image Section */}
-        <div className="w-full md:w-1/2 h-48 md:h-auto">
-          <img
-            src="/brand/apex.jpg"
-            alt="Modal Image"
-            className="w-full h-full object-cover md:rounded-l-lg"
-          />
-        </div>
-
-        {/* Form Section */}
-        <div className="w-full md:w-1/2 p-6 flex flex-col justify-center relative">
-          {/* Close Button */}
-          <button
-            onClick={onClose}
-            className="absolute right-4 top-4 text-gray-400 hover:text-gray-500 z-10"
+      <div className="relative w-full max-w-xl bg-gradient-to-br from-gray-900 to-black rounded-2xl shadow-2xl overflow-hidden my-4 border border-gray-800">
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 text-white/70 hover:text-white bg-black/50 hover:bg-black/70 p-1.5 rounded-full transition-all duration-200 z-10"
+        >
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
-            ✕
-          </button>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
 
+        {/* Auth Form */}
+        <div className="p-6">
+          <div className="flex items-center justify-center mb-4">
+            <h1 className="text-xl font-bold text-white">Catalysy</h1>
+          </div>
           <AuthForm onClose={onClose} />
         </div>
       </div>
