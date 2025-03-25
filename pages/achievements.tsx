@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import SlidingBanner from "../components/Banner/SlidingBanner";
 import AchievementGrid from "../components/Achievements/AchievementGrid";
 import Pagination from "../components/common/Pagination";
+import AchievementModal from "@/components/Achievements/AchievementModal";
+import { Achievement } from "@/types/Achievement";
+import Modal from "@/components/Layout/Modal";
 
 const SAMPLE_ACHIEVEMENTS = {
   trending: [
@@ -17,6 +20,7 @@ const SAMPLE_ACHIEVEMENTS = {
       game: {
         name: "Nyan Heroes",
         icon: "/placeholders/achivements/4.jpg",
+        deeplink: "https://store.steampowered.com/app/588650/Dead_Cells",
       },
     },
     {
@@ -31,6 +35,7 @@ const SAMPLE_ACHIEVEMENTS = {
       game: {
         name: "Uldor Test",
         icon: "/placeholders/achivements/4.jpg",
+        deeplink: "https://store.steampowered.com/app/588650/Dead_Cells",
       },
     },
   ],
@@ -49,6 +54,9 @@ const BANNER_ITEMS = [
 ];
 
 export default function AchievementsPage() {
+  const [isAchievementModalOpen, setIsAchievementModalOpen] = useState(false);
+  const [selectedAchievement, setSelectedAchievement] = useState<Achievement>();
+
   const [trendingAchievements, setTrendingAchievements] = useState(
     SAMPLE_ACHIEVEMENTS.trending
   );
@@ -67,7 +75,13 @@ export default function AchievementsPage() {
           <h2 className="text-2xl font-bold text-white mb-6">
             Trending Achievements
           </h2>
-          <AchievementGrid achievements={trendingAchievements} />
+          <AchievementGrid
+            achievements={trendingAchievements}
+            onSelectAchievement={(achievement) => {
+              setSelectedAchievement(achievement);
+              setIsAchievementModalOpen(true);
+            }}
+          />
         </section>
 
         <section>
@@ -79,7 +93,13 @@ export default function AchievementsPage() {
               className="px-4 py-2 border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-gray-500 rounded-lg bg-surface text-black "
             />
           </div>
-          <AchievementGrid achievements={allAchievements} />
+          <AchievementGrid
+            achievements={allAchievements}
+            onSelectAchievement={(achievement) => {
+              setSelectedAchievement(achievement);
+              setIsAchievementModalOpen(true);
+            }}
+          />
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
@@ -87,6 +107,15 @@ export default function AchievementsPage() {
           />
         </section>
       </div>
+        <Modal show={isAchievementModalOpen} closeModal={() => setIsAchievementModalOpen(false)}>
+          {selectedAchievement ? (
+            <AchievementModal
+              isOpen={isAchievementModalOpen}
+              onClose={() => setIsAchievementModalOpen(false)}
+              achievement={selectedAchievement}
+            />
+          ): null}
+        </Modal>
     </div>
   );
 }

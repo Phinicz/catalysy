@@ -533,6 +533,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                   </div>
                 )}
               </div>
+              <div id="modal-root"></div>
               <AuthModal
                 isOpen={isAuthModalOpen}
                 onClose={() => setIsAuthModalOpen(false)}

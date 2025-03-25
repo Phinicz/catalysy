@@ -1,28 +1,9 @@
 import React, { useState } from "react";
-
-// Updated interface with optional newer fields
-interface Achievement {
-  id: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  points: number;
-  startDate: string;
-  endDate: string;
-  status: "active" | "expired";
-  game: {
-    name: string;
-    icon: string;
-  };
-  // Make new fields optional with defaults
-  genre?: "Action" | "RPG" | "Strategy" | "Sports" | "Adventure";
-  tier?: "free" | "standard" | "premium";
-  isHighPoints?: boolean;
-  isExpiringSoon?: boolean;
-}
-
+import AchievementModal from "./AchievementModal";
+import { Achievement } from "@/types/Achievement";
 interface AchievementGridProps {
   achievements: Achievement[];
+  onSelectAchievement: (achievement: Achievement) => void;
 }
 
 // Helper function to determine if an achievement is high points
@@ -72,6 +53,7 @@ const determineTier = (points: number): Achievement["tier"] => {
 
 export default function AchievementGrid({
   achievements,
+  onSelectAchievement 
 }: AchievementGridProps) {
   const [hoveredTooltip, setHoveredTooltip] = useState<string | null>(null);
 
@@ -270,6 +252,14 @@ export default function AchievementGrid({
               <p className="text-sm text-text-secondary mb-3">
                 {achievement.description}
               </p>
+              <button
+                className="w-full py-2 px-4 bg-primary font-semibold text-white rounded-lg hover:bg-gray-800 transition-colors mb-3"
+                onClick={()=>{
+                  onSelectAchievement(achievement)
+                }}
+              >
+                Get Reward
+              </button>
               <div className="flex items-center justify-between text-xs text-text-tertiary">
                 <span>Start: {achievement.startDate}</span>
                 <span>End: {achievement.endDate}</span>
