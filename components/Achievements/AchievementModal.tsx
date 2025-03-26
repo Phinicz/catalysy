@@ -1,5 +1,7 @@
+import { supabase } from "@/lib/supabase";
 import { Achievement } from "@/types/Achievement";
-import { Fragment, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useAccount } from "wagmi";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -8,6 +10,44 @@ interface AuthModalProps {
 }
 
 export default function AchievementModal({ isOpen, onClose, achievement }: AuthModalProps) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const startTask = async ()=>{
+    setIsLoading(true);
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session?.user) return;
+
+      try {
+        const { error: insertError } = await supabase
+        .from("tasks")
+        .insert({ 
+          // id: achievement.id,
+          user_id: session.user.id,
+          title: achievement.title,
+          description: achievement.description,
+          status: "ongoing",
+          created_at: new Date().toISOString(),
+          progress: 0,
+        });
+        if (insertError) {
+          console.error("Task creation error:", insertError);
+          throw insertError;
+        }
+        window.open(achievement.game.deeplink, "_blank");
+      } catch (err) {
+        console.error("Task creation error:", err);
+        throw new Error("Failed to subscribe to task. Please try again.");
+      }
+    } catch (err: any) {
+      console.error("Auth error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden"; // Disable scrolling
@@ -91,13 +131,12 @@ export default function AchievementModal({ isOpen, onClose, achievement }: AuthM
                 {achievement.status === "active" ? "Active" : "Expired"}
               </div>
               <div className="w-full flex justify-end">
-                <a href={achievement.game.deeplink} target="_blank" rel="noreferrer">
                   <button
                     className="w-52 py-2 px-4 bg-green-600 font-semibold text-white rounded-lg hover:bg-gray-800 transition-colors"
+                    onClick={startTask}
                   >
                     Start Task
                   </button>
-                </a>
               </div>
             </div>
           </div>
