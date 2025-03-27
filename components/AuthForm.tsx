@@ -101,6 +101,8 @@ export default function AuthForm({ onClose }: AuthFormProps) {
             password: formState.password,
           });
 
+        console.log(data, "here is the user data");
+
         if (signInError) {
           if (signInError.message.includes("Email not confirmed")) {
             setConfirmationEmail(formState.email);

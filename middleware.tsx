@@ -10,9 +10,21 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession();
 
-  // Redirect if not authenticated
-  if (!session && req.nextUrl.pathname.startsWith("/dashboard")) {
-    return NextResponse.redirect(new URL("/auth", req.url));
+  // Protected routes that require authentication
+  const protectedRoutes = [
+    "/dashboard",
+    "/subscriptions",
+    "/subscription-success",
+  ];
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    req.nextUrl.pathname.startsWith(route)
+  );
+
+  // Redirect if not authenticated and trying to access protected route
+  if (!session && isProtectedRoute) {
+    const redirectUrl = new URL("/auth", req.url);
+    redirectUrl.searchParams.set("redirectTo", req.nextUrl.pathname);
+    return NextResponse.redirect(redirectUrl);
   }
 
   return res;

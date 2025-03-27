@@ -30,7 +30,7 @@ const SNAG = () => {
                   className="border-t border-gray-700 hover:bg-gray-600"
                 >
                   <td className="px-6 py-4 text-white">
-                    {user.userMetadata[0]?.displayName || "N/A"}
+                    {user.displayName || "N/A"}
                   </td>
                   <td className="px-6 py-4 text-white">
                     <span className="text-sm font-mono">

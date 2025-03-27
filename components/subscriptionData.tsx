@@ -1,4 +1,5 @@
 import { SubscriptionTier } from "../types/Tier";
+
 export const subscriptionData: SubscriptionTier[] = [
   {
     name: "Free Subscription",
@@ -18,26 +19,6 @@ export const subscriptionData: SubscriptionTier[] = [
         gameGenre: "Varies",
         rewardRange: "20-40",
         description: "Moderate effort with a limited selection of achievements",
-        bonuses: {
-          standardBattlePass: "+15% OG Points",
-          premiumBattlePass: "+30% OG Points",
-        },
-      },
-      {
-        name: "Tier 3: Hard",
-        gameGenre: "Varies",
-        rewardRange: "50-100",
-        description: "Restricted access to select hard-tier achievements",
-        bonuses: {
-          standardBattlePass: "+15% OG Points",
-          premiumBattlePass: "+30% OG Points",
-        },
-      },
-      {
-        name: "Tier 4: Epic/Seasonal",
-        gameGenre: "Varies",
-        rewardRange: "150-300",
-        description: "Limited seasonal events with prestigious achievements",
         bonuses: {
           standardBattlePass: "+15% OG Points",
           premiumBattlePass: "+30% OG Points",
@@ -80,7 +61,7 @@ export const subscriptionData: SubscriptionTier[] = [
         name: "Tier 4: Epic/Seasonal",
         gameGenre: "Varies",
         rewardRange: "300-450",
-        description: "Access to seasonal achievements with higher rewards",
+        description: "Limited access to seasonal achievements",
         bonuses: {
           premiumBattlePass: "+20% OG Points",
         },
@@ -115,7 +96,7 @@ export const subscriptionData: SubscriptionTier[] = [
         gameGenre: "Varies",
         rewardRange: "400-500",
         description:
-          "Limited seasonal events with top-tier rewards and prestige",
+          "Full access to limited seasonal events with top-tier rewards and prestige",
       },
     ],
   },

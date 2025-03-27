@@ -1,3 +1,4 @@
+"use client";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import Sidebar from "../components/Layout/Sidebar";
@@ -166,6 +167,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 
         if (error) throw error;
         setProfile(data);
+        console.log(profile, "here is the profile");
       } else {
         setProfile(null);
       }
