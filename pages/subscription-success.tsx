@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { Loader2 } from "lucide-react";
-
+import { supabase } from "@/lib/supabase";
 export default function SubscriptionSuccess() {
   const router = useRouter();
   const { session_id } = router.query;
   const [status, setStatus] = useState("processing");
-  const supabase = useSupabaseClient();
 
   useEffect(() => {
     if (session_id) {

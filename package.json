@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.0",
+    "@radix-ui/react-tooltip": "^1.1.8",
     "@rainbow-me/rainbowkit": "^2.2.3",
     "@snagsolutions/sdk": "^0.1.0-alpha.10",
     "@stripe/stripe-js": "^6.1.0",
