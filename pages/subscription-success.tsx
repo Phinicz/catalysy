@@ -62,13 +62,16 @@ export default function SubscriptionSuccess() {
           plan_id: planData.id,
           status: "active",
           start_date: new Date().toISOString(),
+          end_date: new Date(
+            Date.now() + 30 * 24 * 60 * 60 * 1000
+          ).toISOString(), // 30 days from now
           payment_id: customerId,
           updated_at: new Date().toISOString(),
         });
 
       if (updateError) {
-        console.error("Update error:", updateError);
-        throw updateError;
+        console.error("Error updating subscription:", updateError);
+        throw new Error("Failed to update subscription");
       }
 
       setStatus("success");

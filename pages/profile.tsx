@@ -12,6 +12,7 @@ import {
   User,
   CreditCard,
   Info,
+  Clock,
 } from "lucide-react";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { useApi } from "@/context/ApiContext";
@@ -38,6 +39,7 @@ interface Subscription {
   early_access: boolean;
   free_shipping: boolean;
   OG_Points: number;
+  end_date: string;
 }
 
 interface ApiRegistrationStatus {
@@ -79,6 +81,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<"profile" | "subscription">(
     "profile"
   );
+  const [timeLeft, setTimeLeft] = useState<string>("");
 
   useEffect(() => {
     fetchProfile();
@@ -155,6 +158,35 @@ export default function ProfilePage() {
       fetchTransactionEntries();
     }
   }, [address, getUsers, getTransactionEntries]);
+
+  useEffect(() => {
+    if (subscription?.end_date) {
+      const timer = setInterval(() => {
+        const endDate = new Date(subscription.end_date);
+        const now = new Date();
+        const difference = endDate.getTime() - now.getTime();
+
+        if (difference <= 0) {
+          setTimeLeft("Subscription expired");
+          clearInterval(timer);
+          return;
+        }
+
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor(
+          (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        );
+        const minutes = Math.floor(
+          (difference % (1000 * 60 * 60)) / (1000 * 60)
+        );
+        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+        setTimeLeft(`${days}d ${hours}h ${minutes}m ${seconds}s`);
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [subscription?.end_date]);
 
   const checkApiRegistrationStatus = async () => {
     if (!address) return;
@@ -286,7 +318,7 @@ export default function ProfilePage() {
       // First, get the user's subscription status and plan_id
       const { data: userSubscription, error: userSubError } = await supabase
         .from("user_subscriptions")
-        .select("plan_id, status")
+        .select("plan_id, status, end_date")
         .eq("user_id", session.user.id)
         .eq("status", "active")
         .single();
@@ -313,7 +345,10 @@ export default function ProfilePage() {
       }
 
       if (planData) {
-        setSubscription(planData);
+        setSubscription({
+          ...planData,
+          end_date: userSubscription.end_date,
+        });
       }
     } catch (error) {
       console.error("Error fetching subscription:", error);
@@ -769,6 +804,39 @@ export default function ProfilePage() {
                         )}
                       </div>
                     </div>
+                  </div>
+                </div>
+                <div className="mb-6 p-4 bg-gray-700 rounded-lg border border-gray-500">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Clock className="w-5 h-5 text-yellow-400" />
+                      <span className="text-gray-300">
+                        Subscription End Time
+                      </span>
+                    </div>
+                    <Tooltip.Provider delayDuration={0}>
+                      <Tooltip.Root>
+                        <Tooltip.Trigger asChild>
+                          <button className="p-1 hover:bg-gray-600 rounded-full transition-colors">
+                            <Info className="w-4 h-4 text-gray-400" />
+                          </button>
+                        </Tooltip.Trigger>
+                        <Tooltip.Portal>
+                          <Tooltip.Content
+                            className="bg-gray-800 text-white px-3 py-2 rounded-lg text-sm border border-gray-500"
+                            sideOffset={5}
+                          >
+                            Your subscription will end on{" "}
+                            {new Date(
+                              subscription.end_date
+                            ).toLocaleDateString()}
+                          </Tooltip.Content>
+                        </Tooltip.Portal>
+                      </Tooltip.Root>
+                    </Tooltip.Provider>
+                  </div>
+                  <div className="mt-2 text-2xl font-bold text-white text-center">
+                    {timeLeft}
                   </div>
                 </div>
               </div>
