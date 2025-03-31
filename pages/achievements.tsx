@@ -5,7 +5,9 @@ import Pagination from "../components/common/Pagination";
 import AchievementModal from "@/components/Achievements/AchievementModal";
 import { Achievement } from "@/types/Achievement";
 import Modal from "@/components/Layout/Modal";
+import { supabase } from "@/lib/supabase";
 
+/*
 const SAMPLE_ACHIEVEMENTS = {
   trending: [
     {
@@ -40,9 +42,10 @@ const SAMPLE_ACHIEVEMENTS = {
     },
   ],
   all: [
-    /* ... trending achievements plus more ... */
+    // ... trending achievements plus more ... 
   ],
 };
+*/
 
 const BANNER_ITEMS = [
   {
@@ -57,15 +60,49 @@ export default function AchievementsPage() {
   const [isAchievementModalOpen, setIsAchievementModalOpen] = useState(false);
   const [selectedAchievement, setSelectedAchievement] = useState<Achievement>();
 
-  const [trendingAchievements, setTrendingAchievements] = useState(
-    SAMPLE_ACHIEVEMENTS.trending
+  const [trendingAchievements, setTrendingAchievements] = useState<Achievement[]>(
+    // SAMPLE_ACHIEVEMENTS.trending
   );
-  const [allAchievements, setAllAchievements] = useState(
-    SAMPLE_ACHIEVEMENTS.trending
+  const [allAchievements, setAllAchievements] = useState<Achievement[]>(
+    // SAMPLE_ACHIEVEMENTS.trending
   );
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(3);
 
+  useEffect(() => {
+    fetchAchievements();
+  }, [])
+  
+  const fetchAchievements = async () => {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session?.user) {
+        window.location.href = "/";
+        return;
+      }
+      const { data, error } = await supabase
+        .from("tasks")
+        .select("*")
+      console.log(data);
+        
+      if (error) throw error;
+      setTrendingAchievements(data);
+      setAllAchievements(data);
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+    }
+  };
+  
+  if (!trendingAchievements || !allAchievements) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-white">Loading...</p>
+      </div>
+    );
+  }
   return (
     <div className="py-20 px-8">
       <SlidingBanner items={BANNER_ITEMS} />

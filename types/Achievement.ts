@@ -17,9 +17,7 @@ export interface Achievement {
   tier?: "free" | "standard" | "premium";
   isHighPoints?: boolean;
   isExpiringSoon?: boolean;
-  game: {
-    name: string;
-    icon: string;
-    deeplink: string;
-  };
+  gameName: string;
+  gameIcon: string;
+  gameDeeplink: string;
 }

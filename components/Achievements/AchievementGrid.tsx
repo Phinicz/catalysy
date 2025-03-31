@@ -238,12 +238,12 @@ export default function AchievementGrid({
             <div className="p-4">
               <div className="flex items-center gap-2 mb-2">
                 <img
-                  src={achievement.game.icon}
-                  alt={achievement.game.name}
+                  src={achievement.gameIcon}
+                  alt={achievement.gameName}
                   className="w-6 h-6 rounded"
                 />
                 <span className="text-sm text-text-secondary">
-                  {achievement.game.name}
+                  {achievement.gameName}
                 </span>
               </div>
               <h3 className="font-medium text-text-primary mb-1">

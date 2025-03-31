@@ -22,12 +22,10 @@ export default function AchievementModal({ isOpen, onClose, achievement }: AuthM
 
       try {
         const { error: insertError } = await supabase
-        .from("tasks")
+        .from("user_tasks")
         .insert({ 
-          // id: achievement.id,
+          task_id: achievement.id,
           user_id: session.user.id,
-          title: achievement.title,
-          description: achievement.description,
           status: "ongoing",
           created_at: new Date().toISOString(),
           progress: 0,
@@ -36,7 +34,7 @@ export default function AchievementModal({ isOpen, onClose, achievement }: AuthM
           console.error("Task creation error:", insertError);
           throw insertError;
         }
-        window.open(achievement.game.deeplink, "_blank");
+        window.open(achievement.gameDeeplink, "_blank");
       } catch (err) {
         console.error("Task creation error:", err);
         throw new Error("Failed to subscribe to task. Please try again.");
@@ -103,12 +101,12 @@ export default function AchievementModal({ isOpen, onClose, achievement }: AuthM
             <div className="p-4 w-full">
               <div className="flex items-center gap-2 mb-2">
                 <img
-                  src={achievement.game.icon}
-                  alt={achievement.game.name}
+                  src={achievement.gameIcon}
+                  alt={achievement.gameName}
                   className="w-6 h-6 rounded"
                 />
                 <span className="text-sm text-text-secondary">
-                  {achievement.game.name}
+                  {achievement.gameName}
                 </span>
               </div>
               <h3 className="font-medium text-text-primary mb-1">
