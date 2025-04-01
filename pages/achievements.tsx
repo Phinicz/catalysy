@@ -85,7 +85,6 @@ export default function AchievementsPage() {
       const { data, error } = await supabase
         .from("tasks")
         .select("*")
-      console.log(data);
         
       if (error) throw error;
       setTrendingAchievements(data);

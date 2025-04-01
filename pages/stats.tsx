@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import SlidingBanner from "../components/Banner/SlidingBanner";
 import TaskList from "../components/Tasks/TaskList";
+import { supabase } from "@/lib/supabase";
+import { Achievement } from "@/types/Achievement";
+import { UserAchievement } from "@/types/UserAchievement";
 
 const SAMPLE_TASKS = {
   ongoing: [
@@ -49,8 +52,54 @@ const BANNER_ITEMS = [
 ];
 
 export default function StatsPage() {
-  const [ongoingTasks, setOngoingTasks] = useState(SAMPLE_TASKS.ongoing);
-  const [completedTasks, setCompletedTasks] = useState(SAMPLE_TASKS.completed);
+  const [ongoingTasks, setOngoingTasks] = useState<UserAchievement[]>([]);
+  const [completedTasks, setCompletedTasks] = useState<UserAchievement[]>([]);
+
+  useEffect(() => {
+    fetchUserTasks();
+  }, [])
+  
+  const fetchUserTasks = async () => {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session?.user) {
+        window.location.href = "/";
+        return;
+      }
+      // get user-tasks from supabase and join them with tasks table
+      const { data, error } = await supabase
+          .from('user_tasks')
+          .select(`
+            user_id,
+            task_id,
+            progress,
+            status,
+            tasks (
+              title,
+              description,
+              imageUrl
+            )
+          `)
+          .eq('user_id', session.user.id);
+      if (error) throw error;
+      const userTasks = data.map((task: any) => ({
+        progress: task.progress,
+        status: task.status,
+        title: task.tasks.title,
+        imageUrl: task.tasks.imageUrl,
+        task_id: task.task_id,
+      })) as UserAchievement[];
+      console.log(userTasks);
+        
+      setOngoingTasks(userTasks.filter(task => task.status === 'ongoing'));
+      setCompletedTasks(userTasks.filter(task => task.status === 'completed'));
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+    }
+  };
 
   return (
     <div className="px-8 py-20">
