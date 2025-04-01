@@ -43,7 +43,6 @@ export default async function handler(
       .eq("user_id", userId)
       .eq("task_id", taskId)
       .single();
-    console.log(task);
     if (userTask) {
       if (userTask.status !== "ongoing") {
         return res.status(400).json({ message: "Task already completed" });
@@ -71,11 +70,13 @@ export default async function handler(
         .eq("id", userId)
         .single();
       if (errorUserData) throw error;
+
       // call to snag api service and complete external rule
-      const rules = await apiService.completeLoyaltyRule(
-        task.external_rule_id,
+      const completeRuleResponse = await apiService.completeLoyaltyRule(
+        task.rule_id,
         userData.wallet_address
       );
+
       return res.status(200).json({ message: "Task completed successfully" });
     } else {
       const { error } = await supabase.from("user_tasks").update({
