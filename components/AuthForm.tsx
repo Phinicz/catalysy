@@ -84,6 +84,28 @@ export default function AuthForm({ onClose }: AuthFormProps) {
             throw profileError;
           }
 
+          // Create subscription entry with free plan
+          const { error: subscriptionError } = await supabase
+            .from("user_subscriptions")
+            .insert({
+              id: crypto.randomUUID(), // Generate a new UUID for the subscription
+              created_at: new Date().toISOString(),
+              user_id: authData.user.id,
+              plan_id: "db9f8557-ade2-48c2-9e94-226b5715d2eb",
+              status: "active",
+              start_date: new Date().toISOString(),
+              end_date: new Date(
+                Date.now() + 30 * 24 * 60 * 60 * 1000
+              ).toISOString(), // 30 days from now
+              updated_at: new Date().toISOString(),
+              payment_id: null,
+            });
+
+          if (subscriptionError) {
+            console.error("Subscription creation error:", subscriptionError);
+            throw subscriptionError;
+          }
+
           // Show confirmation message
           setConfirmationEmail(formState.email);
           setShowConfirmation(true);
