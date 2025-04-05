@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { loadStripe } from "@stripe/stripe-js";
 import { supabase } from "@/lib/supabase";
+
 const PlanBadge = ({ children, color = "bg-gray-700" }: any) => (
   <motion.span
     className={`inline-flex items-center justify-center p-1 rounded-full ${color}`}
@@ -27,6 +28,40 @@ const SubscriptionPage = () => {
   const { data: subscriptionsData, error, isLoading } = useSubscriptions();
   const [hoveredPlan, setHoveredPlan] = useState<string | null>(null);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [currentSubscription, setCurrentSubscription] = useState<string | null>(
+    null
+  );
+
+  useEffect(() => {
+    const fetchCurrentSubscription = async () => {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data: subscription, error: subError } = await supabase
+          .from("user_subscriptions")
+          .select("plan_id")
+          .eq("user_id", user.id)
+          .eq("status", "active")
+          .single();
+
+        if (subError) {
+          console.error("Error fetching current subscription:", subError);
+          return;
+        }
+
+        if (subscription) {
+          setCurrentSubscription(subscription.plan_id);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+
+    fetchCurrentSubscription();
+  }, []);
 
   const handleSubscribe = async (plan: any) => {
     try {
@@ -188,7 +223,7 @@ const SubscriptionPage = () => {
   };
 
   return (
-    <div className="min-h-screen  py-16 px-4">
+    <div className="min-h-screen py-16 px-4">
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -206,6 +241,7 @@ const SubscriptionPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
         {subscriptionsData.map((plan, index) => {
           const planConfig = getPlanConfig(plan.name);
+          const isCurrentPlan = currentSubscription === plan.id;
 
           return (
             <motion.div
@@ -229,10 +265,24 @@ const SubscriptionPage = () => {
                 }
                 transform transition-all duration-300
                 ${planConfig.glowColor}
+                ${isCurrentPlan ? "ring-4 ring-yellow-500" : ""}
                 shadow-xl`}
             >
+              {/* Current Plan Badge */}
+              {isCurrentPlan && (
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="absolute top-4 left-4 z-10"
+                >
+                  <span className="px-4 py-2 bg-yellow-600 text-white text-xs rounded-full shadow-lg">
+                    Current Plan
+                  </span>
+                </motion.div>
+              )}
+
               {/* Popular Badge */}
-              {plan.name === "Premium" && (
+              {plan.name === "Premium" && !isCurrentPlan && (
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -349,10 +399,12 @@ const SubscriptionPage = () => {
                     shadow-lg
                     disabled:opacity-50 disabled:cursor-not-allowed`}
                   onClick={() => handleSubscribe(plan)}
-                  disabled={loadingPlan === plan.id}
+                  disabled={loadingPlan === plan.id || isCurrentPlan}
                 >
                   {loadingPlan === plan.id ? (
                     <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                  ) : isCurrentPlan ? (
+                    "Current Plan"
                   ) : plan.price === 0 ? (
                     "Get Started"
                   ) : (

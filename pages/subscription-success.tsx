@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+
 export default function SubscriptionSuccess() {
   const router = useRouter();
   const { session_id } = router.query;
@@ -54,10 +55,30 @@ export default function SubscriptionSuccess() {
         throw new Error("Failed to get user");
       }
 
-      // Update user's subscription in Supabase
-      const { error: updateError } = await supabase
+      // First, end the current active subscription if it exists
+      const { error: endSubscriptionError } = await supabase
         .from("user_subscriptions")
-        .upsert({
+        .update({
+          status: "ended",
+          end_date: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("user_id", user.id)
+        .eq("status", "active");
+
+      if (endSubscriptionError) {
+        console.error(
+          "Error ending current subscription:",
+          endSubscriptionError
+        );
+        throw new Error("Failed to end current subscription");
+      }
+
+      // Create new subscription
+      const { error: createError } = await supabase
+        .from("user_subscriptions")
+        .insert({
+          id: crypto.randomUUID(),
           user_id: user.id,
           plan_id: planData.id,
           status: "active",
@@ -66,12 +87,13 @@ export default function SubscriptionSuccess() {
             Date.now() + 30 * 24 * 60 * 60 * 1000
           ).toISOString(), // 30 days from now
           payment_id: customerId,
+          created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         });
 
-      if (updateError) {
-        console.error("Error updating subscription:", updateError);
-        throw new Error("Failed to update subscription");
+      if (createError) {
+        console.error("Error creating new subscription:", createError);
+        throw new Error("Failed to create new subscription");
       }
 
       setStatus("success");
@@ -142,11 +164,11 @@ export default function SubscriptionSuccess() {
               Something Went Wrong
             </h2>
             <p className="text-gray-400 mb-4">
-              Failed to activate your subscription.
+              There was an error activating your subscription.
             </p>
             <button
               onClick={() => router.push("/subscriptions")}
-              className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600"
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
             >
               Try Again
             </button>
