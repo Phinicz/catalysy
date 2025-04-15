@@ -424,7 +424,7 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-gray-500 text-xl">
+      <div className="min-h-screen flex items-center justify-center bg-black text-gray-500 text-xl p-4">
         Loading...
       </div>
     );
@@ -432,137 +432,151 @@ export default function ProfilePage() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-gray-500 text-xl">
+      <div className="min-h-screen flex items-center justify-center bg-black text-gray-500 text-xl p-4">
         Profile not found
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen py-20 flex justify-center items-center">
+    <div className="min-h-screen py-10 md:py-20 flex justify-center items-start md:items-center">
       <div className="max-w-3xl w-full px-4">
         {/* Tab Navigation */}
-        <div className="flex space-x-4 mb-6">
+        <div className="flex space-x-2 md:space-x-4 mb-6 overflow-x-auto pb-2">
           <button
             onClick={() => setActiveTab("profile")}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+            className={`flex items-center space-x-2 px-3 py-2 md:px-4 text-sm md:text-base rounded-lg transition-colors whitespace-nowrap ${
               activeTab === "profile"
                 ? "bg-purple-600 text-white"
                 : "bg-gray-800 text-gray-400 hover:bg-gray-700"
             }`}
           >
-            <User className="w-5 h-5" />
+            <User className="w-4 h-4 md:w-5 md:h-5" />
             <span>Profile</span>
           </button>
           <button
             onClick={() => setActiveTab("subscription")}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+            className={`flex items-center space-x-2 px-3 py-2 md:px-4 text-sm md:text-base rounded-lg transition-colors whitespace-nowrap ${
               activeTab === "subscription"
                 ? "bg-purple-600 text-white"
                 : "bg-gray-800 text-gray-400 hover:bg-gray-700"
             }`}
           >
-            <CreditCard className="w-5 h-5" />
+            <CreditCard className="w-4 h-4 md:w-5 md:h-5" />
             <span>Subscription</span>
           </button>
         </div>
 
         {/* Profile Tab Content */}
         {activeTab === "profile" && (
-          <div className="bg-gray-900 rounded-lg shadow-lg p-6 border border-gray-500 relative">
+          <div className="bg-gray-900 rounded-lg shadow-lg p-4 md:p-6 border border-gray-500 relative">
             {!isEditing ? (
               <div className="space-y-6 text-white">
-                <div className="flex items-start gap-6">
-                  <div className="flex-shrink-0 border-4 border-gray-500 rounded-full overflow-hidden">
+                <div className="flex flex-col md:flex-row items-start gap-4 md:gap-6">
+                  <div className="flex-shrink-0 border-4 border-gray-500 rounded-full overflow-hidden mx-auto md:mx-0">
                     {profile.profile_picture ? (
                       <img
                         src={profile.profile_picture}
                         alt={profile.username}
-                        className="h-32 w-32 object-cover"
+                        className="h-24 w-24 md:h-32 md:w-32 object-cover"
                       />
                     ) : (
-                      <div className="h-32 w-32 bg-gray-700 flex items-center justify-center text-3xl text-gray-500 font-bold">
+                      <div className="h-24 w-24 md:h-32 md:w-32 bg-gray-700 flex items-center justify-center text-2xl md:text-3xl text-gray-500 font-bold">
                         {profile.username[0].toUpperCase()}
                       </div>
                     )}
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h1 className="text-3xl font-bold text-white">
+                  <div className="flex-1 w-full">
+                    <div className="flex flex-col md:flex-row items-center md:items-start justify-between text-center md:text-left">
+                      <div className="mb-4 md:mb-0">
+                        <h1 className="text-2xl md:text-3xl font-bold text-white">
                           {profile.username}
                         </h1>
-                        <p className="text-sm text-gray-400">{profile.email}</p>
-                        <span className="mt-1 inline-block px-3 py-1 text-xs font-medium bg-gray-500 text-white rounded-full uppercase">
+                        <p className="text-sm text-gray-400 break-all">
+                          {profile.email}
+                        </p>
+                        <span className="mt-2 inline-block px-3 py-1 text-xs font-medium bg-gray-500 text-white rounded-full uppercase">
                           {profile.role}
                         </span>
                       </div>
                       <button
                         onClick={() => setIsEditing(true)}
-                        className="bg-gray-600 px-4 py-2 rounded-lg text-white font-bold hover:bg-gray-700 transition"
+                        className="bg-gray-600 px-4 py-2 rounded-lg text-white font-bold hover:bg-gray-700 transition text-sm md:text-base w-full md:w-auto"
                       >
                         Edit Profile
                       </button>
                     </div>
-                    <div className="mt-4">
-                      <h3 className="font-medium text-gray-500">Bio</h3>
-                      <p className="mt-1 text-gray-300">
-                        {profile.bio || "No bio yet"}
-                      </p>
-                    </div>
-                    <div className="mt-4">
-                      <h3 className="font-medium text-gray-500">Twitter</h3>
-                      <p className="mt-1 text-gray-300">
-                        {profile.twitter_username ? (
-                          <a
-                            href={`https://twitter.com/${profile.twitter_username}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-400 hover:text-blue-300"
-                          >
-                            {profile.twitter_username}
-                          </a>
-                        ) : (
-                          "No Twitter connected"
-                        )}
-                      </p>
-                    </div>
-                    <div className="mt-4">
-                      <h3 className="font-medium text-gray-500">Wallet</h3>
-                      {isConnected ? (
-                        <div className="mt-1 flex items-center space-x-2">
-                          <p className="text-gray-300 font-mono">
-                            {formatAddress(address)}
-                          </p>
-                          <button
-                            onClick={copyAddress}
-                            className="p-1 hover:bg-gray-800 rounded-full transition-colors"
-                            title="Copy address"
-                          >
-                            <Copy className="w-4 h-4 text-gray-400" />
-                          </button>
-                          {copied && (
-                            <span className="text-sm text-green-500">
-                              Copied!
-                            </span>
-                          )}
-                        </div>
-                      ) : (
-                        <p className="mt-1 text-gray-500">
-                          No wallet connected
+                    <div className="mt-4 space-y-4 text-center md:text-left">
+                      <div>
+                        <h3 className="font-medium text-gray-500 text-sm">
+                          Bio
+                        </h3>
+                        <p className="mt-1 text-gray-300 text-sm md:text-base">
+                          {profile.bio || "No bio yet"}
                         </p>
-                      )}
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-gray-500 text-sm">
+                          Twitter
+                        </h3>
+                        <p className="mt-1 text-gray-300 text-sm md:text-base">
+                          {profile.twitter_username ? (
+                            <a
+                              href={`https://twitter.com/${profile.twitter_username}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-400 hover:text-blue-300 break-all"
+                            >
+                              @{profile.twitter_username}
+                            </a>
+                          ) : (
+                            "No Twitter connected"
+                          )}
+                        </p>
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-gray-500 text-sm">
+                          Wallet
+                        </h3>
+                        {isConnected ? (
+                          <div className="mt-1 flex items-center justify-center md:justify-start space-x-2">
+                            <p className="text-gray-300 font-mono text-sm md:text-base break-all">
+                              {formatAddress(address)}
+                            </p>
+                            <button
+                              onClick={copyAddress}
+                              className="p-1 hover:bg-gray-800 rounded-full transition-colors flex-shrink-0"
+                              title="Copy address"
+                            >
+                              <Copy className="w-4 h-4 text-gray-400" />
+                            </button>
+                            {copied && (
+                              <span className="text-xs md:text-sm text-green-500">
+                                Copied!
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="mt-1 text-gray-500 text-sm md:text-base">
+                            No wallet connected
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4 border-t border-gray-500 pt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-gray-500 pt-6">
                   <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-500">
-                    <h3 className="text-gray-500 font-medium">Coins</h3>
-                    <p className="text-2xl font-bold text-white">{coins}</p>
+                    <h3 className="text-gray-500 font-medium text-sm">Coins</h3>
+                    <p className="text-xl md:text-2xl font-bold text-white">
+                      {coins}
+                    </p>
                   </div>
                   <div className="bg-gray-800 p-4 rounded-lg text-center border border-gray-500">
-                    <h3 className="text-gray-500 font-medium">OG Points</h3>
-                    <p className="text-2xl font-bold text-white">
+                    <h3 className="text-gray-500 font-medium text-sm">
+                      OG Points
+                    </h3>
+                    <p className="text-xl md:text-2xl font-bold text-white">
                       {subscription?.OG_Points || 0}
                     </p>
                   </div>
@@ -577,12 +591,17 @@ export default function ProfilePage() {
                   <label className="block text-sm font-medium text-gray-500 mb-2">
                     Profile Picture
                   </label>
-                  <ImageUpload
-                    currentImage={profile.profile_picture}
-                    onUploadComplete={(url) =>
-                      setEditForm((prev) => ({ ...prev, profile_picture: url }))
-                    }
-                  />
+                  <div className="flex justify-center md:justify-start">
+                    <ImageUpload
+                      currentImage={editForm.profile_picture}
+                      onUploadComplete={(url) =>
+                        setEditForm((prev) => ({
+                          ...prev,
+                          profile_picture: url,
+                        }))
+                      }
+                    />
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-2">
@@ -598,7 +617,7 @@ export default function ProfilePage() {
                         username: e.target.value,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-500 bg-gray-800 text-white rounded-lg"
+                    className="w-full px-3 py-2 border border-gray-500 bg-gray-800 text-white rounded-lg text-sm md:text-base"
                   />
                 </div>
                 <div>
@@ -611,14 +630,14 @@ export default function ProfilePage() {
                       setEditForm((prev) => ({ ...prev, bio: e.target.value }))
                     }
                     rows={4}
-                    className="w-full px-3 py-2 border border-gray-500 bg-gray-800 text-white rounded-lg"
+                    className="w-full px-3 py-2 border border-gray-500 bg-gray-800 text-white rounded-lg text-sm md:text-base"
                   ></textarea>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-2">
                     Twitter Username
                   </label>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col md:flex-row gap-2">
                     <input
                       type="text"
                       placeholder="Enter your Twitter username"
@@ -629,35 +648,35 @@ export default function ProfilePage() {
                           twitter_username: e.target.value.replace(/^@/, ""),
                         }))
                       }
-                      className="flex-1 px-3 py-2 border border-gray-500 bg-gray-800 text-white rounded-lg"
+                      className="flex-1 px-3 py-2 border border-gray-500 bg-gray-800 text-white rounded-lg text-sm md:text-base"
                     />
                     {editForm.twitter_username && (
                       <a
                         href={`https://twitter.com/${editForm.twitter_username}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center"
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center justify-center text-sm md:text-base"
                       >
                         View Profile
                       </a>
                     )}
                   </div>
-                  <p className="mt-1 text-sm text-gray-400">
+                  <p className="mt-1 text-xs md:text-sm text-gray-400">
                     Enter your Twitter username without the @ symbol
                   </p>
                 </div>
-                <div className="flex gap-4">
+                <div className="flex flex-col md:flex-row gap-4">
                   <button
                     type="submit"
                     disabled={isUpdating}
-                    className="flex-1 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition disabled:bg-gray-600"
+                    className="flex-1 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition disabled:bg-gray-600 text-sm md:text-base"
                   >
                     {isUpdating ? "Saving..." : "Save Changes"}
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsEditing(false)}
-                    className="flex-1 bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition"
+                    className="flex-1 bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition text-sm md:text-base"
                   >
                     Cancel
                   </button>
@@ -669,30 +688,31 @@ export default function ProfilePage() {
 
         {/* Subscription Tab Content */}
         {activeTab === "subscription" && (
-          <div className="bg-gray-900 rounded-lg shadow-lg p-6 border border-gray-500">
-            <h2 className="text-xl font-bold text-white mb-4">
+          <div className="bg-gray-900 rounded-lg shadow-lg p-4 md:p-6 border border-gray-500">
+            <h2 className="text-lg md:text-xl font-bold text-white mb-4">
               Subscription Details
             </h2>
             {subscription ? (
               <div className="space-y-6">
-                <div className="bg-gray-800 p-6 rounded-lg border border-gray-500">
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center space-x-3">
-                      <Star className="w-6 h-6 text-yellow-400" />
-                      <h3 className="text-xl font-semibold text-white">
+                <div className="bg-gray-800 p-4 md:p-6 rounded-lg border border-gray-500">
+                  <div className="flex items-center justify-between mb-4 md:mb-6">
+                    <div className="flex items-center space-x-2 md:space-x-3">
+                      <Star className="w-5 h-5 md:w-6 md:h-6 text-yellow-400" />
+                      <h3 className="text-lg md:text-xl font-semibold text-white">
                         {subscription.name}
                       </h3>
                     </div>
+                    {/* Tooltip might be less user-friendly on mobile, but kept for now */}
                     <Tooltip.Provider delayDuration={0}>
                       <Tooltip.Root>
                         <Tooltip.Trigger asChild>
                           <button className="p-2 hover:bg-gray-700 rounded-full transition-colors">
-                            <Info className="w-5 h-5 text-gray-400" />
+                            <Info className="w-4 h-4 md:w-5 md:h-5 text-gray-400" />
                           </button>
                         </Tooltip.Trigger>
                         <Tooltip.Portal>
                           <Tooltip.Content
-                            className="bg-gray-800 text-white px-3 py-2 rounded-lg text-sm border border-gray-500"
+                            className="bg-gray-800 text-white px-3 py-2 rounded-lg text-sm border border-gray-500 max-w-[200px] md:max-w-xs shadow-lg z-50"
                             sideOffset={5}
                           >
                             You are currently using the {subscription.name} plan
@@ -701,117 +721,79 @@ export default function ProfilePage() {
                       </Tooltip.Root>
                     </Tooltip.Provider>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                    {/* Simplified structure for benefits list */}
+                    <ul className="space-y-3">
+                      <li className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
                         <div className="flex items-center space-x-2">
-                          <Shield className="w-5 h-5 text-purple-400" />
-                          <span className="text-gray-300">Max Rank</span>
+                          <Shield className="w-5 h-5 text-purple-400 flex-shrink-0" />
+                          <span className="text-gray-300 text-sm">
+                            Max Rank
+                          </span>
                         </div>
-                        <Tooltip.Provider delayDuration={0}>
-                          <Tooltip.Root>
-                            <Tooltip.Trigger asChild>
-                              <button className="p-1 hover:bg-gray-600 rounded-full transition-colors">
-                                <Info className="w-4 h-4 text-gray-400" />
-                              </button>
-                            </Tooltip.Trigger>
-                            <Tooltip.Portal>
-                              <Tooltip.Content
-                                className="bg-gray-800 text-white px-3 py-2 rounded-lg text-sm border border-gray-500"
-                                sideOffset={5}
-                              >
-                                Your maximum achievable rank is{" "}
-                                {subscription.max_rank}
-                              </Tooltip.Content>
-                            </Tooltip.Portal>
-                          </Tooltip.Root>
-                        </Tooltip.Provider>
-                      </div>
-                      <div className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
+                        <span className="font-medium text-white text-sm">
+                          {subscription.max_rank}
+                        </span>
+                      </li>
+                      <li className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
                         <div className="flex items-center space-x-2">
-                          <Star className="w-5 h-5 text-yellow-400" />
-                          <span className="text-gray-300">
+                          <Star className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+                          <span className="text-gray-300 text-sm">
                             Achievement Tier
                           </span>
                         </div>
-                        <Tooltip.Provider delayDuration={0}>
-                          <Tooltip.Root>
-                            <Tooltip.Trigger asChild>
-                              <button className="p-1 hover:bg-gray-600 rounded-full transition-colors">
-                                <Info className="w-4 h-4 text-gray-400" />
-                              </button>
-                            </Tooltip.Trigger>
-                            <Tooltip.Portal>
-                              <Tooltip.Content
-                                className="bg-gray-800 text-white px-3 py-2 rounded-lg text-sm border border-gray-500"
-                                sideOffset={5}
-                              >
-                                You are capable of Tier{" "}
-                                {subscription.achievement_tier} and will earn{" "}
-                                {subscription.OG_Points} OG points on each
-                                achievement
-                              </Tooltip.Content>
-                            </Tooltip.Portal>
-                          </Tooltip.Root>
-                        </Tooltip.Provider>
-                      </div>
-                    </div>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
+                        <span className="font-medium text-white text-sm">
+                          {subscription.achievement_tier}
+                        </span>
+                      </li>
+                      <li className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
                         <div className="flex items-center space-x-2">
-                          <Zap className="w-5 h-5 text-blue-400" />
-                          <span className="text-gray-300">OG Points</span>
+                          <Zap className="w-5 h-5 text-blue-400 flex-shrink-0" />
+                          <span className="text-gray-300 text-sm">
+                            Weekly OG Points
+                          </span>
                         </div>
-                        <Tooltip.Provider delayDuration={0}>
-                          <Tooltip.Root>
-                            <Tooltip.Trigger asChild>
-                              <button className="p-1 hover:bg-gray-600 rounded-full transition-colors">
-                                <Info className="w-4 h-4 text-gray-400" />
-                              </button>
-                            </Tooltip.Trigger>
-                            <Tooltip.Portal>
-                              <Tooltip.Content
-                                className="bg-gray-800 text-white px-3 py-2 rounded-lg text-sm border border-gray-500"
-                                sideOffset={5}
-                              >
-                                You will receive {subscription.OG_Points} OG
-                                points every week
-                              </Tooltip.Content>
-                            </Tooltip.Portal>
-                          </Tooltip.Root>
-                        </Tooltip.Provider>
-                      </div>
-                      <div className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
+                        <span className="font-medium text-white text-sm">
+                          {subscription.OG_Points}
+                        </span>
+                      </li>
+                    </ul>
+                    <ul className="space-y-3">
+                      <li className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
                         <div className="flex items-center space-x-2">
-                          <Rocket className="w-5 h-5 text-purple-400" />
-                          <span className="text-gray-300">Early Access</span>
+                          <Rocket className="w-5 h-5 text-purple-400 flex-shrink-0" />
+                          <span className="text-gray-300 text-sm">
+                            Early Access
+                          </span>
                         </div>
                         {subscription.early_access ? (
-                          <Check className="w-5 h-5 text-green-400" />
+                          <Check className="w-5 h-5 text-green-400 flex-shrink-0" />
                         ) : (
-                          <span className="text-gray-500">Not Available</span>
+                          <span className="text-gray-500 text-sm">N/A</span>
                         )}
-                      </div>
-                      <div className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
+                      </li>
+                      <li className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
                         <div className="flex items-center space-x-2">
-                          <Check className="w-5 h-5 text-green-400" />
-                          <span className="text-gray-300">Free Shipping</span>
+                          <Check className="w-5 h-5 text-green-400 flex-shrink-0" />
+                          <span className="text-gray-300 text-sm">
+                            Free Shipping
+                          </span>
                         </div>
                         {subscription.free_shipping ? (
-                          <Check className="w-5 h-5 text-green-400" />
+                          <Check className="w-5 h-5 text-green-400 flex-shrink-0" />
                         ) : (
-                          <span className="text-gray-500">Not Available</span>
+                          <span className="text-gray-500 text-sm">N/A</span>
                         )}
-                      </div>
-                    </div>
+                      </li>
+                    </ul>
                   </div>
                 </div>
                 <div className="mb-6 p-4 bg-gray-700 rounded-lg border border-gray-500">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <Clock className="w-5 h-5 text-yellow-400" />
-                      <span className="text-gray-300">
-                        Subscription End Time
+                      <span className="text-gray-300 text-sm">
+                        Subscription Ends In
                       </span>
                     </div>
                     <Tooltip.Provider delayDuration={0}>
@@ -823,29 +805,32 @@ export default function ProfilePage() {
                         </Tooltip.Trigger>
                         <Tooltip.Portal>
                           <Tooltip.Content
-                            className="bg-gray-800 text-white px-3 py-2 rounded-lg text-sm border border-gray-500"
+                            className="bg-gray-800 text-white px-3 py-2 rounded-lg text-sm border border-gray-500 max-w-[200px] md:max-w-xs shadow-lg z-50"
                             sideOffset={5}
                           >
                             Your subscription will end on{" "}
-                            {new Date(
-                              subscription.end_date
-                            ).toLocaleDateString()}
+                            {new Date(subscription.end_date).toLocaleDateString(
+                              "en-US",
+                              { year: "numeric", month: "long", day: "numeric" }
+                            )}
                           </Tooltip.Content>
                         </Tooltip.Portal>
                       </Tooltip.Root>
                     </Tooltip.Provider>
                   </div>
-                  <div className="mt-2 text-2xl font-bold text-white text-center">
+                  <div className="mt-2 text-lg md:text-2xl font-bold text-white text-center">
                     {timeLeft}
                   </div>
                 </div>
               </div>
             ) : (
               <div className="bg-gray-800 p-6 rounded-lg border border-gray-500 text-center">
-                <p className="text-gray-300 mb-4">No active subscription</p>
+                <p className="text-gray-300 mb-4 text-sm md:text-base">
+                  No active subscription
+                </p>
                 <a
                   href="/subscriptions"
-                  className="inline-block px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+                  className="inline-block px-4 py-2 md:px-6 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm md:text-base"
                 >
                   View Subscription Plans
                 </a>
@@ -857,83 +842,91 @@ export default function ProfilePage() {
         {/* API Access Section - Only show on profile tab */}
         {activeTab === "profile" && (
           <div className="mt-6 pt-6 border-t border-gray-500">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-500">API Access</h2>
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4">
+              <h2 className="text-lg md:text-xl font-bold text-gray-500 mb-2 md:mb-0">
+                API Access
+              </h2>
               {!apiStatus.isRegistegray &&
                 !isApiRegistering &&
                 !isCheckingApi && (
                   <button
                     onClick={() => setIsApiRegistering(true)}
-                    className="bg-gray-600 px-4 py-2 rounded-lg text-white font-bold hover:bg-gray-700 transition"
+                    className="bg-gray-600 px-4 py-2 rounded-lg text-white font-bold hover:bg-gray-700 transition text-sm md:text-base w-full md:w-auto"
                   >
                     Register for API
                   </button>
                 )}
             </div>
 
-            {isCheckingApi ? (
-              <div className="bg-gray-800 p-4 rounded-lg border border-gray-500">
-                <p className="text-white text-center">
-                  Checking registration status...
-                </p>
-              </div>
-            ) : apiStatus.isRegistegray ? (
-              <div className="bg-gray-800 p-4 rounded-lg border border-gray-500">
-                <p className="text-white">
-                  ✓ Registegray for API access as{" "}
-                  <span className="text-white font-semibold">
-                    {apiStatus.displayName}
-                  </span>
-                </p>
-              </div>
-            ) : isApiRegistering ? (
-              <form onSubmit={handleApiRegistration} className="space-y-4">
-                <p className="text-gray-400">
-                  Register using your profile information:
-                </p>
+            {
+              isCheckingApi ? (
                 <div className="bg-gray-800 p-4 rounded-lg border border-gray-500">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm text-gray-500 mb-1">
-                        Display Name
-                      </label>
-                      <p className="text-white">{profile?.username}</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-500 mb-1">
-                        Email
-                      </label>
-                      <p className="text-white">{profile?.email}</p>
+                  <p className="text-white text-center text-sm md:text-base">
+                    Checking registration status...
+                  </p>
+                </div>
+              ) : apiStatus.isRegistegray ? (
+                <div className="bg-gray-800 p-4 rounded-lg border border-gray-500">
+                  <p className="text-white text-sm md:text-base">
+                    ✓ Registegray for API access as{" "}
+                    <span className="text-white font-semibold">
+                      {apiStatus.displayName}
+                    </span>
+                  </p>
+                </div>
+              ) : isApiRegistering ? (
+                <form onSubmit={handleApiRegistration} className="space-y-4">
+                  <p className="text-gray-400 text-sm md:text-base">
+                    Register using your profile information:
+                  </p>
+                  <div className="bg-gray-800 p-4 rounded-lg border border-gray-500">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs md:text-sm text-gray-500 mb-1">
+                          Display Name
+                        </label>
+                        <p className="text-white text-sm md:text-base break-words">
+                          {profile?.username}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-xs md:text-sm text-gray-500 mb-1">
+                          Email
+                        </label>
+                        <p className="text-white text-sm md:text-base break-words">
+                          {profile?.email}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="flex gap-4">
+                  <div className="flex flex-col md:flex-row gap-4">
+                    <button
+                      type="submit"
+                      disabled={!isConnected || isLoading}
+                      className="flex-1 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition disabled:bg-gray-600 text-sm md:text-base"
+                    >
+                      {isLoading ? "Registering..." : "Confirm Registration"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsApiRegistering(false)}
+                      className="flex-1 bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition text-sm md:text-base"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              ) : !isConnected ? (
+                <div className="text-center">
                   <button
-                    type="submit"
-                    disabled={!isConnected || isLoading}
-                    className="flex-1 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition disabled:bg-gray-600"
+                    onClick={openConnectModal}
+                    className="bg-gray-600 px-4 py-2 rounded-lg text-white font-bold hover:bg-gray-700 transition text-sm md:text-base"
                   >
-                    {isLoading ? "Registering..." : "Confirm Registration"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsApiRegistering(false)}
-                    className="flex-1 bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition"
-                  >
-                    Cancel
+                    Connect Wallet to Register
                   </button>
                 </div>
-              </form>
-            ) : !isConnected ? (
-              <div className="text-center">
-                <button
-                  onClick={openConnectModal}
-                  className="bg-gray-600 px-4 py-2 rounded-lg text-white font-bold hover:bg-gray-700 transition"
-                >
-                  Connect Wallet to Register
-                </button>
-              </div>
-            ) : null}
+              ) : null // Only show connect button if not connected and not already registered/registering
+            }
           </div>
         )}
       </div>

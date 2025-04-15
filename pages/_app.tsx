@@ -11,7 +11,7 @@ import { createStorage } from "wagmi";
 import { ApiProvider } from "../context/ApiContext";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BellRing, User } from "lucide-react";
+import { BellRing, User, Menu, X } from "lucide-react";
 import { CustomWalletConnect } from "../components/CustomWalletConnect";
 import { supabase } from "../lib/supabase";
 import Image from "next/image";
@@ -107,6 +107,25 @@ function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const queryClient = new QueryClient();
   const contentRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Add router event listeners for loading state
+  useEffect(() => {
+    const handleStart = () => setIsLoading(true);
+    const handleComplete = () => {
+      setTimeout(() => setIsLoading(false), 800); // Give animation time to complete
+    };
+
+    router.events.on("routeChangeStart", handleStart);
+    router.events.on("routeChangeComplete", handleComplete);
+    router.events.on("routeChangeError", handleComplete);
+
+    return () => {
+      router.events.off("routeChangeStart", handleStart);
+      router.events.off("routeChangeComplete", handleComplete);
+      router.events.off("routeChangeError", handleComplete);
+    };
+  }, [router]);
 
   // Determine which layout to use based on current route
   const shouldUseStandardLayout = bypassRoutes.some((route) =>
@@ -138,6 +157,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     // Set active blade based on current route when component mounts or route changes
@@ -236,6 +256,86 @@ function MyApp({ Component, pageProps }: AppProps) {
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
         />
       </Head>
+      {/* Loading Animation */}
+      <AnimatePresence mode="wait">
+        {isLoading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ x: "-100vw", rotate: 0 }}
+              animate={{
+                x: "100vw",
+                rotate: 360,
+                transition: {
+                  x: { duration: 1.5, ease: "easeInOut" },
+                  rotate: { duration: 1.5, ease: "linear" },
+                },
+              }}
+              exit={{ x: "100vw", opacity: 0 }}
+              className="relative"
+            >
+              {/* Rocket */}
+              <motion.div
+                className="w-16 h-16 relative"
+                animate={{
+                  y: [-10, 10, -10],
+                }}
+                transition={{
+                  y: {
+                    duration: 0.5,
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                    ease: "easeInOut",
+                  },
+                }}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="w-full h-full text-green-500 transform -rotate-45"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c1.5-1.5 1.5-3.5 0-5s-3.5-1.5-5 0z" />
+                  <path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+                  <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
+                  <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
+                </svg>
+
+                {/* Rocket trail */}
+                <motion.div
+                  className="absolute -right-8 top-1/2 flex space-x-1"
+                  animate={{
+                    opacity: [0, 1, 0],
+                  }}
+                  transition={{
+                    duration: 0.3,
+                    repeat: Infinity,
+                  }}
+                >
+                  {[...Array(3)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className="w-3 h-3 rounded-full bg-gradient-to-r from-green-500 to-green-300"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: [0, 1, 0] }}
+                      transition={{
+                        duration: 0.5,
+                        delay: i * 0.1,
+                        repeat: Infinity,
+                      }}
+                    />
+                  ))}
+                </motion.div>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
           <RainbowKitProvider>
@@ -243,9 +343,27 @@ function MyApp({ Component, pageProps }: AppProps) {
               <div className="flex flex-col h-screen w-full">
                 {!shouldUseStandardLayout ? (
                   <div className="relative flex h-full w-full overflow-hidden bg-gradient-to-b from-gray-900 to-black">
+                    {/* Mobile menu toggle button */}
+                    <button
+                      onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                      className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors"
+                    >
+                      {isMobileMenuOpen ? (
+                        <X className="w-6 h-6" />
+                      ) : (
+                        <Menu className="w-6 h-6" />
+                      )}
+                    </button>
+
                     {/* Left side navigation with dynamic 3D ribbon effect */}
-                    <div className="absolute left-0 top-0 h-full flex items-center justify-start">
-                      <div className="h-full pl-2 bg-gradient-to-r from-gray-900 to-transparent flex flex-col justify-between">
+                    <div
+                      className={`fixed md:absolute left-0 top-0 h-full flex items-center justify-start transition-transform duration-300 ease-in-out z-40 ${
+                        isMobileMenuOpen
+                          ? "translate-x-0"
+                          : "-translate-x-full md:translate-x-0"
+                      }`}
+                    >
+                      <div className="h-full w-64 pl-2 bg-gradient-to-r from-gray-900 via-gray-900 to-gray-900/95 backdrop-blur-lg flex flex-col justify-between md:bg-gradient-to-r md:from-gray-900 md:to-transparent">
                         {/* Logo at the top */}
                         <div className="flex justify-center py-4">
                           <Link href="/" className="flex items-center group">
@@ -267,7 +385,10 @@ function MyApp({ Component, pageProps }: AppProps) {
                             return (
                               <motion.button
                                 key={index}
-                                onClick={() => navigateToBlade(index)}
+                                onClick={() => {
+                                  navigateToBlade(index);
+                                  setIsMobileMenuOpen(false);
+                                }}
                                 className={`flex items-center justify-start py-2 pr-6 pl-4 transition-all rounded-r-lg transform relative ${
                                   isActive
                                     ? "bg-gradient-to-r from-green-600 to-green-700 text-white font-bold shadow-lg shadow-green-500/20 -translate-x-1"
@@ -331,9 +452,10 @@ function MyApp({ Component, pageProps }: AppProps) {
                         <div className="flex flex-col items-start space-y-2 mt-auto mb-4">
                           {/* Notifications button */}
                           <motion.button
-                            onClick={() =>
-                              setIsNotificationsOpen(!isNotificationsOpen)
-                            }
+                            onClick={() => {
+                              setIsNotificationsOpen(!isNotificationsOpen);
+                              setIsMobileMenuOpen(false);
+                            }}
                             className="flex items-center justify-start py-2 pr-6 pl-4 rounded-r-lg text-gray-300 hover:bg-gray-800/40 hover:text-white w-full"
                             whileHover={{
                               x: 8,
@@ -359,11 +481,14 @@ function MyApp({ Component, pageProps }: AppProps) {
                           {/* Profile button */}
                           <div className="relative w-full">
                             <motion.button
-                              onClick={() =>
-                                profile
-                                  ? setIsProfileMenuOpen(!isProfileMenuOpen)
-                                  : setIsAuthModalOpen(true)
-                              }
+                              onClick={() => {
+                                if (profile) {
+                                  setIsProfileMenuOpen(!isProfileMenuOpen);
+                                } else {
+                                  setIsAuthModalOpen(true);
+                                }
+                                setIsMobileMenuOpen(false);
+                              }}
                               className="flex items-center justify-start py-2 pr-6 pl-4 rounded-r-lg text-gray-300 hover:bg-gray-800/40 hover:text-white w-full"
                               whileHover={{
                                 x: 8,
@@ -411,14 +536,20 @@ function MyApp({ Component, pageProps }: AppProps) {
                                 <Link
                                   href="/profile"
                                   className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 transition-colors"
-                                  onClick={() => setIsProfileMenuOpen(false)}
+                                  onClick={() => {
+                                    setIsProfileMenuOpen(false);
+                                    setIsMobileMenuOpen(false);
+                                  }}
                                 >
                                   Profile Settings
                                 </Link>
                                 <Link
                                   href="/teammember"
                                   className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 transition-colors"
-                                  onClick={() => setIsProfileMenuOpen(false)}
+                                  onClick={() => {
+                                    setIsProfileMenuOpen(false);
+                                    setIsMobileMenuOpen(false);
+                                  }}
                                 >
                                   Team Member
                                 </Link>
@@ -426,6 +557,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                                   onClick={async () => {
                                     await supabase.auth.signOut();
                                     setIsProfileMenuOpen(false);
+                                    setIsMobileMenuOpen(false);
                                     router.push("/");
                                   }}
                                   className="block w-full text-left px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 transition-colors"
@@ -442,7 +574,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                     {/* Main Content Area with 3D transition effect */}
                     <div
                       ref={contentRef}
-                      className="w-full h-full perspective-1000"
+                      className="w-full h-full perspective-1000 relative z-30"
                     >
                       <AnimatePresence mode="wait">
                         <motion.div
@@ -467,7 +599,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                             stiffness: 300,
                             damping: 25,
                           }}
-                          className="w-full h-full pl-40 pr-15 flex items-center justify-center"
+                          className="w-full h-full md:pl-40 pl-4 pr-4 flex items-center justify-center"
                         >
                           <div className="w-full h-full mx-auto max-w-[1300px] p-4 md:p-6">
                             <div className="w-full h-full rounded-xl overflow-hidden border border-gray-700 shadow-2xl relative">
