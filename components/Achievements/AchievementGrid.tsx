@@ -103,7 +103,7 @@ export default function AchievementGrid({
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
       {enhancedAchievements.length === 0 ? (
         <div className="col-span-full text-center py-8 bg-surface rounded-lg">
           <p className="text-text-secondary">No achievements available</p>
@@ -112,10 +112,10 @@ export default function AchievementGrid({
         enhancedAchievements.map((achievement) => (
           <div
             key={achievement.id}
-            className="bg-surface rounded-lg overflow-hidden relative"
+            className="bg-surface rounded-lg overflow-hidden relative hover:shadow-lg transition-shadow duration-300"
           >
             {/* Top Left - Genre Badge */}
-            <div className="absolute top-2 left-2">
+            <div className="absolute top-2 left-2 z-10">
               <span
                 className={`px-2 py-1 rounded-full text-xs font-medium ${
                   GenreColors[achievement.genre || "Adventure"]
@@ -126,12 +126,12 @@ export default function AchievementGrid({
             </div>
 
             {/* Top Right - Points Badge */}
-            <div className="absolute top-2 right-2 px-2 py-1 rounded bg-black/50 text-white text-sm">
+            <div className="absolute top-2 right-2 z-10 px-2 py-1 rounded bg-black/50 text-white text-xs sm:text-sm">
               +{achievement.points} Points
             </div>
 
             {/* Bottom Right Corner - Status Indicators */}
-            <div className="absolute bottom-2 right-2 flex gap-2">
+            <div className="absolute bottom-2 right-2 flex gap-1 sm:gap-2 z-10">
               {achievement.isExpiringSoon && (
                 <div
                   className="relative"
@@ -142,7 +142,7 @@ export default function AchievementGrid({
                 >
                   <div className="p-1 rounded-full bg-orange-100">
                     <svg
-                      className="w-4 h-4 text-orange-600"
+                      className="w-3 h-3 sm:w-4 sm:h-4 text-orange-600"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -173,7 +173,7 @@ export default function AchievementGrid({
                 >
                   <div className="p-1 rounded-full bg-yellow-100">
                     <svg
-                      className="w-4 h-4 text-yellow-600"
+                      className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-600"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -207,7 +207,7 @@ export default function AchievementGrid({
                 >
                   {achievement.tier === "premium" ? (
                     <svg
-                      className="w-4 h-4"
+                      className="w-3 h-3 sm:w-4 sm:h-4"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -221,7 +221,7 @@ export default function AchievementGrid({
                     </svg>
                   ) : achievement.tier === "standard" ? (
                     <svg
-                      className="w-4 h-4"
+                      className="w-3 h-3 sm:w-4 sm:h-4"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -253,21 +253,21 @@ export default function AchievementGrid({
               />
             </div>
 
-            <div className="p-4">
+            <div className="p-3 sm:p-4">
               <div className="flex items-center gap-2 mb-2">
                 <img
                   src={achievement.game.icon}
                   alt={achievement.game.name}
-                  className="w-6 h-6 rounded"
+                  className="w-5 h-5 sm:w-6 sm:h-6 rounded"
                 />
-                <span className="text-sm text-text-secondary">
+                <span className="text-xs sm:text-sm text-text-secondary">
                   {achievement.game.name}
                 </span>
               </div>
-              <h3 className="font-medium text-text-primary mb-1">
+              <h3 className="font-medium text-text-primary text-sm sm:text-base mb-1">
                 {achievement.title}
               </h3>
-              <p className="text-sm text-text-secondary mb-3">
+              <p className="text-xs sm:text-sm text-text-secondary mb-2 sm:mb-3 line-clamp-2">
                 {achievement.description}
               </p>
               <div className="flex items-center justify-between text-xs text-text-tertiary">
@@ -275,7 +275,7 @@ export default function AchievementGrid({
                 <span>End: {achievement.endDate}</span>
               </div>
               <div
-                className={`mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                className={`mt-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                   achievement.status === "active"
                     ? "bg-green-100 text-green-800"
                     : "bg-gray-100 text-gray-800"

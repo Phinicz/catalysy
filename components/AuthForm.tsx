@@ -54,7 +54,7 @@ export default function AuthForm({ onClose }: AuthFormProps) {
                 username: formState.username,
                 role: formState.role,
               },
-              emailRedirectTo: `${window.location.origin}/auth/callback`,
+              emailRedirectTo: `${process.env.NEXT_PUBLIC_REDIRECT_URL}/auth/callback`,
             },
           });
 
@@ -142,7 +142,7 @@ export default function AuthForm({ onClose }: AuthFormProps) {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${process.env.NEXT_PUBLIC_REDIRECT_URL}/auth/callback`,
         },
       });
 
