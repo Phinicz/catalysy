@@ -1,8 +1,14 @@
 import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import SlidingBanner from "../components/Banner/SlidingBanner";
 import AchievementGrid from "../components/Achievements/AchievementGrid";
 import Pagination from "../components/common/Pagination";
+import AchievementModal from "@/components/Achievements/AchievementModal";
+import { Achievement } from "@/types/Achievement";
+import Modal from "@/components/Layout/Modal";
+import { supabase } from "@/lib/supabase";
 
+/*
 const SAMPLE_ACHIEVEMENTS = {
   trending: [
     {
@@ -17,6 +23,7 @@ const SAMPLE_ACHIEVEMENTS = {
       game: {
         name: "Nyan Heroes",
         icon: "/placeholders/achivements/4.jpg",
+        deeplink: "https://store.steampowered.com/app/588650/Dead_Cells",
       },
     },
     {
@@ -31,13 +38,15 @@ const SAMPLE_ACHIEVEMENTS = {
       game: {
         name: "Uldor Test",
         icon: "/placeholders/achivements/4.jpg",
+        deeplink: "https://store.steampowered.com/app/588650/Dead_Cells",
       },
     },
   ],
   all: [
-    /* ... trending achievements plus more ... */
+    // ... trending achievements plus more ... 
   ],
 };
+*/
 
 const BANNER_ITEMS = [
   {
@@ -49,50 +58,124 @@ const BANNER_ITEMS = [
 ];
 
 export default function AchievementsPage() {
-  const [trendingAchievements, setTrendingAchievements] = useState(
-    SAMPLE_ACHIEVEMENTS.trending
-  );
-  const [allAchievements, setAllAchievements] = useState(
-    SAMPLE_ACHIEVEMENTS.trending
-  );
+  const router = useRouter();
+  const [isAchievementModalOpen, setIsAchievementModalOpen] = useState(false);
+  const [selectedAchievement, setSelectedAchievement] = useState<Achievement>();
+
+  const [trendingAchievements, setTrendingAchievements] =
+    useState<Achievement[]>();
+  // SAMPLE_ACHIEVEMENTS.trending
+  const [allAchievements, setAllAchievements] = useState<Achievement[]>();
+  // SAMPLE_ACHIEVEMENTS.trending
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(3);
 
+  useEffect(() => {
+    fetchAchievements();
+  }, []);
+
+  const fetchAchievements = async () => {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session?.user) {
+        window.location.href = "/";
+        return;
+      }
+      const { data, error } = await supabase.from("tasks").select("*");
+
+      if (error) throw error;
+      setTrendingAchievements(data);
+      setAllAchievements(data);
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+    }
+  };
+
+  if (!trendingAchievements || !allAchievements) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-white">Loading...</p>
+      </div>
+    );
+  }
   return (
-    <div className="py-12 sm:py-20 px-4 sm:px-8">
+    <div className="py-20 px-8">
       <SlidingBanner items={BANNER_ITEMS} />
 
-      <div className="mt-6 sm:mt-8">
-        <section className="mb-8 sm:mb-12">
-          <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">
-            Trending Achievements
-          </h2>
-          <AchievementGrid achievements={trendingAchievements} />
+      <div className="mt-8">
+        <section className="mb-12">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-white">
+              Trending Achievements
+            </h2>
+            <button
+              onClick={() => router.push("/admin/create-achievement")}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              Create Achievement
+            </button>
+          </div>
+          <AchievementGrid
+            achievements={trendingAchievements}
+            onSelectAchievement={(achievement) => {
+              setSelectedAchievement(achievement);
+              setIsAchievementModalOpen(true);
+            }}
+          />
         </section>
 
         <section>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
-            <h2 className="text-xl sm:text-2xl font-bold text-white">
-              All Achievements
-            </h2>
-            <div className="w-full sm:w-auto">
-              <input
-                type="search"
-                placeholder="Search Achievements"
-                className="w-full sm:w-64 px-4 py-2 border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-gray-500 rounded-lg bg-surface text-black"
-              />
-            </div>
-          </div>
-          <AchievementGrid achievements={allAchievements} />
-          <div className="mt-6 sm:mt-8">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-white">All Achievements</h2>
+            <input
+              type="search"
+              placeholder="Search Achievements"
+              className="px-4 py-2 border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-gray-500 rounded-lg bg-surface text-black"
             />
           </div>
+          <AchievementGrid
+            achievements={allAchievements}
+            onSelectAchievement={(achievement) => {
+              setSelectedAchievement(achievement);
+              setIsAchievementModalOpen(true);
+            }}
+          />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         </section>
       </div>
+
+      <Modal
+        show={isAchievementModalOpen}
+        closeModal={() => setIsAchievementModalOpen(false)}
+      >
+        {selectedAchievement ? (
+          <AchievementModal
+            isOpen={isAchievementModalOpen}
+            onClose={() => setIsAchievementModalOpen(false)}
+            achievement={selectedAchievement}
+          />
+        ) : null}
+      </Modal>
     </div>
   );
 }

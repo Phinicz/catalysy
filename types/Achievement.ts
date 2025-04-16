@@ -11,11 +11,13 @@ export interface Achievement {
     current: number;
     total: number;
   };
-  genre: string;
-  difficulty: "Easy" | "Medium" | "Hard";
-  tier: "free" | "standard" | "premium";
-  game: {
-    name: string;
-    icon: string;
-  };
+  // Make new fields optional with defaults
+  genre?: "Action" | "RPG" | "Strategy" | "Sports" | "Adventure";
+  difficulty?: "Easy" | "Medium" | "Hard";
+  tier?: "free" | "standard" | "premium";
+  isHighPoints?: boolean;
+  isExpiringSoon?: boolean;
+  gameName: string;
+  gameIcon: string;
+  gameDeeplink: string;
 }

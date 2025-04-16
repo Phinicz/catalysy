@@ -1,3 +1,5 @@
+import { UserAchievement } from "@/types/UserAchievement";
+
 interface Task {
   id: string;
   title: string;
@@ -8,7 +10,7 @@ interface Task {
 }
 
 interface TaskListProps {
-  tasks: Task[];
+  tasks: UserAchievement[];
   type: "ongoing" | "completed";
 }
 
@@ -26,7 +28,7 @@ export default function TaskList({ tasks, type }: TaskListProps) {
       ) : (
         tasks.map((task) => (
           <div
-            key={task.id}
+            key={task.task_id}
             className="bg-surface p-4 rounded-lg flex items-center gap-4"
           >
             <div className="w-16 h-16 rounded-lg overflow-hidden bg-background">
