@@ -14,10 +14,19 @@ interface Subscription {
   free_shipping: boolean;
   updated_at: string;
   OG_Points: number;
+  stripe_price_id: string;
+}
+
+interface UserSubscription {
+  plan_id: string;
+  status: string;
+  end_date: string;
 }
 
 export function useSubscriptions() {
   const [data, setData] = useState<Subscription[] | null>(null);
+  const [currentSubscription, setCurrentSubscription] =
+    useState<Subscription | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -25,7 +34,16 @@ export function useSubscriptions() {
     async function fetchSubscriptions() {
       try {
         console.log("Fetching subscription plans...");
-        const { data, error } = await supabase
+
+        // Get current user
+        const {
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser();
+        if (userError) throw userError;
+
+        // Fetch all subscription plans
+        const { data: plans, error: plansError } = await supabase
           .from("subscription_plans")
           .select(
             `
@@ -46,16 +64,29 @@ export function useSubscriptions() {
           )
           .order("price", { ascending: true });
 
-        if (error) {
-          console.error("Supabase error:", error);
-          throw error;
-        }
+        if (plansError) throw plansError;
 
-        console.log("Fetched subscription plans:", data);
-        if (data) {
-          setData(data);
-        } else {
-          console.log("No data returned from query");
+        // Set all available plans
+        setData(plans);
+
+        // If user is logged in, fetch their current subscription
+        if (user) {
+          const { data: userSub, error: userSubError } = await supabase
+            .from("user_subscriptions")
+            .select("plan_id, status, end_date")
+            .eq("user_id", user.id)
+            .eq("status", "active")
+            .single();
+
+          if (!userSubError && userSub) {
+            // Find the subscription plan details
+            const currentPlan = plans.find(
+              (plan) => plan.id === userSub.plan_id
+            );
+            if (currentPlan) {
+              setCurrentSubscription(currentPlan);
+            }
+          }
         }
       } catch (err) {
         console.error("Detailed error:", err);
@@ -70,5 +101,5 @@ export function useSubscriptions() {
     fetchSubscriptions();
   }, []);
 
-  return { data, error, isLoading };
+  return { data, currentSubscription, error, isLoading };
 }

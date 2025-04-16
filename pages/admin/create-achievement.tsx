@@ -1,17 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/router";
 import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
-
-// This should be stored in environment variables in a real application
-const ADMIN_PASSWORD = "admin123";
+import { useAdmin } from "@/hooks/useAdmin";
 
 export default function CreateAchievementPage() {
   const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const { isAdmin, isLoading } = useAdmin();
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitLoading, setIsSubmitLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -26,30 +23,19 @@ export default function CreateAchievementPage() {
     rule_id: "",
   });
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      setError("");
-    } else {
-      setError("Invalid password");
-    }
-  };
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        name === "points" || name === "steps" ? parseInt(value) || 0 : value,
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsSubmitLoading(true);
 
     try {
       const { data, error } = await supabase
@@ -68,60 +54,25 @@ export default function CreateAchievementPage() {
       console.error("Error creating achievement:", error);
       setError("Failed to create achievement");
     } finally {
-      setIsLoading(false);
+      setIsSubmitLoading(false);
     }
   };
 
-  if (!isAuthenticated) {
+  // Show loading state
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900">
-        <div className="max-w-md w-full">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="backdrop-blur-lg bg-white/10 rounded-2xl p-8 shadow-2xl border border-white/20"
-          >
-            <div className="text-center">
-              <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
-                Admin Access
-              </h2>
-              <p className="mt-2 text-gray-400">Enter password to continue</p>
-            </div>
-            <form className="mt-8 space-y-6" onSubmit={handlePasswordSubmit}>
-              <div className="relative group">
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  className="block w-full px-4 py-3 rounded-xl bg-gray-800/50 border-2 border-white/10 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 group-hover:border-white/20"
-                  placeholder="Admin password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              {error && (
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="text-red-400 text-sm text-center"
-                >
-                  {error}
-                </motion.p>
-              )}
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                type="submit"
-                className="w-full py-3 px-4 rounded-xl font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform transition-all duration-200"
-              >
-                Access Admin Panel
-              </motion.button>
-            </form>
-          </motion.div>
-        </div>
+        <div className="text-white text-xl">Loading...</div>
       </div>
     );
+  }
+
+  // Redirect non-admin users
+  if (!isAdmin) {
+    if (typeof window !== "undefined") {
+      router.push("/achievements");
+    }
+    return null;
   }
 
   return (
@@ -365,10 +316,10 @@ export default function CreateAchievementPage() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isSubmitLoading}
                   className="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl hover:from-blue-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                 >
-                  {isLoading ? "Creating..." : "Create Achievement"}
+                  {isSubmitLoading ? "Creating..." : "Create Achievement"}
                 </motion.button>
               </div>
             </form>

@@ -24,7 +24,12 @@ const PlanBadge = ({ children, color = "bg-gray-700" }: any) => (
 );
 
 const SubscriptionPage = () => {
-  const { data: subscriptionsData, error, isLoading } = useSubscriptions();
+  const {
+    data: subscriptionsData,
+    currentSubscription,
+    error,
+    isLoading,
+  } = useSubscriptions();
   const [hoveredPlan, setHoveredPlan] = useState<string | null>(null);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
@@ -188,7 +193,7 @@ const SubscriptionPage = () => {
   };
 
   return (
-    <div className="min-h-screen  py-16 px-4">
+    <div className="min-h-screen py-16 px-4">
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -197,15 +202,29 @@ const SubscriptionPage = () => {
         <h1 className="text-5xl font-bold text-white mb-4 tracking-tight">
           Unlock Your Gaming Potential
         </h1>
-        <p className="text-gray-400 text-xl max-w-2xl mx-auto">
-          Choose the perfect plan to elevate your gaming experience and access
-          exclusive rewards
-        </p>
+        {currentSubscription ? (
+          <div className="text-gray-400 text-xl max-w-2xl mx-auto">
+            <p className="mb-2">
+              You are currently on the{" "}
+              <span className="text-blue-400 font-semibold">
+                {currentSubscription.name}
+              </span>{" "}
+              plan
+            </p>
+            <p>Upgrade to access more exclusive rewards and features</p>
+          </div>
+        ) : (
+          <p className="text-gray-400 text-xl max-w-2xl mx-auto">
+            Choose the perfect plan to elevate your gaming experience and access
+            exclusive rewards
+          </p>
+        )}
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-        {subscriptionsData.map((plan, index) => {
+        {subscriptionsData?.map((plan, index) => {
           const planConfig = getPlanConfig(plan.name);
+          const isCurrentPlan = currentSubscription?.id === plan.id;
 
           return (
             <motion.div
@@ -221,7 +240,9 @@ const SubscriptionPage = () => {
               className={`group relative rounded-2xl overflow-hidden 
                 bg-gradient-to-br ${planConfig.gradient} 
                 border-2 ${
-                  plan.name === "Premium"
+                  isCurrentPlan
+                    ? "border-green-500"
+                    : plan.name === "Premium"
                     ? "border-purple-800"
                     : plan.name === "Standard"
                     ? "border-blue-800"
@@ -229,8 +250,28 @@ const SubscriptionPage = () => {
                 }
                 transform transition-all duration-300
                 ${planConfig.glowColor}
-                shadow-xl`}
+                shadow-xl
+                ${
+                  isCurrentPlan
+                    ? "ring-2 ring-green-500 ring-offset-2 ring-offset-gray-900"
+                    : ""
+                }
+              `}
             >
+              {/* Current Plan Badge */}
+              {isCurrentPlan && (
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="absolute top-4 left-4 z-10"
+                >
+                  <span className="px-4 py-2 bg-green-600 text-white text-xs rounded-full shadow-lg flex items-center gap-2">
+                    <Check className="w-4 h-4" />
+                    Current Plan
+                  </span>
+                </motion.div>
+              )}
+
               {/* Popular Badge */}
               {plan.name === "Premium" && (
                 <motion.div
@@ -344,15 +385,21 @@ const SubscriptionPage = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className={`w-full px-4 py-3 rounded-lg font-semibold transition-colors 
-                    ${planConfig.accentColor} text-white
-                    hover:brightness-110 
+                    ${
+                      isCurrentPlan
+                        ? "bg-green-600 hover:bg-green-700"
+                        : `${planConfig.accentColor} hover:brightness-110`
+                    }
+                    text-white
                     shadow-lg
                     disabled:opacity-50 disabled:cursor-not-allowed`}
-                  onClick={() => handleSubscribe(plan)}
-                  disabled={loadingPlan === plan.id}
+                  onClick={() => !isCurrentPlan && handleSubscribe(plan)}
+                  disabled={loadingPlan === plan.id || isCurrentPlan}
                 >
                   {loadingPlan === plan.id ? (
                     <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                  ) : isCurrentPlan ? (
+                    "Current Plan"
                   ) : plan.price === 0 ? (
                     "Get Started"
                   ) : (
