@@ -51,9 +51,19 @@ const determineTier = (points: number): Achievement["tier"] => {
   return "free";
 };
 
+// Helper function to format dates in a readable way
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
 export default function AchievementGrid({
   achievements,
-  onSelectAchievement 
+  onSelectAchievement,
 }: AchievementGridProps) {
   const [hoveredTooltip, setHoveredTooltip] = useState<string | null>(null);
 
@@ -254,15 +264,15 @@ export default function AchievementGrid({
               </p>
               <button
                 className="w-full py-2 px-4 bg-primary font-semibold text-white rounded-lg hover:bg-gray-800 transition-colors mb-3"
-                onClick={()=>{
-                  onSelectAchievement(achievement)
+                onClick={() => {
+                  onSelectAchievement(achievement);
                 }}
               >
                 Get Reward
               </button>
               <div className="flex items-center justify-between text-xs text-text-tertiary">
-                <span>Start: {achievement.startDate}</span>
-                <span>End: {achievement.endDate}</span>
+                <span>Start: {formatDate(achievement.startDate)}</span>
+                <span>End: {formatDate(achievement.endDate)}</span>
               </div>
               <div
                 className={`mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${

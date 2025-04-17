@@ -3,16 +3,30 @@ import { Achievement } from "@/types/Achievement";
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 
+// Helper function to format dates in a readable way
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   achievement: Achievement;
 }
 
-export default function AchievementModal({ isOpen, onClose, achievement }: AuthModalProps) {
+export default function AchievementModal({
+  isOpen,
+  onClose,
+  achievement,
+}: AuthModalProps) {
   const [isLoading, setIsLoading] = useState(false);
 
-  const startTask = async ()=>{
+  const startTask = async () => {
     setIsLoading(true);
     try {
       const {
@@ -22,14 +36,14 @@ export default function AchievementModal({ isOpen, onClose, achievement }: AuthM
 
       try {
         const { error: insertError } = await supabase
-        .from("user_tasks")
-        .insert({ 
-          task_id: achievement.id,
-          user_id: session.user.id,
-          status: "ongoing",
-          created_at: new Date().toISOString(),
-          progress: 0,
-        });
+          .from("user_tasks")
+          .insert({
+            task_id: achievement.id,
+            user_id: session.user.id,
+            status: "ongoing",
+            created_at: new Date().toISOString(),
+            progress: 0,
+          });
         if (insertError) {
           console.error("Task creation error:", insertError);
           throw insertError;
@@ -44,7 +58,7 @@ export default function AchievementModal({ isOpen, onClose, achievement }: AuthM
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -89,55 +103,55 @@ export default function AchievementModal({ isOpen, onClose, achievement }: AuthM
             />
           </svg>
         </button>
-          <div className="flex flex-col items-center justify-center mb-4">
-            <div className="aspect-video relative">
-              <img
-                src={achievement.imageUrl}
-                alt={achievement.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
+        <div className="flex flex-col items-center justify-center mb-4">
+          <div className="aspect-video relative">
+            <img
+              src={achievement.imageUrl}
+              alt={achievement.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
 
-            <div className="p-4 w-full">
-              <div className="flex items-center gap-2 mb-2">
-                <img
-                  src={achievement.gameIcon}
-                  alt={achievement.gameName}
-                  className="w-6 h-6 rounded"
-                />
-                <span className="text-sm text-text-secondary">
-                  {achievement.gameName}
-                </span>
-              </div>
-              <h3 className="font-medium text-text-primary mb-1">
-                {achievement.title}
-              </h3>
-              <p className="text-sm text-text-secondary mb-3">
-                {achievement.description}
-              </p>
-              <div className="flex items-center justify-between text-xs text-text-tertiary">
-                <span>Start: {achievement.startDate}</span>
-                <span>End: {achievement.endDate}</span>
-              </div>
-              <div
-                className={`mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  achievement.status === "active"
-                    ? "bg-green-100 text-green-800"
-                    : "bg-gray-100 text-gray-800"
-                }`}
+          <div className="p-4 w-full">
+            <div className="flex items-center gap-2 mb-2">
+              <img
+                src={achievement.gameIcon}
+                alt={achievement.gameName}
+                className="w-6 h-6 rounded"
+              />
+              <span className="text-sm text-text-secondary">
+                {achievement.gameName}
+              </span>
+            </div>
+            <h3 className="font-medium text-text-primary mb-1">
+              {achievement.title}
+            </h3>
+            <p className="text-sm text-text-secondary mb-3">
+              {achievement.description}
+            </p>
+            <div className="flex items-center justify-between text-xs text-text-tertiary">
+              <span>Start: {formatDate(achievement.startDate)}</span>
+              <span>End: {formatDate(achievement.endDate)}</span>
+            </div>
+            <div
+              className={`mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                achievement.status === "active"
+                  ? "bg-green-100 text-green-800"
+                  : "bg-gray-100 text-gray-800"
+              }`}
+            >
+              {achievement.status === "active" ? "Active" : "Expired"}
+            </div>
+            <div className="w-full flex justify-end">
+              <button
+                className="w-52 py-2 px-4 bg-green-600 font-semibold text-white rounded-lg hover:bg-gray-800 transition-colors"
+                onClick={startTask}
               >
-                {achievement.status === "active" ? "Active" : "Expired"}
-              </div>
-              <div className="w-full flex justify-end">
-                  <button
-                    className="w-52 py-2 px-4 bg-green-600 font-semibold text-white rounded-lg hover:bg-gray-800 transition-colors"
-                    onClick={startTask}
-                  >
-                    Start Task
-                  </button>
-              </div>
+                Start Task
+              </button>
             </div>
           </div>
+        </div>
       </div>
     </>
   );

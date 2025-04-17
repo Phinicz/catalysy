@@ -9,45 +9,7 @@ import Modal from "@/components/Layout/Modal";
 import { supabase } from "@/lib/supabase";
 import { useAdmin } from "@/hooks/useAdmin";
 
-/*
-const SAMPLE_ACHIEVEMENTS = {
-  trending: [
-    {
-      id: "1",
-      title: "Master Strategist",
-      description: "Win 50 ranked matches with a win rate above 60%",
-      imageUrl: "/placeholders/achivements/4.jpg",
-      points: 500,
-      startDate: "2024-12-01",
-      endDate: "2024-12-31",
-      status: "active" as const,
-      game: {
-        name: "Nyan Heroes",
-        icon: "/placeholders/achivements/4.jpg",
-        deeplink: "https://store.steampowered.com/app/588650/Dead_Cells",
-      },
-    },
-    {
-      id: "2",
-      title: "Dungeon Master",
-      description: "Complete all dungeons in hardcore mode",
-      imageUrl: "/placeholders/achivements/5.jpg",
-      points: 1000,
-      startDate: "2024-12-15",
-      endDate: "2025-01-15",
-      status: "active" as const,
-      game: {
-        name: "Uldor Test",
-        icon: "/placeholders/achivements/4.jpg",
-        deeplink: "https://store.steampowered.com/app/588650/Dead_Cells",
-      },
-    },
-  ],
-  all: [
-    // ... trending achievements plus more ... 
-  ],
-};
-*/
+const ITEMS_PER_PAGE = 6; // Number of achievements to show per page
 
 const BANNER_ITEMS = [
   {
@@ -63,21 +25,21 @@ export default function AchievementsPage() {
   const { isAdmin } = useAdmin();
   const [isAchievementModalOpen, setIsAchievementModalOpen] = useState(false);
   const [selectedAchievement, setSelectedAchievement] = useState<Achievement>();
-
-  const [trendingAchievements, setTrendingAchievements] =
-    useState<Achievement[]>();
-  // SAMPLE_ACHIEVEMENTS.trending
-  const [allAchievements, setAllAchievements] = useState<Achievement[]>();
-  // SAMPLE_ACHIEVEMENTS.trending
+  const [trendingAchievements, setTrendingAchievements] = useState<
+    Achievement[]
+  >([]);
+  const [allAchievements, setAllAchievements] = useState<Achievement[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(3);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchAchievements();
-  }, []);
+  }, [currentPage]); // Refetch when page changes
 
   const fetchAchievements = async () => {
     try {
+      setIsLoading(true);
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -85,24 +47,47 @@ export default function AchievementsPage() {
         window.location.href = "/";
         return;
       }
-      const { data, error } = await supabase.from("tasks").select("*");
+
+      // Fetch total count for pagination
+      const { count } = await supabase
+        .from("tasks")
+        .select("*", { count: "exact", head: true });
+
+      if (count !== null) {
+        setTotalPages(Math.ceil(count / ITEMS_PER_PAGE));
+      }
+
+      // Fetch paginated achievements
+      const { data, error } = await supabase
+        .from("tasks")
+        .select("*")
+        .range(
+          (currentPage - 1) * ITEMS_PER_PAGE,
+          currentPage * ITEMS_PER_PAGE - 1
+        )
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setTrendingAchievements(data);
+
+      // Set trending achievements (first 3)
+      setTrendingAchievements(data.slice(0, 3));
+      // Set all achievements for current page
       setAllAchievements(data);
     } catch (error) {
       console.error("Error:", error);
     } finally {
+      setIsLoading(false);
     }
   };
 
-  if (!trendingAchievements || !allAchievements) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <p className="text-white">Loading...</p>
       </div>
     );
   }
+
   return (
     <div className="py-20 px-8">
       <SlidingBanner items={BANNER_ITEMS} />
@@ -160,11 +145,13 @@ export default function AchievementsPage() {
               setIsAchievementModalOpen(true);
             }}
           />
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-          />
+          {totalPages > 1 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          )}
         </section>
       </div>
 
