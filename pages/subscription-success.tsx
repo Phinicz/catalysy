@@ -35,7 +35,7 @@ export default function SubscriptionSuccess() {
       // Get the plan_id based on the plan name
       const { data: planData, error: planError } = await supabase
         .from("subscription_plans")
-        .select("id")
+        .select("id, OG_Points")
         .eq("name", planName)
         .single();
 
@@ -72,6 +72,17 @@ export default function SubscriptionSuccess() {
       if (updateError) {
         console.error("Error updating subscription:", updateError);
         throw new Error("Failed to update subscription");
+      }
+
+      // Update user's OG points in their profile
+      const { error: profileError } = await supabase
+        .from("user_profiles")
+        .update({ og_points: planData.OG_Points })
+        .eq("id", user.id);
+
+      if (profileError) {
+        console.error("Error updating user profile:", profileError);
+        throw new Error("Failed to update user profile");
       }
 
       setStatus("success");

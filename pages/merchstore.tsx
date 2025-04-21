@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Package,
@@ -6,183 +6,247 @@ import {
   Gamepad2,
   ChevronDown,
   RefreshCw,
-  Filter,
   Search,
+  Filter,
+  Loader2,
+  Star,
 } from "lucide-react";
-
-// Dummy data for loot items
-const dummyLootItems = [
-  {
-    id: "1",
-    name: "Legendary Dragon Sword",
-    type: "Weapon",
-    rarity: "Legendary",
-    purchaseDate: "2024-03-15",
-    price: 299.99,
-    image: "/lootbag/1.png",
-    category: "Weapons",
-  },
-  {
-    id: "2",
-    name: "Phoenix Mount",
-    type: "Vehicle",
-    rarity: "Epic",
-    purchaseDate: "2024-02-28",
-    price: 199.99,
-    image: "/lootbag/2.png",
-    category: "Mounts",
-  },
-  {
-    id: "3",
-    name: "Stealth Armor Set",
-    type: "Armor",
-    rarity: "Rare",
-    purchaseDate: "2024-03-01",
-    price: 149.99,
-    image: "/lootbag/3.png",
-    category: "Armor",
-  },
-  {
-    id: "4",
-    name: "Mystic Spell Tome",
-    type: "Consumable",
-    rarity: "Epic",
-    purchaseDate: "2024-02-20",
-    price: 79.99,
-    image: "/lootbag/4.png",
-    category: "Consumables",
-  },
-];
+import { supabase } from "@/lib/supabase";
+import MerchCard from "@/components/MerchCard";
+import MerchFilter from "@/components/MerchFilter";
+import { MerchItem } from "@/types/MerchPage";
 
 const Merchstore: React.FC = () => {
+  const [items, setItems] = useState<MerchItem[]>([]);
+  const [filteredItems, setFilteredItems] = useState<MerchItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [userOGPoints, setUserOGPoints] = useState<number>(0);
 
-  // Rarity color mapping
-  const rarityColors = {
-    Legendary: "bg-orange-500",
-    Epic: "bg-purple-500",
-    Rare: "bg-blue-500",
-    Common: "bg-green-500",
+  useEffect(() => {
+    fetchMerchItems();
+    fetchUserOGPoints();
+  }, []);
+
+  const fetchMerchItems = async () => {
+    try {
+      const { data, error } = await supabase.from("merch_items").select("*");
+
+      if (error) throw error;
+      if (data) {
+        // Transform the data to match MerchItem type
+        const transformedItems: MerchItem[] = data.map((item) => ({
+          id: item.id,
+          name: item.name,
+          price: item.price_usd || 0,
+          image: item.image_url,
+          category: item.category || "Other",
+          description: item.description || "",
+          crypto: item.crypto || false,
+          ogPoints: item.og_points || false,
+          debitCard: item.debit_card || false,
+          price_og_points: item.price_og_points || null,
+        }));
+        setItems(transformedItems);
+        setFilteredItems(transformedItems);
+      }
+    } catch (error) {
+      console.error("Error fetching merch items:", error);
+      setError("Failed to load merchandise items");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // Filter categories
-  const categories = ["All", "Weapons", "Mounts", "Armor", "Consumables"];
+  const fetchUserOGPoints = async () => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
 
-  // Filter logic
-  const filteredItems = dummyLootItems.filter(
-    (item) =>
-      (selectedCategory === "All" || item.category === selectedCategory) &&
-      item.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("og_points")
+        .eq("id", user.id)
+        .single();
+
+      if (profile) {
+        setUserOGPoints(profile.og_points);
+      }
+    } catch (error) {
+      console.error("Error fetching OG points:", error);
+    }
+  };
+
+  const handleSearch = (term: string) => {
+    setSearchTerm(term);
+    filterItems(term, selectedCategory);
+  };
+
+  const handleCategoryChange = (category: string | null) => {
+    setSelectedCategory(category);
+    filterItems(searchTerm, category);
+  };
+
+  const filterItems = (term: string, category: string | null) => {
+    let filtered = items;
+
+    if (term) {
+      filtered = filtered.filter((item) =>
+        item.name.toLowerCase().includes(term.toLowerCase())
+      );
+    }
+
+    if (category) {
+      filtered = filtered.filter((item) => item.category === category);
+    }
+
+    setFilteredItems(filtered);
+  };
+
+  const handleOGPointsUpdate = (newPoints: number) => {
+    setUserOGPoints(newPoints);
+  };
+
+  // Get unique categories from items
+  const categories = ["All", ...new Set(items.map((item) => item.category))];
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen pt-20 px-4 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto text-indigo-500" />
+          <p className="mt-2 text-gray-400">Loading merchandise...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen pt-20 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-red-900/20 border border-red-800 rounded-lg p-4 text-red-400">
+            <h2 className="text-xl font-bold mb-2">Error</h2>
+            <p>{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="min-h-screen mt-16 bg-gradient-to-br from-gray-900 to-gray-800 text-white px-4 sm:px-8 py-6"
-    >
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 space-y-4 sm:space-y-0">
-        <div className="flex items-center space-x-3">
-          <Package size={32} className="text-indigo-400" />
-          <h1 className="text-2xl sm:text-3xl font-bold">Loot Bag</h1>
-        </div>
-        <div className="flex items-center space-x-3 w-full sm:w-auto">
-          <div className="relative flex-1 sm:flex-none">
-            <input
-              type="text"
-              placeholder="Search your loot..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-gray-700 text-white pl-10 pr-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-            <Search className="absolute left-3 top-3 text-gray-400" size={18} />
-          </div>
-          <button className="bg-indigo-600 hover:bg-indigo-700 p-2 rounded-full transition-colors">
-            <RefreshCw size={20} />
-          </button>
-        </div>
-      </div>
-
-      {/* Category Filters (Horizontal Scroll on Mobile) */}
-      <div className="overflow-x-auto">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 pb-2">
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`whitespace-nowrap px-4 py-2 rounded-full transition-all duration-300 text-center ${
-                selectedCategory === category
-                  ? "bg-indigo-600 text-white"
-                  : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-              }`}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Loot Grid */}
-      {filteredItems.length > 0 ? (
-        <motion.div
-          layout
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6"
-        >
-          {filteredItems.map((item, index) => (
+    <div className="min-h-screen bg-[#0a0a0a]">
+      {/* Hero Section */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="relative h-[40vh] bg-gradient-to-br from-purple-900 via-indigo-900 to-gray-900 overflow-hidden"
+      >
+        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
+        <div className="container mx-auto px-4 h-full flex flex-col justify-center items-center relative z-10">
+          <motion.h1
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-5xl md:text-6xl font-bold text-white text-center mb-4"
+          >
+            Merch Store
+          </motion.h1>
+          <motion.p
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-xl text-gray-300 text-center max-w-2xl"
+          >
+            Exclusive merchandise for our community members
+          </motion.p>
+          {userOGPoints > 0 && (
             <motion.div
-              key={item.id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{
-                delay: index * 0.1,
-                type: "spring",
-                stiffness: 300,
-              }}
-              className="bg-gray-800 rounded-2xl p-4 sm:p-6 hover:shadow-2xl hover:scale-105 transition-all duration-300 border border-gray-700"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="mt-6 bg-purple-900/50 backdrop-blur-sm px-6 py-3 rounded-full flex items-center gap-2 border border-purple-700/50"
             >
-              <div className="relative mb-4">
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-full h-40 sm:h-48 object-cover rounded-xl"
-                />
-                <div
-                  className={`absolute top-2 right-2 ${
-                    rarityColors[item.rarity as keyof typeof rarityColors]
-                  } text-white px-2 py-1 rounded-full text-xs font-bold`}
-                >
-                  {item.rarity}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-lg sm:text-xl font-bold text-indigo-300">
-                  {item.name}
-                </h3>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400">{item.type}</span>
-                  <span className="text-green-400 font-bold">
-                    ${item.price.toFixed(2)}
-                  </span>
-                </div>
-                <p className="text-xs sm:text-sm text-gray-500">
-                  Purchased: {item.purchaseDate}
-                </p>
-              </div>
+              <Star className="text-purple-400" />
+              <span className="text-white font-medium">
+                {userOGPoints} OG Points Available
+              </span>
             </motion.div>
-          ))}
-        </motion.div>
-      ) : (
-        <div className="text-center py-12">
-          <ShoppingCart size={48} className="mx-auto text-gray-600 mb-4" />
-          <p className="text-lg sm:text-xl text-gray-400">
-            No items found in your Loot Bag
-          </p>
+          )}
         </div>
-      )}
-    </motion.div>
+      </motion.div>
+
+      {/* Search and Filter Section */}
+      <div className="container mx-auto px-4 -mt-8 relative z-20">
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="bg-gray-800/50 backdrop-blur-sm p-6 rounded-2xl border border-gray-700/50 shadow-xl"
+        >
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search merchandise..."
+                value={searchTerm}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="w-full bg-gray-900/50 text-white pl-12 pr-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-purple-500 transition-colors"
+              />
+            </div>
+            <MerchFilter
+              categories={categories}
+              selectedCategory={selectedCategory || "All"}
+              onCategoryChange={handleCategoryChange}
+            />
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Items Grid */}
+      <div className="container mx-auto px-4 py-12">
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500" />
+          </div>
+        ) : filteredItems.length > 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          >
+            {filteredItems.map((item, index) => (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 * index }}
+              >
+                <MerchCard
+                  item={item}
+                  onOGPointsUpdate={handleOGPointsUpdate}
+                />
+              </motion.div>
+            ))}
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center text-gray-400 py-12"
+          >
+            No items found matching your criteria
+          </motion.div>
+        )}
+      </div>
+    </div>
   );
 };
 

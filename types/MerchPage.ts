@@ -23,8 +23,9 @@ export interface MerchItem {
   price: number;
   image: string;
   category: string;
+  description: string;
   crypto: boolean;
   ogPoints: boolean;
   debitCard: boolean;
-  description: string;
+  price_og_points: number | null;
 }

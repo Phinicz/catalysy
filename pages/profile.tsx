@@ -29,6 +29,7 @@ interface UserProfile {
   coins: number;
   gems: number;
   twitter_username?: string;
+  og_points?: number;
 }
 
 interface Subscription {
@@ -577,7 +578,7 @@ export default function ProfilePage() {
                       OG Points
                     </h3>
                     <p className="text-xl md:text-2xl font-bold text-white">
-                      {subscription?.OG_Points || 0}
+                      {profile.og_points || 0}
                     </p>
                   </div>
                 </div>
