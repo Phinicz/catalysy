@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { loadStripe } from "@stripe/stripe-js";
+import toast from "react-hot-toast";
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -22,6 +23,7 @@ interface PaymentModalProps {
   };
   userOGPoints?: number;
   onOGPointsUpdate?: (newPoints: number) => void;
+  isPurchased?: boolean;
 }
 
 const PaymentModal: React.FC<PaymentModalProps> = ({
@@ -30,6 +32,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   item,
   userOGPoints = 0,
   onOGPointsUpdate,
+  isPurchased = false,
 }) => {
   const [selectedMethod, setSelectedMethod] = useState<
     "crypto" | "card" | "og_points" | null
@@ -81,15 +84,74 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   }, [userOGPoints]);
 
   const handlePayment = async (method: "crypto" | "card" | "og_points") => {
+    if (isPurchased) {
+      toast.error("This item has already been purchased");
+      return;
+    }
     setError(null);
     setIsProcessing(true);
+
     try {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (!user) throw new Error("User not authenticated");
+      if (!user) {
+        toast.error("Please sign in to make a purchase");
+        return;
+      }
 
       switch (method) {
+        case "og_points":
+          if (userOGPoints < item.price_og_points!) {
+            toast.error("Insufficient OG Points");
+            return;
+          }
+          // First create the purchase record with pending status
+          const { data: purchaseData, error: createPurchaseError } =
+            await supabase
+              .from("user_purchases")
+              .insert({
+                user_id: user.id,
+                item_id: item.id,
+                payment_method: "og_points",
+                og_points_spent: item.price_og_points,
+                status: "pending", // Start with pending status
+              })
+              .select()
+              .single();
+
+          if (createPurchaseError) throw createPurchaseError;
+
+          // Then deduct points from user profile
+          const { error: updateError } = await supabase
+            .from("user_profiles")
+            .update({
+              og_points: currentOGPoints - (item.price_og_points || 0),
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", user.id);
+
+          if (updateError) throw updateError;
+
+          // Update purchase status to completed
+          const { error: updatePurchaseError } = await supabase
+            .from("user_purchases")
+            .update({ status: "completed" })
+            .eq("id", purchaseData.id);
+
+          if (updatePurchaseError) throw updatePurchaseError;
+
+          // Update the local state with new OG points
+          const newPoints = currentOGPoints - (item.price_og_points || 0);
+          setCurrentOGPoints(newPoints);
+          if (onOGPointsUpdate) {
+            onOGPointsUpdate(newPoints);
+          }
+
+          alert(`Purchase successful! Remaining OG Points: ${newPoints}`);
+          onClose();
+          break;
+
         case "crypto":
           // Create initial purchase record for crypto
           const { data: cryptoPurchaseData, error: createCryptoPurchaseError } =
@@ -173,64 +235,11 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             setError(error instanceof Error ? error.message : "Payment failed");
           }
           break;
-
-        case "og_points":
-          if (!item.price_og_points) {
-            throw new Error("This item cannot be purchased with OG Points");
-          }
-          if (currentOGPoints < item.price_og_points) {
-            throw new Error("Insufficient OG Points");
-          }
-
-          // First create the purchase record with pending status
-          const { data: purchaseData, error: createPurchaseError } =
-            await supabase
-              .from("user_purchases")
-              .insert({
-                user_id: user.id,
-                item_id: item.id,
-                payment_method: "og_points",
-                og_points_spent: item.price_og_points,
-                status: "pending", // Start with pending status
-              })
-              .select()
-              .single();
-
-          if (createPurchaseError) throw createPurchaseError;
-
-          // Then deduct points from user profile
-          const { error: updateError } = await supabase
-            .from("user_profiles")
-            .update({
-              og_points: currentOGPoints - item.price_og_points,
-              updated_at: new Date().toISOString(),
-            })
-            .eq("id", user.id);
-
-          if (updateError) throw updateError;
-
-          // Update purchase status to completed
-          const { error: updatePurchaseError } = await supabase
-            .from("user_purchases")
-            .update({ status: "completed" })
-            .eq("id", purchaseData.id);
-
-          if (updatePurchaseError) throw updatePurchaseError;
-
-          // Update the local state with new OG points
-          const newPoints = currentOGPoints - item.price_og_points;
-          setCurrentOGPoints(newPoints);
-          if (onOGPointsUpdate) {
-            onOGPointsUpdate(newPoints);
-          }
-
-          alert(`Purchase successful! Remaining OG Points: ${newPoints}`);
-          onClose();
-          break;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Payment error:", error);
-      setError(error instanceof Error ? error.message : "Payment failed");
+      toast.error(error.message || "Payment failed");
+      setError(error.message || "Payment failed");
     } finally {
       setIsProcessing(false);
     }

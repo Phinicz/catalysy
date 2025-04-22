@@ -24,34 +24,63 @@ const Merchstore: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userOGPoints, setUserOGPoints] = useState<number>(0);
+  const [purchasedItems, setPurchasedItems] = useState<number[]>([]);
 
   useEffect(() => {
     fetchMerchItems();
     fetchUserOGPoints();
+    fetchPurchasedItems();
   }, []);
 
   const fetchMerchItems = async () => {
     try {
-      const { data, error } = await supabase.from("merch_items").select("*");
-
-      if (error) throw error;
-      if (data) {
-        // Transform the data to match MerchItem type
-        const transformedItems: MerchItem[] = data.map((item) => ({
-          id: item.id,
-          name: item.name,
-          price: item.price_usd || 0,
-          image: item.image_url,
-          category: item.category || "Other",
-          description: item.description || "",
-          crypto: item.crypto || false,
-          ogPoints: item.og_points || false,
-          debitCard: item.debit_card || false,
-          price_og_points: item.price_og_points || null,
-        }));
-        setItems(transformedItems);
-        setFilteredItems(transformedItems);
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        setError("Please sign in to view merchandise");
+        setIsLoading(false);
+        return;
       }
+
+      // First fetch all merch items
+      const { data: itemsData, error: itemsError } = await supabase
+        .from("merch_items")
+        .select("*");
+
+      if (itemsError) throw itemsError;
+
+      // Then fetch user's completed purchases
+      const { data: purchasesData, error: purchasesError } = await supabase
+        .from("user_purchases")
+        .select("item_id")
+        .eq("user_id", user.id)
+        .eq("status", "completed");
+
+      if (purchasesError) throw purchasesError;
+
+      // Create a set of purchased item IDs for quick lookup
+      const purchasedItemIds = new Set(
+        purchasesData?.map((purchase) => purchase.item_id) || []
+      );
+
+      // Transform the data to match MerchItem type and include purchase status
+      const transformedItems: MerchItem[] = itemsData.map((item) => ({
+        id: item.id,
+        name: item.name,
+        price: item.price_usd || 0,
+        image: item.image_url,
+        category: item.category || "Other",
+        description: item.description || "",
+        crypto: item.crypto || false,
+        ogPoints: item.og_points || false,
+        debitCard: item.debit_card || false,
+        price_og_points: item.price_og_points || null,
+        isPurchased: purchasedItemIds.has(item.id),
+      }));
+
+      setItems(transformedItems);
+      setFilteredItems(transformedItems);
     } catch (error) {
       console.error("Error fetching merch items:", error);
       setError("Failed to load merchandise items");
@@ -78,6 +107,42 @@ const Merchstore: React.FC = () => {
       }
     } catch (error) {
       console.error("Error fetching OG points:", error);
+    }
+  };
+
+  const fetchPurchasedItems = async () => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Fetch all completed purchases for the user
+      const { data: purchases, error: purchaseError } = await supabase
+        .from("user_purchases")
+        .select(
+          `
+          id,
+          item_id,
+          status,
+          payment_method,
+          created_at
+        `
+        )
+        .eq("user_id", user.id)
+        .eq("status", "completed");
+
+      if (purchaseError) throw purchaseError;
+
+      if (purchases) {
+        // Create a set of purchased item IDs
+        const purchasedItemIds = new Set(
+          purchases.map((purchase) => parseInt(purchase.item_id))
+        );
+        setPurchasedItems(Array.from(purchasedItemIds));
+      }
+    } catch (error) {
+      console.error("Error fetching purchased items:", error);
     }
   };
 

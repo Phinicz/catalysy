@@ -44,6 +44,9 @@ const MerchCard: React.FC<MerchCardProps> = ({ item, onOGPointsUpdate }) => {
   }, []);
 
   const handleBuyNow = async () => {
+    if (item.isPurchased) {
+      return;
+    }
     setIsPaymentModalOpen(true);
   };
 
@@ -64,10 +67,19 @@ const MerchCard: React.FC<MerchCardProps> = ({ item, onOGPointsUpdate }) => {
           scale: 1.03,
           boxShadow: "0 20px 30px rgba(0,0,0,0.3)",
         }}
-        className="relative bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl overflow-hidden border border-gray-700 transform transition-all duration-300"
+        className={`relative bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl overflow-hidden border border-gray-700 transform transition-all duration-300 ${
+          item.isPurchased ? "opacity-75" : ""
+        }`}
         onHoverStart={() => setIsHovered(true)}
         onHoverEnd={() => setIsHovered(false)}
       >
+        {item.isPurchased && (
+          <div className="absolute inset-0 bg-black/50 z-10 flex items-center justify-center">
+            <div className="bg-green-600/80 text-white px-4 py-2 rounded-lg font-medium">
+              Already Purchased
+            </div>
+          </div>
+        )}
         <div className="relative group">
           <motion.div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           <motion.img
@@ -150,10 +162,15 @@ const MerchCard: React.FC<MerchCardProps> = ({ item, onOGPointsUpdate }) => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleBuyNow}
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-medium shadow-lg transition-all duration-300 flex items-center gap-2"
+              disabled={item.isPurchased}
+              className={`${
+                item.isPurchased
+                  ? "bg-gray-600 cursor-not-allowed"
+                  : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+              } text-white px-6 py-3 rounded-xl font-medium shadow-lg transition-all duration-300 flex items-center gap-2`}
             >
               <ShoppingCart className="w-5 h-5" />
-              Buy Now
+              {item.isPurchased ? "Already Purchased" : "Buy Now"}
             </motion.button>
           </motion.div>
         </div>
@@ -178,6 +195,7 @@ const MerchCard: React.FC<MerchCardProps> = ({ item, onOGPointsUpdate }) => {
         item={item}
         userOGPoints={userOGPoints}
         onOGPointsUpdate={handleOGPointsUpdate}
+        isPurchased={item.isPurchased}
       />
     </>
   );

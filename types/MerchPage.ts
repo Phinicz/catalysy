@@ -28,4 +28,5 @@ export interface MerchItem {
   ogPoints: boolean;
   debitCard: boolean;
   price_og_points: number | null;
+  isPurchased: boolean;
 }
