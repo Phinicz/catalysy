@@ -8,5 +8,5 @@ export interface UserProfile {
   profile_picture?: string;
   bio?: string;
   coins: number;
-  gems: number;
+  points: number;
 }

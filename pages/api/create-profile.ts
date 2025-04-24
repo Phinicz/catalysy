@@ -26,7 +26,7 @@ export default async function handler(
         bio: null,
         profile_picture: null,
         coins: 0,
-        gems: 0,
+        points: 0,
       },
     ]);
 

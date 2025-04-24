@@ -204,12 +204,12 @@ const Merchstore: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className=" bg-[#0a0a0a]">
       {/* Hero Section */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="relative h-[40vh] bg-gradient-to-br from-purple-900 via-indigo-900 to-gray-900 overflow-hidden"
+        className="relative py-8 bg-gradient-to-br from-purple-900 via-indigo-900 to-gray-900 overflow-hidden"
       >
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-20" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
@@ -230,54 +230,13 @@ const Merchstore: React.FC = () => {
           >
             Exclusive merchandise for our community members
           </motion.p>
-          {userOGPoints > 0 && (
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="mt-6 bg-purple-900/50 backdrop-blur-sm px-6 py-3 rounded-full flex items-center gap-2 border border-purple-700/50"
-            >
-              <Star className="text-purple-400" />
-              <span className="text-white font-medium">
-                {userOGPoints} OG Points Available
-              </span>
-            </motion.div>
-          )}
         </div>
       </motion.div>
 
-      {/* Search and Filter Section */}
-      <div className="container mx-auto px-4 -mt-8 relative z-20">
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="bg-gray-800/50 backdrop-blur-sm p-6 rounded-2xl border border-gray-700/50 shadow-xl"
-        >
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search merchandise..."
-                value={searchTerm}
-                onChange={(e) => handleSearch(e.target.value)}
-                className="w-full bg-gray-900/50 text-white pl-12 pr-4 py-3 rounded-xl border border-gray-700 focus:outline-none focus:border-purple-500 transition-colors"
-              />
-            </div>
-            <MerchFilter
-              categories={categories}
-              selectedCategory={selectedCategory || "All"}
-              onCategoryChange={handleCategoryChange}
-            />
-          </div>
-        </motion.div>
-      </div>
-
       {/* Items Grid */}
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-8">
         {isLoading ? (
-          <div className="flex justify-center items-center h-64">
+          <div className="flex justify-center items-center min-h-[50vh]">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500" />
           </div>
         ) : filteredItems.length > 0 ? (
@@ -285,14 +244,15 @@ const Merchstore: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 md:gap-8"
           >
             {filteredItems.map((item, index) => (
               <motion.div
                 key={item.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 * index }}
+                transition={{ delay: 0.1 * (index % 4) }}
+                className="h-full"
               >
                 <MerchCard
                   item={item}
@@ -305,9 +265,9 @@ const Merchstore: React.FC = () => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-center text-gray-400 py-12"
+            className="text-center text-gray-400 min-h-[50vh] flex items-center justify-center"
           >
-            No items found matching your criteria
+            <p>No items found</p>
           </motion.div>
         )}
       </div>

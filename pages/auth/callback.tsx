@@ -39,6 +39,18 @@ export default function AuthCallback() {
           if (!profile) {
             // If no profile exists, create one for Google users
             if (session.user.app_metadata.provider === "google") {
+              // Get the free plan ID and benefits
+              const { data: freePlan, error: planError } = await supabase
+                .from("subscription_plans")
+                .select("id, OG_Points")
+                .eq("name", "Free")
+                .single();
+
+              if (planError) {
+                console.error("Error fetching free plan:", planError);
+                throw planError;
+              }
+
               const { error: createError } = await supabase
                 .from("user_profiles")
                 .insert({
@@ -49,13 +61,33 @@ export default function AuthCallback() {
                   email: session.user.email,
                   role: "player",
                   coins: 0,
-                  gems: 0,
+                  points: 0,
                   profile_picture: session.user.user_metadata.avatar_url,
+                  subscription: "Free",
+                  og_points: freePlan.OG_Points || 500, // Default to 500 if not specified in plan
                 });
 
               if (createError) {
                 console.error("Profile creation error:", createError);
                 throw createError;
+              }
+
+              // Create subscription record for Google OAuth users
+              const { error: subscriptionError } = await supabase
+                .from("user_subscriptions")
+                .insert({
+                  user_id: session.user.id,
+                  plan_id: freePlan.id,
+                  status: "active",
+                  start_date: new Date().toISOString(),
+                });
+
+              if (subscriptionError) {
+                console.error(
+                  "Subscription creation error:",
+                  subscriptionError
+                );
+                throw subscriptionError;
               }
             }
           }

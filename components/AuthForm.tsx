@@ -65,7 +65,19 @@ export default function AuthForm({ onClose }: AuthFormProps) {
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
         try {
-          // Create user profile
+          // Get the free plan ID and benefits
+          const { data: freePlan, error: planError } = await supabase
+            .from("subscription_plans")
+            .select("id, OG_Points")
+            .eq("name", "Free")
+            .single();
+
+          if (planError) {
+            console.error("Error fetching free plan:", planError);
+            throw planError;
+          }
+
+          // Create user profile with plan benefits
           const { error: profileError } = await supabase
             .from("user_profiles")
             .insert({
@@ -74,14 +86,31 @@ export default function AuthForm({ onClose }: AuthFormProps) {
               email: formState.email,
               role: formState.role,
               coins: 0,
-              gems: 0,
+              points: 0,
               wallet_address: address,
               twitter_username: formState.twitter_username,
+              subscription: "Free",
+              og_points: freePlan.OG_Points || 500, // Default to 500 if not specified in plan
             });
 
           if (profileError) {
             console.error("Profile creation error:", profileError);
             throw profileError;
+          }
+
+          // Create subscription record
+          const { error: subscriptionError } = await supabase
+            .from("user_subscriptions")
+            .insert({
+              user_id: authData.user.id,
+              plan_id: freePlan.id,
+              status: "active",
+              start_date: new Date().toISOString(),
+            });
+
+          if (subscriptionError) {
+            console.error("Subscription creation error:", subscriptionError);
+            throw subscriptionError;
           }
 
           // Show confirmation message

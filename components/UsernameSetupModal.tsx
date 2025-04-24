@@ -40,7 +40,7 @@ export default function UsernameSetupModal({
             email,
             role,
             coins: 0,
-            gems: 0,
+            points: 0,
             profile_picture: user.user_metadata.avatar_url,
           },
         ]);

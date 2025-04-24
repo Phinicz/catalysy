@@ -267,22 +267,22 @@ function MyApp({ Component, pageProps }: AppProps) {
                             : "-translate-x-full md:translate-x-0"
                         }`}
                       >
-                        <div className="h-full w-64 pl-2 bg-gradient-to-r from-gray-900 via-gray-900 to-gray-900/95 backdrop-blur-lg flex flex-col justify-between md:bg-gradient-to-r md:from-gray-900 md:to-transparent">
+                        <div className="h-full w-52 pl-2 bg-gradient-to-r from-gray-900 via-gray-900 to-gray-900/95 backdrop-blur-lg flex flex-col justify-between md:bg-gradient-to-r md:from-gray-900 md:to-transparent">
                           {/* Logo at the top */}
                           <div className="flex justify-center py-4">
                             <Link href="/" className="flex items-center group">
                               <Image
                                 src="/brand/logo.png"
                                 alt="Logo"
-                                width={120}
-                                height={120}
+                                width={100}
+                                height={100}
                                 className="transition-transform duration-300 group-hover:scale-105"
                               />
                             </Link>
                           </div>
 
                           {/* Navigation buttons */}
-                          <div className="flex flex-col items-start space-y-2 py-4 overflow-y-auto overflow-x-hidden max-h-[calc(100vh-200px)]">
+                          <div className="flex flex-col items-start space-y-1 py-4 overflow-y-auto overflow-x-hidden max-h-[calc(100vh-200px)]">
                             {blades.map((blade, index) => {
                               const isActive = index === activeBlade;
 
@@ -293,18 +293,18 @@ function MyApp({ Component, pageProps }: AppProps) {
                                     navigateToBlade(index);
                                     setIsMobileMenuOpen(false);
                                   }}
-                                  className={`flex items-center justify-start py-2 pr-6 pl-4 transition-all rounded-r-lg transform relative ${
+                                  className={`flex items-center justify-start w-full py-2 pr-4 pl-3 transition-all rounded-r-lg transform relative ${
                                     isActive
-                                      ? "bg-gradient-to-r from-green-600 to-green-700 text-white font-bold shadow-lg shadow-green-500/20 -translate-x-1"
+                                      ? "bg-gradient-to-r from-green-600 to-green-700 text-white font-bold shadow-sm shadow-green-500/20 -translate-x-1"
                                       : "text-gray-300 hover:bg-gray-800/40 hover:text-white"
                                   }`}
                                   initial={false}
                                   animate={{
                                     x: isActive ? -1 : 0,
-                                    scale: isActive ? 1.05 : 1,
+                                    scale: isActive ? 1.02 : 1,
                                   }}
                                   whileHover={{
-                                    x: isActive ? -1 : 8,
+                                    x: isActive ? -1 : 4,
                                     backgroundColor: !isActive
                                       ? "rgba(31, 41, 55, 0.7)"
                                       : undefined,
@@ -340,7 +340,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                                   {isActive && (
                                     <motion.div
                                       layoutId="activeIndicator"
-                                      className="absolute right-0 top-0 bottom-0 w-1 bg-green-400"
+                                      className="absolute right-0 top-0 bottom-0 w-0.5 bg-green-400"
                                       initial={{ opacity: 0 }}
                                       animate={{ opacity: 1 }}
                                       exit={{ opacity: 0 }}
@@ -360,9 +360,9 @@ function MyApp({ Component, pageProps }: AppProps) {
                                 setIsNotificationsOpen(!isNotificationsOpen);
                                 setIsMobileMenuOpen(false);
                               }}
-                              className="flex items-center justify-start py-2 pr-6 pl-4 rounded-r-lg text-gray-300 hover:bg-gray-800/40 hover:text-white w-full"
+                              className="flex items-center justify-start w-full py-2 pr-4 pl-3 rounded-r-lg text-gray-300 hover:bg-gray-800/40 hover:text-white"
                               whileHover={{
-                                x: 8,
+                                x: 4,
                                 backgroundColor: "rgba(31, 41, 55, 0.7)",
                               }}
                               transition={{
@@ -507,7 +507,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                             }}
                             className="w-full h-full md:pl-40 pl-4 pr-4 flex items-center justify-center"
                           >
-                            <div className="w-full h-full mx-auto max-w-[1300px] p-4 md:p-6">
+                            <div className="w-full h-full mx-auto max-w-[1170px] p-4 md:p-6">
                               <div className="w-full h-full rounded-xl overflow-hidden border border-gray-700 shadow-2xl relative">
                                 {/* Green glow effect at the top */}
                                 <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-400 via-green-500 to-green-400 opacity-70 shadow-lg shadow-green-500/50" />
