@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { supabase } from "../../lib/supabase";
+import { createWelcomeNotification } from "../../utils/notifications";
 
 export default function AuthCallback() {
   const router = useRouter();
@@ -71,6 +72,12 @@ export default function AuthCallback() {
                 console.error("Profile creation error:", createError);
                 throw createError;
               }
+
+              // Create welcome notification for Google OAuth users
+              const username =
+                session.user.user_metadata.full_name ||
+                session.user.email?.split("@")[0];
+              await createWelcomeNotification(session.user.id, username);
 
               // Create subscription record for Google OAuth users
               const { error: subscriptionError } = await supabase

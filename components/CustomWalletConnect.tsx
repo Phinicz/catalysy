@@ -155,9 +155,6 @@ export const CustomWalletConnect = () => {
                     className="bg-gray-600 text-white font-medium py-2 px-4 rounded hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-offset-2"
                   >
                     {account.displayName}
-                    {account.displayBalance
-                      ? ` (${account.displayBalance})`
-                      : ""}
                   </button>
                 </div>
               );

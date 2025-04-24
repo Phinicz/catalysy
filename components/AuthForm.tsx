@@ -4,6 +4,7 @@ import { supabase } from "../lib/supabase";
 import { useAccount, useDisconnect, useEnsAvatar, useEnsName } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { createWelcomeNotification } from "../utils/notifications";
 
 interface AuthFormProps {
   onClose?: () => void;
@@ -111,6 +112,19 @@ export default function AuthForm({ onClose }: AuthFormProps) {
           if (subscriptionError) {
             console.error("Subscription creation error:", subscriptionError);
             throw subscriptionError;
+          }
+
+          // Create welcome notification
+          try {
+            const notificationCreated = await createWelcomeNotification(
+              authData.user.id,
+              formState.username
+            );
+            if (!notificationCreated) {
+              console.error("Failed to create welcome notification");
+            }
+          } catch (error) {
+            console.error("Error creating welcome notification:", error);
           }
 
           // Show confirmation message

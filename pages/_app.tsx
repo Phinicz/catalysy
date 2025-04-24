@@ -11,7 +11,7 @@ import { createStorage } from "wagmi";
 import { ApiProvider } from "../context/ApiContext";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BellRing, User, Menu, X } from "lucide-react";
+import { BellRing, User, Menu, X, Bell } from "lucide-react";
 import { CustomWalletConnect } from "../components/CustomWalletConnect";
 import { supabase } from "../lib/supabase";
 import Image from "next/image";
@@ -21,6 +21,8 @@ import Head from "next/head";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import PageTransition from "../components/Layout/PageTransition";
+import NotificationModal from "../components/NotificationModal";
+import NotificationIndicator from "../components/NotificationIndicator";
 
 const config = getDefaultConfig({
   appName: "My RainbowKit App",
@@ -360,7 +362,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                                 setIsNotificationsOpen(!isNotificationsOpen);
                                 setIsMobileMenuOpen(false);
                               }}
-                              className="flex items-center justify-start w-full py-2 pr-4 pl-3 rounded-r-lg text-gray-300 hover:bg-gray-800/40 hover:text-white"
+                              className="flex items-center justify-start w-full py-2 pr-4 pl-3 rounded-r-lg text-gray-300 hover:bg-gray-800/40 hover:text-white relative"
                               whileHover={{
                                 x: 4,
                                 backgroundColor: "rgba(31, 41, 55, 0.7)",
@@ -371,7 +373,10 @@ function MyApp({ Component, pageProps }: AppProps) {
                                 damping: 25,
                               }}
                             >
-                              <BellRing className="w-4 h-4 mr-2 text-gray-400" />
+                              <div className="relative">
+                                <Bell className="w-4 h-4 mr-2 text-gray-400" />
+                                <NotificationIndicator />
+                              </div>
                               <span className="text-sm font-medium tracking-wide">
                                 Notifications
                               </span>
@@ -576,6 +581,10 @@ function MyApp({ Component, pageProps }: AppProps) {
               <AuthModal
                 isOpen={isAuthModalOpen}
                 onClose={() => setIsAuthModalOpen(false)}
+              />
+              <NotificationModal
+                isOpen={isNotificationsOpen}
+                onClose={() => setIsNotificationsOpen(false)}
               />
               <ToastContainer
                 position="top-right"

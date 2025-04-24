@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
 import { useAdmin } from "@/hooks/useAdmin";
+import { createNewAchievementNotification } from "@/utils/notifications";
 
 export default function CreateAchievementPage() {
   const router = useRouter();
@@ -38,7 +39,9 @@ export default function CreateAchievementPage() {
     setIsSubmitLoading(true);
 
     try {
-      const { data, error } = await supabase
+      // Step 1: Create achievement
+      console.log("[Debug Step 1] Creating achievement...");
+      const { data: achievementData, error: achievementError } = await supabase
         .from("tasks")
         .insert({
           ...formData,
@@ -47,7 +50,47 @@ export default function CreateAchievementPage() {
         .select()
         .single();
 
-      if (error) throw error;
+      if (achievementError) {
+        console.error(
+          "[Debug Step 1] Error creating achievement:",
+          achievementError
+        );
+        throw achievementError;
+      }
+      console.log(
+        "[Debug Step 1] Achievement created successfully:",
+        achievementData
+      );
+
+      // Step 2: Get all users to notify
+      console.log("[Debug Step 2] Fetching users for notifications...");
+      const { data: users, error: usersError } = await supabase
+        .from("user_profiles")
+        .select("id");
+
+      if (usersError) {
+        console.error("[Debug Step 2] Error fetching users:", usersError);
+        // Don't throw here - we still want to redirect even if notifications fail
+      } else if (users) {
+        // Step 3: Send notifications to all users
+        console.log("[Debug Step 3] Sending notifications to users...");
+        for (const user of users) {
+          try {
+            await createNewAchievementNotification(
+              user.id,
+              formData.title,
+              formData.points,
+              formData.gameName
+            );
+            console.log(`[Debug Step 3] Notification sent to user ${user.id}`);
+          } catch (notifError) {
+            console.error(
+              `[Debug Step 3] Error sending notification to user ${user.id}:`,
+              notifError
+            );
+          }
+        }
+      }
 
       router.push("/achievements");
     } catch (error) {

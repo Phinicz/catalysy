@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { createSubscriptionNotification } from "@/utils/notifications";
+
 export default function SubscriptionSuccess() {
   const router = useRouter();
   const { session_id } = router.query;
@@ -83,6 +85,14 @@ export default function SubscriptionSuccess() {
       if (profileError) {
         console.error("Error updating user profile:", profileError);
         throw new Error("Failed to update user profile");
+      }
+
+      // Create subscription notification
+      try {
+        await createSubscriptionNotification(user.id, planName);
+      } catch (notificationError) {
+        console.error("Error creating notification:", notificationError);
+        // Don't throw error here as the subscription is already activated
       }
 
       setStatus("success");
