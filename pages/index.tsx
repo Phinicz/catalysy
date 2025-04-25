@@ -13,11 +13,15 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/router";
 import { useApi } from "@/context/ApiContext";
+import { Achievement } from "@/types/Achievement";
 
 export default function HomePage() {
   const [userRole, setUserRole] = useState<"player" | "partner" | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [usercount, setUserCount] = useState(0);
+  const [trendingAchievements, setTrendingAchievements] = useState<
+    Achievement[]
+  >([]);
   const router = useRouter();
 
   const { getUserCount } = useApi();
@@ -25,19 +29,13 @@ export default function HomePage() {
   useEffect(() => {
     const fetchUserCount = async () => {
       try {
-        // setLoading(true);
         const response = await getUserCount({
           organizationId: process.env.NEXT_PUBLIC_ORGANIZATION_ID || "",
           websiteId: process.env.NEXT_PUBLIC_WEBSITE_ID || "",
         });
-        console.log(response, "response");
         setUserCount(response.totalCount);
-        // setError(null);
       } catch (err) {
-        // setError("Failed to fetch user count");
         console.error(err);
-      } finally {
-        // setLoading(false);
       }
     };
 
@@ -46,7 +44,23 @@ export default function HomePage() {
 
   useEffect(() => {
     fetchUserRole();
+    fetchTrendingAchievements();
   }, []);
+
+  const fetchTrendingAchievements = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("tasks")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(3);
+
+      if (error) throw error;
+      setTrendingAchievements(data || []);
+    } catch (error) {
+      console.error("Error fetching trending achievements:", error);
+    }
+  };
 
   const fetchUserRole = async () => {
     try {
@@ -70,29 +84,12 @@ export default function HomePage() {
   };
 
   const playerContent = {
-    bannerItems: [
-      {
-        id: "1",
-        imageUrl: "/placeholders/achivements/1.jpg",
-        title: "Level Up Your Gaming Experience",
-        description:
-          "Complete achievements, earn rewards, and enhance your gameplay",
-      },
-      {
-        id: "2",
-        imageUrl: "/placeholders/achivements/2.jpg",
-        title: "Join Gaming Challenges",
-        description:
-          "Compete in daily and weekly challenges to earn exclusive rewards",
-      },
-      {
-        id: "3",
-        imageUrl: "/placeholders/achivements/3.jpg",
-        title: "Connect with Pro Players",
-        description:
-          "Get coached by experienced players and improve your skills",
-      },
-    ],
+    bannerItems: trendingAchievements.map((achievement) => ({
+      id: achievement.id,
+      imageUrl: achievement.imageUrl,
+      title: achievement.title,
+      description: achievement.description,
+    })),
     howItWorks: [
       {
         icon: <Gamepad2 className="w-8 h-8 text-gray-500" />,
@@ -158,8 +155,8 @@ export default function HomePage() {
   const content = userRole === "partner" ? partnerContent : playerContent;
 
   return (
-    <div className=" pt-16 ">
-      <div className="max-w-7xl mx-auto px-4 ">
+    <div className="pt-16">
+      <div className="max-w-7xl mx-auto px-4">
         <SlidingBanner items={content.bannerItems} />
 
         <div className="mt-16 mb-20">
@@ -211,30 +208,29 @@ export default function HomePage() {
                 </div>
               </>
             ) : (
-              Array(4)
-                .fill(null)
-                .map((_, index) => (
-                  <div
-                    key={index}
-                    className="bg-surface rounded-lg overflow-hidden hover:shadow-md transition-shadow"
-                  >
-                    <div className="aspect-video bg-gray-200 relative">
-                      <img
-                        src={`/placeholders/achivements/${index + 1}.jpg`}
-                        alt="Game Preview"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="p-4">
-                      <h4 className="font-semibold text-text-primary mb-1">
-                        Game Title {index + 1}
-                      </h4>
-                      <p className="text-sm text-text-secondary">
-                        Available Achievements: {25 + index * 5}
-                      </p>
-                    </div>
+              trendingAchievements.map((achievement) => (
+                <div
+                  key={achievement.id}
+                  className="bg-surface rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => router.push(`/achievements`)}
+                >
+                  <div className="aspect-video bg-gray-200 relative">
+                    <img
+                      src={achievement.imageUrl}
+                      alt={achievement.title}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                ))
+                  <div className="p-4">
+                    <h4 className="font-semibold text-text-primary mb-1">
+                      {achievement.title}
+                    </h4>
+                    <p className="text-sm text-text-secondary">
+                      Points: {achievement.points}
+                    </p>
+                  </div>
+                </div>
+              ))
             )}
           </div>
         </div>
@@ -248,7 +244,12 @@ export default function HomePage() {
               ? "Join our network of gaming experts and start earning today!"
               : "Level up your gaming experience and earn rewards while playing!"}
           </p>
-          <button className="px-8 py-3  text-white bg-gray-600 rounded-lg font-medium hover:bg-gray-800 transition-colors">
+          <button
+            onClick={() =>
+              router.push(userRole === "partner" ? "/partner" : "/achievements")
+            }
+            className="px-8 py-3 text-white bg-gray-600 rounded-lg font-medium hover:bg-gray-800 transition-colors"
+          >
             {userRole === "partner" ? "Become a Partner" : "Start Playing"}
           </button>
         </div>

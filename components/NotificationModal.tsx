@@ -24,6 +24,9 @@ interface NotificationModalProps {
   onClose: () => void;
 }
 
+// Create a custom event for notification updates
+export const notificationUpdateEvent = new Event("notificationsUpdated");
+
 export default function NotificationModal({
   isOpen,
   onClose,
@@ -44,6 +47,7 @@ export default function NotificationModal({
       } = await supabase.auth.getSession();
       if (!session?.user) return;
 
+      // Fetch notifications
       const { data, error } = await supabase
         .from("notifications")
         .select("*")
@@ -55,15 +59,29 @@ export default function NotificationModal({
       setIsLoading(false);
 
       // Mark all as read
-      await supabase
-        .from("notifications")
-        .update({ read: true })
-        .eq("user_id", session.user.id)
-        .eq("read", false);
+      const unreadNotifications = (data || [])
+        .filter((n) => !n.read)
+        .map((n) => n.id);
+      if (unreadNotifications.length > 0) {
+        await supabase
+          .from("notifications")
+          .update({ read: true })
+          .in("id", unreadNotifications);
+
+        // Dispatch the custom event to trigger a notification count update
+        window.dispatchEvent(notificationUpdateEvent);
+      }
     } catch (error) {
       console.error("Error fetching notifications:", error);
       setIsLoading(false);
     }
+  };
+
+  // Handle modal close
+  const handleClose = () => {
+    // Dispatch the event to ensure counts are updated
+    window.dispatchEvent(notificationUpdateEvent);
+    onClose();
   };
 
   const getNotificationIcon = (type: Notification["type"]) => {
@@ -90,7 +108,7 @@ export default function NotificationModal({
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <h2 className="text-xl font-bold text-white">Notifications</h2>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="p-1 text-gray-400 hover:text-white transition-colors"
           >
             <X className="w-5 h-5" />
@@ -116,7 +134,9 @@ export default function NotificationModal({
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="bg-gray-800 rounded-lg p-4 space-y-2"
+                  className={`bg-gray-800 rounded-lg p-4 space-y-2 ${
+                    !notification.read ? "ring-1 ring-green-500" : ""
+                  }`}
                 >
                   <div className="flex items-start space-x-3">
                     <div className="flex-shrink-0">

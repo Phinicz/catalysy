@@ -7,6 +7,8 @@ import {
   UserCountParams,
   LoyaltyRulesResponse,
   RuleProcessingStatus,
+  GetLoyaltyAccountsParams,
+  LoyaltyAccountsResponse,
 } from "../types/api.types";
 
 interface ApiContextType {
@@ -20,6 +22,9 @@ interface ApiContextType {
     ruleId: string
   ) => Promise<RuleProcessingStatus>;
   getTransactionEntries: () => Promise<any>;
+  getLoyaltyAccounts: (
+    params?: GetLoyaltyAccountsParams
+  ) => Promise<LoyaltyAccountsResponse>;
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -36,6 +41,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({
     getRuleProcessingStatus:
       apiService.getRuleProcessingStatus.bind(apiService),
     getTransactionEntries: apiService.getTransactionEntries.bind(apiService),
+    getLoyaltyAccounts: apiService.getLoyaltyAccounts.bind(apiService),
   };
 
   return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>;

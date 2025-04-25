@@ -82,3 +82,26 @@ export type RuleProcessingStatus = {
   message: string;
   rewarded: boolean;
 };
+
+export interface GetLoyaltyAccountsParams {
+  organizationId?: string;
+  websiteId?: string;
+  loyaltyCurrencyId?: string;
+  limit?: number;
+  startingAfter?: string;
+}
+
+export interface LoyaltyAccountsResponse {
+  data: {
+    id: string;
+    amount: number;
+    userId: string;
+    loyaltyCurrencyId: string;
+    organizationId: string;
+    websiteId: string;
+    createdAt: string;
+    updatedAt: string;
+  }[];
+  hasMore: boolean;
+  totalCount: number;
+}

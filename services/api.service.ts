@@ -8,6 +8,29 @@ import {
   RuleProcessingStatus,
 } from "../types/api.types";
 
+interface LoyaltyAccountsResponse {
+  data: Array<{
+    id: string;
+    userId: string;
+    loyaltyCurrencyId: string;
+    amount: number;
+    organizationId: string;
+    websiteId: string;
+    createdAt: string;
+    updatedAt: string;
+  }>;
+  hasMore: boolean;
+  totalCount: number;
+}
+
+interface GetLoyaltyAccountsParams {
+  organizationId?: string;
+  websiteId?: string;
+  loyaltyCurrencyId?: string;
+  limit?: number;
+  startingAfter?: string;
+}
+
 class ApiService {
   private async fetchApi<T>(
     endpoint: string,
@@ -119,6 +142,35 @@ class ApiService {
 
   async getTransactionEntries(): Promise<any> {
     return this.fetchApi("/loyalty/transaction_entries", {
+      method: "GET",
+      headers: {
+        "X-API-KEY": process.env.NEXT_PUBLIC_SNAG_API_KEY || "",
+      },
+    });
+  }
+
+  async getLoyaltyAccounts(
+    params: GetLoyaltyAccountsParams = {}
+  ): Promise<LoyaltyAccountsResponse> {
+    const queryParams = new URLSearchParams();
+
+    if (params.organizationId)
+      queryParams.append("organizationId", params.organizationId);
+    if (params.websiteId) queryParams.append("websiteId", params.websiteId);
+    if (params.loyaltyCurrencyId)
+      queryParams.append("loyaltyCurrencyId", params.loyaltyCurrencyId);
+    if (params.limit) queryParams.append("limit", params.limit.toString());
+    if (params.startingAfter)
+      queryParams.append("startingAfter", params.startingAfter);
+
+    // Add sorting to get highest points first
+    queryParams.append("orderBy[amount]", "desc");
+
+    const endpoint = `/loyalty/accounts${
+      queryParams.toString() ? `?${queryParams}` : ""
+    }`;
+
+    return this.fetchApi<LoyaltyAccountsResponse>(endpoint, {
       method: "GET",
       headers: {
         "X-API-KEY": process.env.NEXT_PUBLIC_SNAG_API_KEY || "",

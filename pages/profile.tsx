@@ -57,6 +57,14 @@ interface TransactionEntry {
   };
 }
 
+interface LoyaltyAccountEntry {
+  id: string;
+  amount: string | number;
+  user?: {
+    walletAddress: string;
+  };
+}
+
 export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
@@ -65,11 +73,12 @@ export default function ProfilePage() {
   const [apiStatus, setApiStatus] = useState<ApiRegistrationStatus>({
     isRegistegray: false,
   });
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const { openConnectModal } = useConnectModal();
   const { address, isConnected } = useAccount();
-  const { createUser, getUsers, getTransactionEntries } = useApi();
+  const { createUser, getUsers, getTransactionEntries, getLoyaltyAccounts } =
+    useApi();
   const [isCheckingApi, setIsCheckingApi] = useState(false);
   const [editForm, setEditForm] = useState({
     username: "",
@@ -96,69 +105,35 @@ export default function ProfilePage() {
   }, [address]);
 
   useEffect(() => {
-    const fetchTransactionEntries = async () => {
+    const fetchCoins = async () => {
+      if (!address) return;
+
       try {
-        // First get the user data to get the user ID
-        const usersResponse = await getUsers();
-        console.log("Users response:", usersResponse);
+        const response = await getLoyaltyAccounts({
+          limit: 100,
+        });
 
-        const user = usersResponse.data.find(
-          (user) => user.walletAddress.toLowerCase() === address?.toLowerCase()
+        // Find the entry for the current user
+        const userEntry = response.data.find(
+          (entry: LoyaltyAccountEntry) =>
+            entry.user?.walletAddress?.toLowerCase() === address.toLowerCase()
         );
 
-        if (!user) {
-          console.log("No user found for address:", address);
-          return;
+        if (userEntry) {
+          console.log("Found user entry:", userEntry);
+          setCoins(Number(userEntry.amount) || 0);
+        } else {
+          console.log("No entry found for user");
+          setCoins(0);
         }
-
-        console.log("Found user:", user);
-
-        // Then get transaction entries
-        const transactionResponse = await getTransactionEntries();
-        console.log("Transaction response:", transactionResponse);
-
-        // Properly extract the data array from the response
-        const transactions = transactionResponse.data || [];
-
-        // Filter transactions for the current user and sum up the amounts
-        const userTransactions = transactions.filter(
-          (transaction: TransactionEntry) => {
-            // Check if the transaction has a loyaltyAccount with a user
-            if (transaction.loyaltyAccount?.user?.id) {
-              return transaction.loyaltyAccount.user.id === user.id;
-            }
-            return false;
-          }
-        );
-
-        console.log("User transactions:", userTransactions);
-
-        // Calculate total coins from valid transactions
-        const totalCoins = userTransactions.reduce(
-          (sum: number, transaction: TransactionEntry) => {
-            const amount = Number(transaction.amount) || 0;
-            console.log(
-              "Processing transaction amount:",
-              transaction.amount,
-              "parsed as:",
-              amount
-            );
-            return sum + amount;
-          },
-          0
-        );
-
-        console.log("Total coins calculated:", totalCoins);
-        setCoins(totalCoins);
       } catch (error) {
-        console.error("Error fetching transaction entries:", error);
+        console.error("Error fetching loyalty accounts:", error);
+        setCoins(0);
       }
     };
 
-    if (address) {
-      fetchTransactionEntries();
-    }
-  }, [address, getUsers, getTransactionEntries]);
+    fetchCoins();
+  }, [address, getLoyaltyAccounts]);
 
   useEffect(() => {
     if (subscription?.end_date) {
@@ -423,20 +398,8 @@ export default function ProfilePage() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-gray-500 text-xl p-4">
-        Loading...
-      </div>
-    );
-  }
-
   if (!profile) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-gray-500 text-xl p-4">
-        Profile not found
-      </div>
-    );
+    return null;
   }
 
   return (

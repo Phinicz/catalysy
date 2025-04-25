@@ -4,6 +4,7 @@ import { useAccount, useDisconnect } from "wagmi";
 import { useApi } from "../context/ApiContext";
 import { toast } from "react-toastify";
 import { supabase } from "../lib/supabase";
+import { Wallet } from "lucide-react";
 
 export const CustomWalletConnect = () => {
   const { address, isConnected } = useAccount();
@@ -130,9 +131,9 @@ export const CustomWalletConnect = () => {
                   <button
                     onClick={openConnectModal}
                     type="button"
-                    className="bg-gray-600 text-white font-medium py-2 px-4 rounded hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:ring-offset-2"
+                    className="p-2 rounded-full bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors"
                   >
-                    Connect Wallet
+                    <Wallet className="w-5 h-5" />
                   </button>
                 );
               }
@@ -141,22 +142,20 @@ export const CustomWalletConnect = () => {
                   <button
                     onClick={openChainModal}
                     type="button"
-                    className="bg-gray-600 text-white font-medium py-2 px-4 rounded hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-offset-2"
+                    className="p-2 rounded-full bg-red-800 text-gray-300 hover:bg-red-700 transition-colors"
                   >
-                    Wrong network
+                    <Wallet className="w-5 h-5" />
                   </button>
                 );
               }
               return (
-                <div className="flex gap-3">
-                  <button
-                    onClick={openAccountModal}
-                    type="button"
-                    className="bg-gray-600 text-white font-medium py-2 px-4 rounded hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-offset-2"
-                  >
-                    {account.displayName}
-                  </button>
-                </div>
+                <button
+                  onClick={openAccountModal}
+                  type="button"
+                  className="p-2 rounded-full bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors"
+                >
+                  <Wallet className="w-5 h-5" />
+                </button>
               );
             })()}
           </div>
