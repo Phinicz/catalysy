@@ -268,7 +268,7 @@ export default function AchievementGrid({
                   onSelectAchievement(achievement);
                 }}
               >
-                Get Reward
+                Start Achievement
               </button>
               <div className="flex items-center justify-between text-xs text-text-tertiary">
                 <span>Start: {formatDate(achievement.startDate)}</span>
