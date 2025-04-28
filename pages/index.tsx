@@ -155,7 +155,7 @@ export default function HomePage() {
   const content = userRole === "partner" ? partnerContent : playerContent;
 
   return (
-    <div className="pt-16">
+    <div className="">
       <div className="max-w-7xl mx-auto px-4">
         <SlidingBanner items={content.bannerItems} />
 
@@ -253,24 +253,6 @@ export default function HomePage() {
             {userRole === "partner" ? "Become a Partner" : "Start Playing"}
           </button>
         </div>
-      </div>
-      <div className="fixed top-4 left-4 z-50">
-        <button
-          onClick={() => router.push("/feedback")}
-          className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg shadow hover:bg-gray-800 transition-all"
-        >
-          <Star className="w-5 h-5 mr-2" />
-          Feedback
-        </button>
-      </div>
-      <div className="fixed top-4 right-4 z-50">
-        <button
-          onClick={() => router.push("/users")}
-          className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg shadow hover:bg-gray-800 transition-all"
-        >
-          <User className="w-5 h-5 mr-2" />
-          Total User: {usercount}
-        </button>
       </div>
     </div>
   );

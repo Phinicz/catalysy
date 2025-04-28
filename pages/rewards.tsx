@@ -36,45 +36,63 @@ export default function RewardsPage() {
   const [completingRule, setCompletingRule] = useState<string | null>(null);
   const [ruleStatus, setRuleStatus] = useState<Record<string, any>>({});
   const [pointsBalance, setPointsBalance] = useState(0);
+  const [claimedRules, setClaimedRules] = useState<Record<string, boolean>>({});
 
   const api = useApi();
   const { address } = useAccount();
 
   // Fetch user's tasks (both completed and ongoing)
   const fetchUserTasks = async () => {
-    if (!address) return;
+    console.log("Starting fetchUserTasks");
     try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      console.log("Session:", session);
+      if (!session?.user) {
+        console.log("No user session found");
+        return;
+      }
+
       const { data, error } = await supabase
         .from("user_tasks")
         .select("*")
-        .eq("user_id", address);
+        .eq("user_id", session.user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
+      console.log("Fetched user tasks:", data);
       setUserTasks(data || []);
-      console.log("User tasks:", data);
     } catch (error) {
-      console.error("Error fetching user tasks:", error);
+      console.error("Error in fetchUserTasks:", error);
     }
   };
 
   // Fetch all tasks to get rule_ids
   const fetchTasks = async () => {
+    console.log("Starting fetchTasks");
     try {
       const { data, error } = await supabase.from("tasks").select("*");
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error in fetchTasks:", error);
+        throw error;
+      }
+      console.log("Fetched all tasks:", data);
       setTasks(data || []);
-      console.log("All tasks:", data);
     } catch (error) {
-      console.error("Error fetching tasks:", error);
+      console.error("Error in fetchTasks:", error);
     }
   };
 
   const fetchRules = async () => {
+    console.log("Starting fetchRules");
     try {
       const response = await api.getLoyaltyRules();
+      console.log("Fetched rules:", response.data);
       setRules(response.data);
-      console.log("Rules:", response.data);
     } catch (err) {
       console.error("Failed to fetch loyalty rules:", err);
       toast.error("Failed to load rewards");
@@ -84,16 +102,46 @@ export default function RewardsPage() {
   };
 
   const fetchPointsBalance = async () => {
-    if (!address) return;
+    console.log("Starting fetchPointsBalance");
     try {
       const response = await api.getLoyaltyAccounts();
       const totalPoints = response.data.reduce(
         (sum, account) => sum + account.amount,
         0
       );
+      console.log("Fetched points balance:", totalPoints);
       setPointsBalance(totalPoints);
     } catch (err) {
       console.error("Failed to fetch points balance:", err);
+    }
+  };
+
+  const checkRewardStatus = async (ruleId: string) => {
+    if (!address) return;
+    try {
+      const response = await api.getRuleProcessingStatus(address, ruleId);
+      console.log("Response:", response);
+
+      // If we get "already been rewarded" message, mark as claimed
+      if (response.message?.includes("already been rewarded")) {
+        setClaimedRules((prev) => ({
+          ...prev,
+          [ruleId]: true,
+        }));
+        return true;
+      }
+      return response.rewarded;
+    } catch (error: any) {
+      console.log("Error checking reward status:", error);
+      // If error message contains "already been rewarded", mark as claimed
+      if (error.message?.includes("already been rewarded")) {
+        setClaimedRules((prev) => ({
+          ...prev,
+          [ruleId]: true,
+        }));
+        return true;
+      }
+      return false;
     }
   };
 
@@ -104,8 +152,27 @@ export default function RewardsPage() {
     }
 
     try {
+      // First check if already claimed
+      const isAlreadyClaimed = await checkRewardStatus(ruleId);
+      if (isAlreadyClaimed) {
+        setRuleStatus((prev) => ({
+          ...prev,
+          [ruleId]: {
+            status: "completed",
+            message: "Already claimed",
+          },
+        }));
+        setClaimedRules((prev) => ({
+          ...prev,
+          [ruleId]: true,
+        }));
+        toast.success("You have already claimed this reward");
+        return;
+      }
+
       setCompletingRule(ruleId);
       const response = await api.completeLoyaltyRule(ruleId, address);
+      console.log("Response:", response);
 
       if (response.rewarded) {
         setRuleStatus((prev) => ({
@@ -114,6 +181,10 @@ export default function RewardsPage() {
             status: "completed",
             message: response.message || "Rule completed successfully",
           },
+        }));
+        setClaimedRules((prev) => ({
+          ...prev,
+          [ruleId]: true,
         }));
         toast.success(`Successfully claimed: ${ruleName}`);
         fetchPointsBalance();
@@ -131,16 +202,38 @@ export default function RewardsPage() {
   };
 
   useEffect(() => {
+    console.log("Initial useEffect triggered");
     fetchRules();
     fetchTasks();
   }, []);
 
   useEffect(() => {
-    if (address) {
-      fetchUserTasks();
-      fetchPointsBalance();
-    }
-  }, [address]);
+    console.log("User tasks useEffect triggered");
+    fetchUserTasks();
+    fetchPointsBalance();
+  }, []);
+
+  // Add effect to check reward status when rules are loaded
+  useEffect(() => {
+    const checkAllRewardsStatus = async () => {
+      console.log("Checking rewards status...");
+      console.log("Current rules:", rules);
+      console.log("Current address:", address);
+
+      if (!rules.length || !address) {
+        console.log("No rules or address available yet");
+        return;
+      }
+
+      for (const rule of rules) {
+        console.log(`Checking status for rule: ${rule.id}`);
+        const isClaimed = await checkRewardStatus(rule.id);
+        console.log(`Rule ${rule.id} claimed:`, isClaimed);
+      }
+    };
+
+    checkAllRewardsStatus();
+  }, [rules, address, api]);
 
   // Get completed task IDs from user_tasks
   const completedTaskIds = userTasks
@@ -258,6 +351,7 @@ export default function RewardsPage() {
             const isPending = completingRule === rule.id;
             const status = ruleStatus[rule.id];
             const isCompleted = status?.status === "completed";
+            const isClaimed = claimedRules[rule.id];
 
             return (
               <motion.div
@@ -312,7 +406,7 @@ export default function RewardsPage() {
                         <Wallet className="w-4 h-4" />
                         Connect Wallet
                       </button>
-                    ) : isCompleted ? (
+                    ) : isClaimed ? (
                       <button
                         disabled
                         className="w-full px-4 py-2 rounded-lg bg-green-500/20 text-green-400 cursor-not-allowed flex items-center justify-center gap-2"

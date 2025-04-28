@@ -95,7 +95,6 @@ export default function NotificationIndicator() {
         }
       )
       .subscribe((status) => {
-        console.log("🔌 Subscription status:", status);
         if (status === "SUBSCRIBED") {
           console.log("✅ Successfully subscribed to notification changes");
         }
@@ -130,7 +129,6 @@ export default function NotificationIndicator() {
   }, []);
 
   const checkUnreadNotifications = async () => {
-    console.log("🔍 Checking unread notifications...");
     try {
       const {
         data: { session },
@@ -148,12 +146,9 @@ export default function NotificationIndicator() {
 
       if (error) throw error;
       const count = data?.length || 0;
-      console.log(`📊 Found ${count} unread notifications`);
       setUnreadCount(count);
       setHasUnread(count > 0);
-    } catch (error) {
-      console.error("❌ Error checking unread notifications:", error);
-    }
+    } catch (error) {}
   };
 
   // Add a test function to the window object for debugging

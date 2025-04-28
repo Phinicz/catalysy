@@ -1,4 +1,6 @@
 import { UserAchievement } from "@/types/UserAchievement";
+import { useRouter } from "next/router";
+import { Award } from "lucide-react";
 
 interface Task {
   id: string;
@@ -15,6 +17,8 @@ interface TaskListProps {
 }
 
 export default function TaskList({ tasks, type }: TaskListProps) {
+  const router = useRouter();
+
   return (
     <div className="grid gap-4">
       {tasks.length === 0 ? (
@@ -51,10 +55,17 @@ export default function TaskList({ tasks, type }: TaskListProps) {
               )}
             </div>
             {type === "completed" && (
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0 flex flex-col items-end gap-2">
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                   Completed
                 </span>
+                <button
+                  onClick={() => router.push("/rewards")}
+                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-blue-500/25 flex items-center gap-2 text-sm font-medium"
+                >
+                  <Award className="w-4 h-4" />
+                  Claim Reward
+                </button>
               </div>
             )}
           </div>
