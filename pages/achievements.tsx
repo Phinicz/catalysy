@@ -8,6 +8,7 @@ import { Achievement } from "@/types/Achievement";
 import Modal from "@/components/Layout/Modal";
 import { supabase } from "@/lib/supabase";
 import { useAdmin } from "@/hooks/useAdmin";
+import { useApi } from "@/context/ApiContext";
 
 const ITEMS_PER_PAGE = 6; // Number of achievements to show per page
 
@@ -23,6 +24,7 @@ const BANNER_ITEMS = [
 export default function AchievementsPage() {
   const router = useRouter();
   const { isAdmin } = useAdmin();
+  const api = useApi();
   const [isAchievementModalOpen, setIsAchievementModalOpen] = useState(false);
   const [selectedAchievement, setSelectedAchievement] = useState<Achievement>();
   const [trendingAchievements, setTrendingAchievements] = useState<
@@ -48,31 +50,40 @@ export default function AchievementsPage() {
         return;
       }
 
-      // Fetch total count for pagination
-      const { count } = await supabase
-        .from("tasks")
-        .select("*", { count: "exact", head: true });
+      // Fetch all tasks from Supabase (get rule_id)
+      const {
+        data: tasks,
+        error: tasksError,
+        count,
+      } = await supabase.from("tasks").select("*", { count: "exact" });
+      if (tasksError) throw tasksError;
 
       if (count !== null) {
         setTotalPages(Math.ceil(count / ITEMS_PER_PAGE));
       }
 
-      // Fetch paginated achievements
-      const { data, error } = await supabase
-        .from("tasks")
-        .select("*")
-        .range(
-          (currentPage - 1) * ITEMS_PER_PAGE,
-          currentPage * ITEMS_PER_PAGE - 1
-        )
-        .order("created_at", { ascending: false });
+      // Fetch all rules from Snag
+      const rulesResponse = await api.getLoyaltyRules();
+      const rules = rulesResponse.data;
 
-      if (error) throw error;
+      // Join tasks with rules by rule_id
+      const achievementsWithReward = tasks.map((task) => {
+        const matchingRule = rules.find((rule) => rule.id === task.rule_id);
+        return {
+          ...task,
+          amount: matchingRule ? matchingRule.amount : undefined,
+        };
+      });
 
       // Set trending achievements (first 3)
-      setTrendingAchievements(data.slice(0, 3));
+      setTrendingAchievements(achievementsWithReward.slice(0, 3));
       // Set all achievements for current page
-      setAllAchievements(data);
+      setAllAchievements(
+        achievementsWithReward.slice(
+          (currentPage - 1) * ITEMS_PER_PAGE,
+          currentPage * ITEMS_PER_PAGE
+        )
+      );
     } catch (error) {
       console.error("Error:", error);
     } finally {

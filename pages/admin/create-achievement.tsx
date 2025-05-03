@@ -17,7 +17,6 @@ export default function CreateAchievementPage() {
     gameIcon: "",
     gameName: "",
     gameDeeplink: "",
-    points: 0,
     startDate: "",
     endDate: "",
     steps: 1,
@@ -79,7 +78,7 @@ export default function CreateAchievementPage() {
             await createNewAchievementNotification(
               user.id,
               formData.title,
-              formData.points,
+              0,
               formData.gameName
             );
             console.log(`[Debug Step 3] Notification sent to user ${user.id}`);
@@ -188,22 +187,6 @@ export default function CreateAchievementPage() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="relative group">
-                      <label className="block text-sm font-medium bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 mb-2">
-                        Points
-                      </label>
-                      <input
-                        type="number"
-                        id="points"
-                        name="points"
-                        required
-                        min="0"
-                        value={formData.points}
-                        onChange={handleChange}
-                        className="block w-full px-4 py-3 rounded-xl bg-gray-800/50 border-2 border-white/10 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 group-hover:border-white/20"
-                      />
-                    </div>
-
                     <div className="relative group">
                       <label className="block text-sm font-medium bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 mb-2">
                         Steps

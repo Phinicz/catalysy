@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import AchievementModal from "./AchievementModal";
-import { Achievement } from "@/types/Achievement";
+import { Achievement as AchievementBase } from "@/types/Achievement";
 interface AchievementGridProps {
-  achievements: Achievement[];
-  onSelectAchievement: (achievement: Achievement) => void;
+  achievements: (AchievementBase & { amount?: string | number })[];
+  onSelectAchievement: (achievement: AchievementBase) => void;
 }
 
 // Helper function to determine if an achievement is high points
@@ -23,7 +23,7 @@ const isExpiringSoon = (endDate: string) => {
 const determineGenre = (
   title: string,
   description: string
-): Achievement["genre"] => {
+): AchievementBase["genre"] => {
   const text = (title + description).toLowerCase();
   if (
     text.includes("battle") ||
@@ -45,7 +45,7 @@ const determineGenre = (
 };
 
 // Helper function to determine tier based on points
-const determineTier = (points: number): Achievement["tier"] => {
+const determineTier = (points: number): AchievementBase["tier"] => {
   if (points >= 1000) return "premium";
   if (points >= 500) return "standard";
   return "free";
@@ -68,17 +68,28 @@ export default function AchievementGrid({
   const [hoveredTooltip, setHoveredTooltip] = useState<string | null>(null);
 
   // Enhance achievements with derived properties
-  const enhancedAchievements = achievements.map((achievement) => ({
-    ...achievement,
-    genre:
-      achievement.genre ||
-      determineGenre(achievement.title, achievement.description),
-    tier: achievement.tier || determineTier(achievement.points),
-    isHighPoints:
-      achievement.isHighPoints ?? isHighPointsAchievement(achievement.points),
-    isExpiringSoon:
-      achievement.isExpiringSoon ?? isExpiringSoon(achievement.endDate),
-  }));
+  const enhancedAchievements = achievements.map((achievement) => {
+    // Determine status based on dates
+    const now = new Date();
+    const start = new Date(achievement.startDate);
+    const end = new Date(achievement.endDate);
+    let status: "active" | "expired" = "expired";
+    if (now >= start && now <= end) {
+      status = "active";
+    }
+    return {
+      ...achievement,
+      genre:
+        achievement.genre ||
+        determineGenre(achievement.title, achievement.description),
+      tier: achievement.tier || determineTier(achievement.points),
+      isHighPoints:
+        achievement.isHighPoints ?? isHighPointsAchievement(achievement.points),
+      isExpiringSoon:
+        achievement.isExpiringSoon ?? isExpiringSoon(achievement.endDate),
+      status,
+    };
+  });
 
   const GenreColors = {
     Action: "bg-red-100 text-red-800",
@@ -101,191 +112,223 @@ export default function AchievementGrid({
           <p className="text-text-secondary">No achievements available</p>
         </div>
       ) : (
-        enhancedAchievements.map((achievement) => (
-          <div
-            key={achievement.id}
-            className="bg-surface rounded-lg overflow-hidden relative"
-          >
-            {/* Top Left - Genre Badge */}
-            <div className="absolute top-2 left-2">
-              <span
-                className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  GenreColors[achievement.genre || "Adventure"]
-                }`}
-              >
-                {achievement.genre || "Adventure"}
-              </span>
-            </div>
-
-            {/* Top Right - Points Badge */}
-            <div className="absolute top-2 right-2 px-2 py-1 rounded bg-black/50 text-white text-sm">
-              +{achievement.points} Points
-            </div>
-
-            {/* Bottom Right Corner - Status Indicators */}
-            <div className="absolute bottom-2 right-2 flex gap-2">
-              {achievement.isExpiringSoon && (
-                <div
-                  className="relative"
-                  onMouseEnter={() =>
-                    setHoveredTooltip(`timer-${achievement.id}`)
-                  }
-                  onMouseLeave={() => setHoveredTooltip(null)}
-                >
-                  <div className="p-1 rounded-full bg-orange-100">
-                    <svg
-                      className="w-4 h-4 text-orange-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                  </div>
-                  {hoveredTooltip === `timer-${achievement.id}` && (
-                    <div className="absolute bottom-full right-0 mb-2 px-2 py-1 text-xs bg-gray-900 text-white rounded whitespace-nowrap">
-                      Expiring Soon!
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {achievement.isHighPoints && (
-                <div
-                  className="relative"
-                  onMouseEnter={() =>
-                    setHoveredTooltip(`star-${achievement.id}`)
-                  }
-                  onMouseLeave={() => setHoveredTooltip(null)}
-                >
-                  <div className="p-1 rounded-full bg-yellow-100">
-                    <svg
-                      className="w-4 h-4 text-yellow-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                      />
-                    </svg>
-                  </div>
-                  {hoveredTooltip === `star-${achievement.id}` && (
-                    <div className="absolute bottom-full right-0 mb-2 px-2 py-1 text-xs bg-gray-900 text-white rounded whitespace-nowrap">
-                      High Points Achievement!
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Tier Badge */}
-              <div
-                className="relative"
-                onMouseEnter={() => setHoveredTooltip(`tier-${achievement.id}`)}
-                onMouseLeave={() => setHoveredTooltip(null)}
-              >
-                <div
-                  className={`p-1 rounded-full ${
-                    TierColors[achievement.tier || "free"]
+        enhancedAchievements.map((achievement) => {
+          console.log(
+            "Reward for achievement",
+            achievement.id,
+            ":",
+            achievement.amount
+          );
+          return (
+            <div
+              key={achievement.id}
+              className="bg-surface rounded-lg overflow-hidden relative"
+            >
+              {/* Top Left - Genre Badge */}
+              <div className="absolute top-2 left-2">
+                <span
+                  className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    GenreColors[achievement.genre || "Adventure"]
                   }`}
                 >
-                  {achievement.tier === "premium" ? (
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M12 4l1.465 1.638a2 2 0 01.411 1.187l.1 2.178a2 2 0 001.346 1.765l1.944.68a2 2 0 011.239 1.838l-.082 2.178a2 2 0 00.582 1.541l1.465 1.638a2 2 0 010 2.674l-1.465 1.638a2 2 0 00-.582 1.541l.082 2.178a2 2 0 01-1.239 1.838l-1.944.68a2 2 0 00-1.346 1.765l-.1 2.178a2 2 0 01-.411 1.187L12 20l-1.465-1.638a2 2 0 01-.411-1.187l-.1-2.178a2 2 0 00-1.346-1.765l-1.944-.68a2 2 0 01-1.239-1.838l.082-2.178a2 2 0 00-.582-1.541L4.93 8.357a2 2 0 010-2.674l1.465-1.638a2 2 0 00.582-1.541l-.082-2.178a2 2 0 011.239-1.838l1.944-.68a2 2 0 001.346-1.765l.1-2.178A2 2 0 0110.535 2L12 4z"
-                      />
-                    </svg>
-                  ) : achievement.tier === "standard" ? (
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
-                      />
-                    </svg>
-                  ) : null}
-                </div>
-                {hoveredTooltip === `tier-${achievement.id}` && (
-                  <div className="absolute bottom-full right-0 mb-2 px-2 py-1 text-xs bg-gray-900 text-white rounded whitespace-nowrap">
-                    {(achievement.tier || "free").charAt(0).toUpperCase() +
-                      (achievement.tier || "free").slice(1)}{" "}
-                    Tier
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="aspect-video relative">
-              <img
-                src={achievement.imageUrl}
-                alt={achievement.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-
-            <div className="p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <img
-                  src={achievement.gameIcon}
-                  alt={achievement.gameName}
-                  className="w-6 h-6 rounded"
-                />
-                <span className="text-sm text-text-secondary">
-                  {achievement.gameName}
+                  {achievement.genre || "Adventure"}
                 </span>
               </div>
-              <h3 className="font-medium text-text-primary mb-1">
-                {achievement.title}
-              </h3>
-              <p className="text-sm text-text-secondary mb-3">
-                {achievement.description}
-              </p>
-              <button
-                className="w-full py-2 px-4 bg-primary font-semibold text-white rounded-lg hover:bg-gray-800 transition-colors mb-3"
-                onClick={() => {
-                  onSelectAchievement(achievement);
-                }}
-              >
-                Start Achievement
-              </button>
-              <div className="flex items-center justify-between text-xs text-text-tertiary">
-                <span>Start: {formatDate(achievement.startDate)}</span>
-                <span>End: {formatDate(achievement.endDate)}</span>
+
+              {/* Top Right - Points Badge */}
+              <div className="absolute top-2 right-2 px-2 py-1 rounded bg-black/50 text-white text-sm">
+                +{achievement.points} Points
               </div>
-              <div
-                className={`mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  achievement.status === "active"
-                    ? "bg-green-100 text-green-800"
-                    : "bg-gray-100 text-gray-800"
-                }`}
-              >
-                {achievement.status === "active" ? "Active" : "Expired"}
+
+              {/* Bottom Right Corner - Status Indicators */}
+              <div className="absolute bottom-2 right-2 flex gap-2">
+                {achievement.isExpiringSoon && (
+                  <div
+                    className="relative"
+                    onMouseEnter={() =>
+                      setHoveredTooltip(`timer-${achievement.id}`)
+                    }
+                    onMouseLeave={() => setHoveredTooltip(null)}
+                  >
+                    <div className="p-1 rounded-full bg-orange-100">
+                      <svg
+                        className="w-4 h-4 text-orange-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    </div>
+                    {hoveredTooltip === `timer-${achievement.id}` && (
+                      <div className="absolute bottom-full right-0 mb-2 px-2 py-1 text-xs bg-gray-900 text-white rounded whitespace-nowrap">
+                        Expiring Soon!
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {achievement.isHighPoints && (
+                  <div
+                    className="relative"
+                    onMouseEnter={() =>
+                      setHoveredTooltip(`star-${achievement.id}`)
+                    }
+                    onMouseLeave={() => setHoveredTooltip(null)}
+                  >
+                    <div className="p-1 rounded-full bg-yellow-100">
+                      <svg
+                        className="w-4 h-4 text-yellow-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                        />
+                      </svg>
+                    </div>
+                    {hoveredTooltip === `star-${achievement.id}` && (
+                      <div className="absolute bottom-full right-0 mb-2 px-2 py-1 text-xs bg-gray-900 text-white rounded whitespace-nowrap">
+                        High Points Achievement!
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Tier Badge */}
+                <div
+                  className="relative"
+                  onMouseEnter={() =>
+                    setHoveredTooltip(`tier-${achievement.id}`)
+                  }
+                  onMouseLeave={() => setHoveredTooltip(null)}
+                >
+                  <div
+                    className={`p-1 rounded-full ${
+                      TierColors[achievement.tier || "free"]
+                    }`}
+                  >
+                    {achievement.tier === "premium" ? (
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M12 4l1.465 1.638a2 2 0 01.411 1.187l.1 2.178a2 2 0 001.346 1.765l1.944.68a2 2 0 011.239 1.838l-.082 2.178a2 2 0 00.582 1.541l1.465 1.638a2 2 0 010 2.674l-1.465 1.638a2 2 0 00-.582 1.541l.082 2.178a2 2 0 01-1.239 1.838l-1.944.68a2 2 0 00-1.346 1.765l-.1 2.178a2 2 0 01-.411 1.187L12 20l-1.465-1.638a2 2 0 01-.411-1.187l-.1-2.178a2 2 0 00-1.346-1.765l-1.944-.68a2 2 0 01-1.239-1.838l.082-2.178a2 2 0 00-.582-1.541L4.93 8.357a2 2 0 010-2.674l1.465-1.638a2 2 0 00.582-1.541l-.082-2.178a2 2 0 011.239-1.838l1.944-.68a2 2 0 001.346-1.765l.1-2.178A2 2 0 0110.535 2L12 4z"
+                        />
+                      </svg>
+                    ) : achievement.tier === "standard" ? (
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+                        />
+                      </svg>
+                    ) : null}
+                  </div>
+                  {hoveredTooltip === `tier-${achievement.id}` && (
+                    <div className="absolute bottom-full right-0 mb-2 px-2 py-1 text-xs bg-gray-900 text-white rounded whitespace-nowrap">
+                      {(achievement.tier || "free").charAt(0).toUpperCase() +
+                        (achievement.tier || "free").slice(1)}{" "}
+                      Tier
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="aspect-video relative">
+                <img
+                  src={achievement.imageUrl}
+                  alt={achievement.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              <div className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <img
+                    src={achievement.gameIcon}
+                    alt={achievement.gameName}
+                    className="w-6 h-6 rounded"
+                  />
+                  <span className="text-sm text-text-secondary">
+                    {achievement.gameName}
+                  </span>
+                </div>
+                <h3 className="font-medium text-text-primary mb-1">
+                  {achievement.title}
+                </h3>
+                <p className="text-sm text-text-secondary mb-3">
+                  {achievement.description}
+                </p>
+                <div className="flex items-center justify-between text-xs text-text-tertiary">
+                  <span>Start: {formatDate(achievement.startDate)}</span>
+                  <span>End: {formatDate(achievement.endDate)}</span>
+                </div>
+                <button
+                  className="w-full py-2 px-4 bg-primary font-semibold text-white rounded-lg hover:bg-gray-800 transition-colors my-2"
+                  onClick={() => {
+                    onSelectAchievement(achievement);
+                  }}
+                >
+                  Start Achievement
+                </button>
+                <div className="mt-1 flex flex-col items-center gap-2">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-sm border ${
+                        achievement.status === "active"
+                          ? "bg-green-100 text-green-800 border-green-200"
+                          : "bg-gray-100 text-gray-800 border-gray-200"
+                      }`}
+                    >
+                      {achievement.status === "active" ? "Active" : "Expired"}
+                    </div>
+                    {achievement.amount && (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full bg-gradient-to-r from-green-400 to-green-600 text-white font-semibold text-xs shadow-sm border border-green-300">
+                        <svg
+                          className="w-4 h-4 mr-1 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 0V4m0 10v6m8-8h-6m-4 0H4"
+                          />
+                        </svg>
+                        Reward: {achievement.amount} points
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        ))
+          );
+        })
       )}
     </div>
   );

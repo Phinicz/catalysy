@@ -22,6 +22,8 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import NotificationModal from "../components/NotificationModal";
 import NotificationIndicator from "../components/NotificationIndicator";
+import TutorialModal from "@/components/TutorialModal";
+import { createNotification } from "@/utils/notifications";
 
 const config = getDefaultConfig({
   appName: "My RainbowKit App",
@@ -396,6 +398,8 @@ function MyApp({ Component, pageProps }: AppProps) {
                             <NotificationIndicator />
                           </motion.button>
 
+                          {/* Test Notification Button */}
+
                           {/* Wallet Connect */}
                           <div className="flex items-center">
                             <CustomWalletConnect />
@@ -590,6 +594,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                 pauseOnHover
                 theme="dark"
               />
+              <TutorialModal />
             </ApiProvider>
           </RainbowKitProvider>
         </QueryClientProvider>
