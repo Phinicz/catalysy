@@ -315,15 +315,24 @@ export default function LoyaltyRulesPage() {
 
         {/* Rules Table */}
         <div className="bg-gray-900/50 rounded-xl border border-gray-700/50 overflow-hidden backdrop-blur-sm">
+          <div className="p-6 border-b border-gray-700/50">
+            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+              <TrendingUp className="w-6 h-6 text-blue-400" />
+              Loyalty Rules Leaderboard
+            </h2>
+            <p className="text-gray-400 mt-2">
+              Track your progress and complete tasks to earn rewards
+            </p>
+          </div>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-800">
               <thead>
                 <tr className="bg-gray-800/50">
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
-                    Rule
+                    Rank
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
-                    Type
+                    Rule Details
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
                     Network
@@ -345,6 +354,7 @@ export default function LoyaltyRulesPage() {
                     const status = ruleStatus.find(
                       (status) => status.loyaltyRuleId === rule.id
                     );
+                    const isCompleted = status?.status === "completed";
                     return (
                       <motion.tr
                         key={rule.id}
@@ -352,41 +362,81 @@ export default function LoyaltyRulesPage() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ duration: 0.3, delay: index * 0.1 }}
-                        className="hover:bg-gray-800/30 transition-colors"
+                        className={`hover:bg-gray-800/30 transition-colors ${
+                          isCompleted ? "bg-green-900/10" : ""
+                        }`}
                       >
                         <td className="px-6 py-4">
                           <div className="flex items-center">
-                            <div className="h-10 w-10 flex-shrink-0 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
-                              <span className="text-blue-400 font-medium">
-                                {rule.name.charAt(0)}
+                            {index < 3 ? (
+                              <div
+                                className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                  index === 0
+                                    ? "bg-yellow-500/20 text-yellow-400"
+                                    : index === 1
+                                    ? "bg-gray-400/20 text-gray-400"
+                                    : "bg-amber-600/20 text-amber-400"
+                                }`}
+                              >
+                                <span className="font-bold">{index + 1}</span>
+                              </div>
+                            ) : (
+                              <span className="text-gray-400 font-medium">
+                                {index + 1}
                               </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center">
+                            <div
+                              className={`h-12 w-12 flex-shrink-0 rounded-lg ${
+                                isCompleted
+                                  ? "bg-gradient-to-br from-green-500/20 to-emerald-500/20"
+                                  : "bg-gradient-to-br from-blue-500/20 to-purple-500/20"
+                              } flex items-center justify-center`}
+                            >
+                              {isCompleted ? (
+                                <CheckCircle2 className="w-6 h-6 text-green-400" />
+                              ) : (
+                                <span className="text-blue-400 font-medium">
+                                  {rule.name.charAt(0)}
+                                </span>
+                              )}
                             </div>
                             <div className="ml-4">
                               <p className="text-sm font-medium text-white">
                                 {rule.name}
                               </p>
+                              <p className="text-xs text-gray-400 mt-1">
+                                {rule.type}
+                              </p>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="px-3 py-1 text-xs font-medium rounded-full bg-blue-900/30 text-blue-400">
-                            {rule.type}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <Network className="w-4 h-4 text-blue-400" />
+                            <span className="text-sm text-gray-300">
+                              {rule.network}
+                            </span>
+                          </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="text-sm text-gray-300">
-                            {rule.network}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <Award className="w-4 h-4 text-yellow-400" />
+                            <span className="text-sm font-medium text-white">
+                              {rule.amount}
+                            </span>
+                          </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="text-sm font-medium text-white">
-                            {rule.amount}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="px-3 py-1 text-xs font-medium rounded-full bg-purple-900/30 text-purple-400 capitalize">
-                            {rule.frequency}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-purple-400" />
+                            <span className="px-3 py-1 text-xs font-medium rounded-full bg-purple-900/30 text-purple-400 capitalize">
+                              {rule.frequency}
+                            </span>
+                          </div>
                         </td>
                         <td className="px-6 py-4">
                           {address ? (

@@ -15,8 +15,20 @@
     "incremental": true,
     "paths": {
       "@/*": ["./*"]
-    }
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "pages/api/users/metadata.js"],
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "next-env.d.ts",
+    "pages/api/users/metadata.js",
+    ".next/types/**/*.ts",
+    "pages/test.jsx"
+  ],
   "exclude": ["node_modules"]
 }
