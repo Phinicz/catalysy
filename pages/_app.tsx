@@ -399,6 +399,35 @@ function MyApp({ Component, pageProps }: AppProps) {
                           </motion.button>
 
                           {/* Test Notification Button */}
+                          {/* <motion.button
+                            onClick={async () => {
+                              const {
+                                data: { session },
+                              } = await supabase.auth.getSession();
+                              if (session?.user) {
+                                await createNotification({
+                                  userId: session.user.id,
+                                  type: "system",
+                                  title: "Test Notification",
+                                  message:
+                                    "This is a test notification message",
+                                  data: { test: true },
+                                });
+                              }
+                            }}
+                            className="relative p-2 rounded-full bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors"
+                            whileHover={{
+                              scale: 1.05,
+                              backgroundColor: "rgba(31, 41, 55, 0.7)",
+                            }}
+                            transition={{
+                              type: "spring",
+                              stiffness: 400,
+                              damping: 25,
+                            }}
+                          >
+                            <BellRing className="w-5 h-5" />
+                          </motion.button> */}
 
                           {/* Wallet Connect */}
                           <div className="flex items-center">
