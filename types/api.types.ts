@@ -105,3 +105,18 @@ export interface LoyaltyAccountsResponse {
   hasMore: boolean;
   totalCount: number;
 }
+
+export interface vouchers {
+  contractType: "ERC20" | "ERC721" | "ERC1155";
+  holder?: string;
+  image: string;
+  category: string;
+  amount: number;
+  username: string;
+  contract: string;
+  receiver?: string;
+  id: number;
+  name: string;
+  type: "blockchain" | "game";
+  tokenId?: string;
+}
