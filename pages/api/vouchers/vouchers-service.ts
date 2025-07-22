@@ -22,14 +22,12 @@ const getRandomUint256 = () => {
   return BigNumber.from(ethers.utils.randomBytes(32)).toString();
 };
 
-const PRIVATE_KEY = process.env.PRIVATE_KEY!;
-
-// Helper: getSigner (placeholder, must be implemented for real signing)
+const MNEMONIC = process.env.MNEMONIC!;
 const getSigner = (): ethers.Wallet => {
-  if (!PRIVATE_KEY) {
-    throw new Error("PRIVATE_KEY is not set in environment variables");
+  if (!MNEMONIC) {
+    throw new Error("MNEMONIC is not set in environment variables");
   }
-  return new ethers.Wallet(PRIVATE_KEY);
+  return ethers.Wallet.fromMnemonic(MNEMONIC);
 };
 
 export class VouchersService {
